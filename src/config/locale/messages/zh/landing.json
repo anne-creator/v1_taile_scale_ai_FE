@@ -106,9 +106,7 @@
     "show_sign": true,
     "show_theme": true,
     "show_locale": true,
-    "topbanner": {
-      "text": "此网站是 ShipAny 模板的演示站点，购买 ShipAny 模板，请访问 <a href='https://shipany.ai/zh/pricing' class='text-orange-300' target='_blank'>ShipAny 官网</a>"
-    }
+    "topbanner": {}
   },
   "footer": {
     "id": "footer",

@@ -15,12 +15,12 @@ export function Features({
   return (
     <section
       id={section.id}
-      className={cn('py-16 md:py-24', section.className, className)}
+      className={cn('py-12 md:py-16', section.className, className)}
     >
       <div className={`container space-y-8 md:space-y-16`}>
         <ScrollAnimation>
           <div className="mx-auto max-w-4xl text-center text-balance">
-            <h2 className="text-foreground mb-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="text-foreground mb-4 text-2xl font-semibold tracking-tight md:text-3xl">
               {section.title}
             </h2>
             <p className="text-muted-foreground mb-6 md:mb-12 lg:mb-16">
