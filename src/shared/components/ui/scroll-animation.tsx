@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
 
@@ -25,11 +25,19 @@ export function ScrollAnimation({
     margin: "-50px", // Optimization: trigger animation earlier for better perceived performance
   });
 
+  // Track if component has mounted (for hydration safety)
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   // Respect user's reduced motion preference (accessibility)
   const shouldReduceMotion = useReducedMotion();
 
-  // If user prefers reduced motion or JavaScript is disabled, show content directly
-  if (shouldReduceMotion) {
+  // Only check reduced motion after hydration to avoid mismatch
+  // During SSR and initial hydration, always render the motion.div
+  if (hasMounted && shouldReduceMotion) {
     return (
       <div ref={ref} className={className}>
         {children}
