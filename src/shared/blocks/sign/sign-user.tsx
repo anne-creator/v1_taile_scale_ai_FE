@@ -54,6 +54,7 @@ export function SignUser({
   const {
     configs,
     fetchConfigs,
+    isShowSignModal,
     setIsShowSignModal,
     isCheckSign,
     setIsCheckSign,
@@ -73,6 +74,13 @@ export function SignUser({
 
   // one tap initialized
   const oneTapInitialized = useRef(false);
+
+  // Reset fallback sync when modal is closed to allow re-check after login
+  useEffect(() => {
+    if (!isShowSignModal) {
+      didFallbackSyncRef.current = false;
+    }
+  }, [isShowSignModal]);
 
   useEffect(() => {
     fetchConfigs();
@@ -134,7 +142,7 @@ export function SignUser({
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPending, sessionUser, user?.id]);
+  }, [isPending, sessionUser, user?.id, isShowSignModal]);
 
   return (
     <>

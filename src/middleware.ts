@@ -6,8 +6,51 @@ import { routing } from '@/core/i18n/config';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Handle CORS for API routes
+  if (pathname.startsWith('/api/')) {
+    if (request.method === 'OPTIONS') {
+      const response = new NextResponse(null, { status: 200 });
+
+      // Set CORS headers
+      response.headers.set(
+        'Access-Control-Allow-Origin',
+        process.env.NEXT_PUBLIC_APP_URL || '*'
+      );
+      response.headers.set(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+      );
+      response.headers.set(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version'
+      );
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      response.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
+
+      return response;
+    }
+
+    const response = NextResponse.next();
+
+    response.headers.set(
+      'Access-Control-Allow-Origin',
+      process.env.NEXT_PUBLIC_APP_URL || '*'
+    );
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+    );
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version'
+    );
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+
+    return response;
+  }
 
   // Handle internationalization first
   const intlResponse = intlMiddleware(request);
@@ -74,5 +117,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api|trpc|_next|_vercel|.*\\..*).*)',
+  matcher: '/((?!trpc|_next|_vercel|.*\\..*).*)',
 };

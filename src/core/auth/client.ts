@@ -77,7 +77,7 @@ function createGetSessionThrottledFetch({
 // Client-side throttle to avoid get-session request storms in browser.
 // Note: must be NEXT_PUBLIC_* to be inlined into client bundles.
 const AUTH_GET_SESSION_MIN_INTERVAL_MS =
-  Number(process.env.NEXT_PUBLIC_AUTH_GET_SESSION_MIN_INTERVAL_MS) || 2000;
+  Number(process.env.NEXT_PUBLIC_AUTH_GET_SESSION_MIN_INTERVAL_MS) || 1000;
 
 // create default auth client, without plugins
 export const authClient = createAuthClient({
