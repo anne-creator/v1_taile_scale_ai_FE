@@ -19,14 +19,14 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/shared/components/ui/drawer';
-import { useAppContext } from '@/shared/contexts/app';
+import { useUI } from '@/shared/contexts/ui';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 
 import { SignInForm } from './sign-in-form';
 
 export function SignModal({ callbackUrl = '/' }: { callbackUrl?: string }) {
   const t = useTranslations('common.sign');
-  const { isShowSignModal, setIsShowSignModal } = useAppContext();
+  const { isShowSignModal, setIsShowSignModal } = useUI();
 
   const isDesktop = useMediaQuery('(min-width: 768px)');
 

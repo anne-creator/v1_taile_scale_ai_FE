@@ -8,7 +8,7 @@ import { signIn } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import { defaultLocale } from '@/config/locale';
 import { Button } from '@/shared/components/ui/button';
-import { useAppContext } from '@/shared/contexts/app';
+import { useUI } from '@/shared/contexts/ui';
 import { cn } from '@/shared/lib/utils';
 import { Button as ButtonType } from '@/shared/types/blocks/common';
 
@@ -26,7 +26,7 @@ export function SocialProviders({
   const t = useTranslations('common.sign');
   const router = useRouter();
 
-  const { setIsShowSignModal } = useAppContext();
+  const { setIsShowSignModal } = useUI();
 
   if (callbackUrl) {
     const locale = useLocale();

@@ -14,7 +14,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
 import { Skeleton } from '@/shared/components/ui/skeleton';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
 
 type ChatListItem = {
   id: string;
@@ -57,7 +57,7 @@ export function ChatHistory() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, isCheckSign } = useAppContext();
+  const { user, isCheckSign } = useAuth();
 
   const page = useMemo(() => {
     const value = Number(searchParams.get('page') || '1');

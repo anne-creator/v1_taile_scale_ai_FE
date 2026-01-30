@@ -11,7 +11,8 @@ import { defaultLocale } from '@/config/locale';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 
 import { SocialProviders } from './social-providers';
 
@@ -29,7 +30,8 @@ export function SignInForm({
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { configs, setIsShowSignModal } = useAppContext();
+  const { refreshUser } = useAuth();
+  const { configs, setIsShowSignModal } = useUI();
 
   const isGoogleAuthEnabled = configs.google_auth_enabled === 'true';
   const isGithubAuthEnabled = configs.github_auth_enabled === 'true';
@@ -84,10 +86,13 @@ export function SignInForm({
           onResponse: (ctx) => {
             // Do NOT reset loading here; navigation may not have completed yet.
           },
-          onSuccess: (ctx) => {
-            // Keep loading=true until navigation completes.
+          onSuccess: async (ctx) => {
+            // Close modal immediately
             setIsShowSignModal(false);
+            // Refresh the page to update server components
             router.refresh();
+            // Manually refresh user state to update client components immediately
+            await refreshUser();
           },
           onError: (e: any) => {
             const status = e?.error?.status;

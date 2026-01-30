@@ -9,7 +9,8 @@ import { useRouter } from '@/core/i18n/navigation';
 import { LocaleSelector } from '@/shared/blocks/common';
 import { PromptInputMessage } from '@/shared/components/ai-elements/prompt-input';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { useChatContext } from '@/shared/contexts/chat';
 
 import { ChatInput } from './input';
@@ -20,7 +21,8 @@ export function ChatGenerator() {
 
   const t = useTranslations('ai.chat.generator');
 
-  const { user, setIsShowSignModal } = useAppContext();
+  const { user } = useAuth();
+  const { setIsShowSignModal } = useUI();
   const { chats, setChats, setChat } = useChatContext();
 
   const [status, setStatus] = useState<UseChatHelpers<UIMessage>['status']>();

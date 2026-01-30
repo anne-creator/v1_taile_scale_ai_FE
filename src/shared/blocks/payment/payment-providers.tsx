@@ -11,7 +11,7 @@ import { signIn } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import { defaultLocale } from '@/config/locale';
 import { Button } from '@/shared/components/ui/button';
-import { useAppContext } from '@/shared/contexts/app';
+import { useUI } from '@/shared/contexts/ui';
 import { cn } from '@/shared/lib/utils';
 import { Button as ButtonType } from '@/shared/types/blocks/common';
 import { PricingItem } from '@/shared/types/blocks/pricing';
@@ -36,7 +36,7 @@ export function PaymentProviders({
   const t = useTranslations('common.payment');
   const router = useRouter();
 
-  const { setIsShowPaymentModal } = useAppContext();
+  const { setIsShowPaymentModal } = useUI();
 
   const [paymentProvider, setPaymentProvider] = useState<string | null>(null);
 

@@ -24,7 +24,8 @@ import {
   SelectValue,
 } from '@/shared/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { getCookie } from '@/shared/lib/cookie';
 import { cn } from '@/shared/lib/utils';
 import { Subscription } from '@/shared/models/subscription';
@@ -89,12 +90,12 @@ export function Pricing({
   const t = useTranslations('pages.pricing.messages');
 
   const {
-    user,
     isShowPaymentModal,
     setIsShowSignModal,
     setIsShowPaymentModal,
     configs,
-  } = useAppContext();
+  } = useUI();
+  const { user } = useAuth();
 
   const [group, setGroup] = useState(() => {
     // find current pricing item

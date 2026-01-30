@@ -37,7 +37,8 @@ import {
 } from '@/shared/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { cn } from '@/shared/lib/utils';
 
 interface ImageGeneratorProps {
@@ -235,8 +236,8 @@ export function ImageGenerator({
   );
   const [isMounted, setIsMounted] = useState(false);
 
-  const { user, isCheckSign, setIsShowSignModal, fetchUserCredits } =
-    useAppContext();
+  const { user, isCheckSign, refreshUser } = useAuth();
+  const { setIsShowSignModal } = useUI();
 
   useEffect(() => {
     setIsMounted(true);
@@ -416,7 +417,7 @@ export function ImageGenerator({
           toast.error(errorMessage);
           resetTaskState();
 
-          fetchUserCredits();
+          void refreshUser();
 
           return true;
         }
@@ -428,7 +429,7 @@ export function ImageGenerator({
         toast.error(`Query task failed: ${error.message}`);
         resetTaskState();
 
-        fetchUserCredits();
+        void refreshUser();
 
         return true;
       }
@@ -558,7 +559,7 @@ export function ImageGenerator({
           toast.success('Image generated successfully');
           setProgress(100);
           resetTaskState();
-          await fetchUserCredits();
+          await refreshUser();
           return;
         }
       }
@@ -566,7 +567,7 @@ export function ImageGenerator({
       setTaskId(newTaskId);
       setProgress(25);
 
-      await fetchUserCredits();
+      await refreshUser();
     } catch (error: any) {
       console.error('Failed to generate image:', error);
       toast.error(`Failed to generate image: ${error.message}`);

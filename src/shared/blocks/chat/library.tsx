@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/shared/components/ui/sidebar';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
 import { useChatContext } from '@/shared/contexts/chat';
 
 export function ChatLibrary({}) {
@@ -39,7 +39,7 @@ export function ChatLibrary({}) {
   const t = useTranslations('ai.chat.library');
   const params = useParams();
 
-  const { user } = useAppContext();
+  const { user } = useAuth();
 
   const { chats, setChats } = useChatContext();
   const [hasMore, setHasMore] = useState(false);

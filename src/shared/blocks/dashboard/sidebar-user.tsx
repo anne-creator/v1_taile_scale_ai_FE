@@ -4,8 +4,10 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 import { ChevronsUpDown, Loader2, LogOut, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { signOut, useSession } from '@/core/auth/client';
+import { signOut } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { SmartIcon } from '@/shared/blocks/common';
 import { SignModal } from '@/shared/blocks/sign/sign-modal';
 import {
@@ -29,7 +31,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/shared/components/ui/sidebar';
-import { useAppContext } from '@/shared/contexts/app';
 import { User as UserType } from '@/shared/models/user';
 import { NavItem } from '@/shared/types/blocks/common';
 import { SidebarUser as SidebarUserType } from '@/shared/types/blocks/dashboard';
@@ -40,8 +41,11 @@ export function SidebarUser({ user }: { user: SidebarUserType }) {
   const { isMobile, open } = useSidebar();
   const router = useRouter();
 
-  // get session (MUST be called unconditionally to keep hook order stable)
-  const { data: session, isPending } = useSession();
+  // get auth context values
+  const { user: authUser, isCheckSign, showOneTap } = useAuth();
+
+  // get UI context values
+  const { configs, fetchConfigs, setIsShowSignModal } = useUI();
 
   // one tap initialized
   const oneTapInitialized = useRef(false);
@@ -57,31 +61,9 @@ export function SidebarUser({ user }: { user: SidebarUserType }) {
     router.push(user.signout_callback || '/sign-in');
   };
 
-  // get app context values
-  const {
-    configs,
-    fetchConfigs,
-    setIsShowSignModal,
-    isCheckSign,
-    setIsCheckSign,
-    user: authUser,
-    setUser,
-    fetchUserInfo,
-    showOneTap,
-  } = useAppContext();
-
   useEffect(() => {
     fetchConfigs();
-  }, []);
-
-  // set is check sign
-  useEffect(() => {
-    if (!hasMounted) {
-      return;
-    }
-
-    setIsCheckSign(isPending);
-  }, [hasMounted, isPending, setIsCheckSign]);
+  }, [fetchConfigs]);
 
   // show one tap if not initialized
   useEffect(() => {
@@ -93,32 +75,14 @@ export function SidebarUser({ user }: { user: SidebarUserType }) {
       configs &&
       configs.google_client_id &&
       configs.google_one_tap_enabled === 'true' &&
-      !session &&
-      !isPending &&
+      !authUser &&
+      !isCheckSign &&
       !oneTapInitialized.current
     ) {
       oneTapInitialized.current = true;
       showOneTap(configs);
     }
-  }, [hasMounted, configs, session, isPending, showOneTap]);
-
-  // set user
-  useEffect(() => {
-    if (!hasMounted) {
-      return;
-    }
-
-    const sessionUser = session?.user;
-    const currentUserId = authUser?.id;
-    const sessionUserId = sessionUser?.id;
-
-    if (sessionUser && sessionUserId !== currentUserId) {
-      setUser(sessionUser as UserType);
-      fetchUserInfo();
-    } else if (!sessionUser && currentUserId) {
-      setUser(null);
-    }
-  }, [hasMounted, session?.user?.id, authUser?.id, setUser, fetchUserInfo]);
+  }, [hasMounted, configs, authUser, isCheckSign, showOneTap]);
 
   // If not mounted, render placeholder to avoid hydration mismatch
   if (!hasMounted) {

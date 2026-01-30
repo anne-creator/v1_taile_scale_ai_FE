@@ -38,7 +38,8 @@ import {
 } from '@/shared/components/ui/select';
 import { Switch } from '@/shared/components/ui/switch';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { cn } from '@/shared/lib/utils';
 
 interface SongData {
@@ -76,8 +77,8 @@ interface SongGeneratorProps {
 
 export function MusicGenerator({ className, srOnlyTitle }: SongGeneratorProps) {
   const t = useTranslations('ai.music');
-  const { user, isCheckSign, setIsShowSignModal, fetchUserCredits } =
-    useAppContext();
+  const { user, isCheckSign, refreshUser } = useAuth();
+  const { setIsShowSignModal } = useUI();
 
   // Form state
   const [provider, setProvider] = useState('kie');
@@ -199,7 +200,7 @@ export function MusicGenerator({ className, srOnlyTitle }: SongGeneratorProps) {
         setGenerationStartTime(null);
         toast.error('Generate music failed: ' + errorMessage);
 
-        fetchUserCredits();
+        void refreshUser();
 
         return true;
       }
@@ -224,7 +225,7 @@ export function MusicGenerator({ className, srOnlyTitle }: SongGeneratorProps) {
       setGenerationStartTime(null);
       toast.error('Create song failed: ' + error.message);
 
-      fetchUserCredits();
+      void refreshUser();
 
       return true; // Stop polling on error
     }
@@ -342,7 +343,7 @@ export function MusicGenerator({ className, srOnlyTitle }: SongGeneratorProps) {
       }
 
       // refresh user credits
-      await fetchUserCredits();
+      await refreshUser();
 
       setTaskId(taskId);
       setProgress(20);

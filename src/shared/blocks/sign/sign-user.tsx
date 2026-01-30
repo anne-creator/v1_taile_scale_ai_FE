@@ -5,7 +5,7 @@ import { Fragment } from 'react/jsx-runtime';
 import { Coins, LayoutDashboard, Loader2, LogOut, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { authClient, signOut, useSession } from '@/core/auth/client';
+import { signOut } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
 import {
   Avatar,
@@ -20,18 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { useAppContext } from '@/shared/contexts/app';
+import { useAuth } from '@/shared/contexts/auth';
+import { useUI } from '@/shared/contexts/ui';
 import { cn } from '@/shared/lib/utils';
 import { User as UserType } from '@/shared/models/user';
 import { NavItem, UserNav } from '@/shared/types/blocks/common';
 
 import { SmartIcon } from '../common/smart-icon';
 import { SignModal } from './sign-modal';
-
-function extractSessionUser(data: any): UserType | null {
-  const u = data?.user ?? data?.data?.user ?? null;
-  return u && typeof u === 'object' ? (u as UserType) : null;
-}
 
 export function SignUser({
   isScrolled,
@@ -50,46 +46,25 @@ export function SignUser({
     setMounted(true);
   }, []);
 
-  // get app context values
+  // get auth context values
+  const { user, isCheckSign, showOneTap } = useAuth();
+
+  // get UI context values
   const {
     configs,
     fetchConfigs,
     isShowSignModal,
     setIsShowSignModal,
-    isCheckSign,
-    setIsCheckSign,
-    user,
-    setUser,
-    fetchUserInfo,
-    showOneTap,
-  } = useAppContext();
+  } = useUI();
 
-  // get session
-  const { data: session, isPending } = useSession();
-  const sessionUser = extractSessionUser(session);
-  const displayUser = (user as UserType | null) ?? sessionUser;
-
-  // In dev (React StrictMode) effects can run twice; ensure we don't spam getSession().
-  const didFallbackSyncRef = useRef(false);
+  const displayUser = user as UserType | null;
 
   // one tap initialized
   const oneTapInitialized = useRef(false);
 
-  // Reset fallback sync when modal is closed to allow re-check after login
-  useEffect(() => {
-    if (!isShowSignModal) {
-      didFallbackSyncRef.current = false;
-    }
-  }, [isShowSignModal]);
-
   useEffect(() => {
     fetchConfigs();
-  }, []);
-
-  // set is check sign
-  useEffect(() => {
-    setIsCheckSign(isPending);
-  }, [isPending]);
+  }, [fetchConfigs]);
 
   // show one tap if not initialized
   useEffect(() => {
@@ -97,52 +72,14 @@ export function SignUser({
       configs &&
       configs.google_client_id &&
       configs.google_one_tap_enabled === 'true' &&
-      !session &&
-      !isPending &&
+      !user &&
+      !isCheckSign &&
       !oneTapInitialized.current
     ) {
       oneTapInitialized.current = true;
       showOneTap(configs);
     }
-  }, [configs, session, isPending]);
-
-  // set user
-  useEffect(() => {
-    const currentUserId = user?.id;
-    const sessionUserId = (sessionUser as any)?.id;
-
-    if (sessionUser && sessionUserId !== currentUserId) {
-      setUser(sessionUser as UserType);
-      fetchUserInfo();
-    } else if (!sessionUser && currentUserId) {
-      setUser(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionUser?.id, (sessionUser as any)?.email, user?.id]);
-
-  // Fallback: if the session cookie is present but useSession lags, do a single refresh.
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (didFallbackSyncRef.current) return;
-    // Only run when useSession is done but still no user.
-    if (isPending) return;
-    if (sessionUser || user) return;
-
-    didFallbackSyncRef.current = true;
-    void (async () => {
-      try {
-        const res: any = await authClient.getSession();
-        const fresh = extractSessionUser(res?.data ?? res);
-        if (fresh?.id) {
-          setUser(fresh);
-          fetchUserInfo();
-        }
-      } catch {
-        // ignore
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPending, sessionUser, user?.id, isShowSignModal]);
+  }, [configs, user, isCheckSign, showOneTap]);
 
   return (
     <>

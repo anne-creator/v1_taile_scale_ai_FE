@@ -19,7 +19,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/shared/components/ui/drawer';
-import { useAppContext } from '@/shared/contexts/app';
+import { useUI } from '@/shared/contexts/ui';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 import { PricingItem } from '@/shared/types/blocks/pricing';
 
@@ -35,8 +35,7 @@ export function PaymentModal({
   onCheckout: (item: PricingItem, paymentProvider?: string) => void;
 }) {
   const t = useTranslations('common.payment');
-  const { isShowPaymentModal, setIsShowPaymentModal } = useAppContext();
-  const { configs } = useAppContext();
+  const { isShowPaymentModal, setIsShowPaymentModal, configs } = useUI();
 
   // todo: dynamic set callbackURL
   const callbackURL = '/';
