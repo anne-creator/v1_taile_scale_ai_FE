@@ -3,7 +3,7 @@ import {
   BrandLogo,
   LocaleSelector,
   ThemeToggler,
-} from '@/shared/blocks/common';
+} from '@/components/custom';
 
 export default function AuthLayout({
   children,

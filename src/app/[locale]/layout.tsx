@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 
 import { routing } from '@/core/i18n/config';
 import { ThemeProvider } from '@/core/theme/provider';
-import { Toaster } from '@/shared/components/ui/sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/shared/contexts/auth';
 import { UIProvider } from '@/shared/contexts/ui';
 import { getMetadata } from '@/shared/lib/seo';

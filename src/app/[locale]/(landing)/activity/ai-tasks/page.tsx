@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 
 import { AITaskStatus } from '@/extensions/ai';
-import { AudioPlayer, Empty, LazyImage } from '@/shared/blocks/common';
-import { TableCard } from '@/shared/blocks/table';
+import { AudioPlayer, Empty, LazyImage } from '@/components/custom';
+import { TableCard } from '@/components/blocks/table';
 import { AITask, getAITasks, getAITasksCount } from '@/shared/models/ai_task';
 import { getUserInfo } from '@/shared/models/user';
 import { Button, Tab } from '@/shared/types/blocks/common';

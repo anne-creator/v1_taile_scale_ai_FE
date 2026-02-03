@@ -5,9 +5,9 @@ import {
   requireAllPermissions,
   requirePermission,
 } from '@/core/rbac';
-import { Empty } from '@/shared/blocks/common';
-import { Header, Main, MainHeader } from '@/shared/blocks/dashboard';
-import { FormCard } from '@/shared/blocks/form';
+import { Empty } from '@/components/custom';
+import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
+import { FormCard } from '@/components/blocks/form';
 import { findUserById } from '@/shared/models/user';
 import {
   assignRolesToUser,

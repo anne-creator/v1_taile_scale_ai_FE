@@ -1,8 +1,8 @@
 import moment from 'moment';
 import { getTranslations } from 'next-intl/server';
 
-import { Empty } from '@/shared/blocks/common';
-import { FormCard } from '@/shared/blocks/form';
+import { Empty } from '@/components/custom';
+import { FormCard } from '@/components/blocks/form';
 import {
   findSubscriptionBySubscriptionNo,
   SubscriptionStatus,

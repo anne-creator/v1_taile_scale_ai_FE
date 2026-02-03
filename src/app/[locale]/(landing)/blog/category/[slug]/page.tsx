@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { getThemePage } from '@/core/theme';
 import { envConfigs } from '@/config';
-import { Empty } from '@/shared/blocks/common';
+import { Empty } from '@/components/custom';
 import {
   PostType as DBPostType,
   getPosts,

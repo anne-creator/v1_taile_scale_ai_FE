@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
-import { Empty } from '@/shared/blocks/common';
-import { TableCard } from '@/shared/blocks/table';
+import { Empty } from '@/components/custom';
+import { TableCard } from '@/components/blocks/table';
 import {
   Apikey,
   ApikeyStatus,

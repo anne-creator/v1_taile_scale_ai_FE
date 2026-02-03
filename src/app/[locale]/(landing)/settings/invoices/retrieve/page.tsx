@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { Empty } from '@/shared/blocks/common';
+import { Empty } from '@/components/custom';
 import {
   findOrderByOrderNo,
   Order,

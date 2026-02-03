@@ -5,7 +5,7 @@ import { getLocale } from 'next-intl/server';
 import { db } from '@/core/db';
 import { envConfigs } from '@/config';
 import * as schema from '@/config/db/schema';
-import { VerifyEmail } from '@/shared/blocks/email/verify-email';
+import { VerifyEmail } from '@/components/blocks/email/verify-email';
 import {
   getCookieFromCtx,
   getHeaderValue,

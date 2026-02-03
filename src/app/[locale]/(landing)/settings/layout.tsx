@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 
-import { ConsoleLayout } from '@/shared/blocks/console/layout';
+import { ConsoleLayout } from '@/components/blocks/console/layout';
 
 export default async function SettingsLayout({
   children,

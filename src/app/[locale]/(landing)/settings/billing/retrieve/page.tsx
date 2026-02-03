@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { envConfigs } from '@/config';
-import { Empty } from '@/shared/blocks/common';
+import { Empty } from '@/components/custom';
 import {
   findSubscriptionBySubscriptionNo,
   updateSubscriptionBySubscriptionNo,

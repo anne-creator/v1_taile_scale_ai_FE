@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { envConfigs } from '@/config';
 import { getThemeLayout } from '@/core/theme';
-import { LocaleDetector, TopBanner } from '@/shared/blocks/common';
+import { LocaleDetector, TopBanner } from '@/components/custom';
 import {
   Footer as FooterType,
   Header as HeaderType,

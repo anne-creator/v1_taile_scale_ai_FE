@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { PERMISSIONS, requirePermission } from '@/core/rbac';
-import { Header, Main, MainHeader } from '@/shared/blocks/dashboard';
-import { FormCard } from '@/shared/blocks/form';
+import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
+import { FormCard } from '@/components/blocks/form';
 import { getUuid } from '@/shared/lib/hash';
 import { addPost, NewPost, PostStatus, PostType } from '@/shared/models/post';
 import {

@@ -7,7 +7,7 @@ import { db } from '@/core/db';
 import { logsSource, pagesSource, postsSource } from '@/core/docs/source';
 import { generateTOC } from '@/core/docs/toc';
 import { post } from '@/config/db/schema';
-import { MarkdownContent } from '@/shared/blocks/common/markdown-content';
+import { MarkdownContent } from '@/components/custom/markdown-content';
 import {
   Category as BlogCategoryType,
   Post as BlogPostType,

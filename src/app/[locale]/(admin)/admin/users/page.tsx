@@ -1,9 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 
 import { PERMISSIONS, requirePermission } from '@/core/rbac';
-import { Header, Main, MainHeader } from '@/shared/blocks/dashboard';
-import { TableCard } from '@/shared/blocks/table';
-import { Badge } from '@/shared/components/ui/badge';
+import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
+import { TableCard } from '@/components/blocks/table';
+import { Badge } from '@/components/ui/badge';
 import { getRemainingCredits } from '@/shared/models/credit';
 import { getUsers, getUsersCount, User } from '@/shared/models/user';
 import { getUserRoles } from '@/shared/services/rbac';

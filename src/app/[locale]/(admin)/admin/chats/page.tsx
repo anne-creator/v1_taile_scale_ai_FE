@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { PERMISSIONS, requirePermission } from '@/core/rbac';
-import { Header, Main, MainHeader } from '@/shared/blocks/dashboard';
-import { TableCard } from '@/shared/blocks/table';
+import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
+import { TableCard } from '@/components/blocks/table';
 import { getChats, getChatsCount } from '@/shared/models/chat';
 import { Button, Crumb, Tab } from '@/shared/types/blocks/common';
 import { type Table } from '@/shared/types/blocks/table';

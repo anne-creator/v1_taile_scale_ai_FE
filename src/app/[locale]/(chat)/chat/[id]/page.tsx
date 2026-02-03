@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { UIMessage } from 'ai';
 
-import { ChatBox } from '@/shared/blocks/chat/box';
-import { Loader } from '@/shared/components/ai-elements/loader';
+import { ChatBox } from '@/components/blocks/chat/box';
+import { Loader } from '@/components/custom/ai/loader';
 import { Chat } from '@/shared/types/chat';
 
 export default function ChatPage() {

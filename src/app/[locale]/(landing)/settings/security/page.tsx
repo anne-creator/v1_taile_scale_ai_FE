@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
-import { Empty } from '@/shared/blocks/common';
-import { PanelCard } from '@/shared/blocks/panel';
+import { Empty } from '@/components/custom';
+import { PanelCard } from '@/components/blocks/panel';
 import { getUserInfo, UpdateUser, updateUser } from '@/shared/models/user';
 import { Button as ButtonType } from '@/shared/types/blocks/common';
 import { Form as FormType } from '@/shared/types/blocks/form';

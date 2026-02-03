@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { envConfigs } from '@/config';
 import { defaultLocale } from '@/config/locale';
 import { redirect } from '@/core/i18n/navigation';
-import { SignUp } from '@/shared/blocks/sign/sign-up';
+import { SignUp } from '@/components/blocks/auth/sign-up';
 import { getConfigs } from '@/shared/models/config';
 import { getSignUser } from '@/shared/models/user';
 

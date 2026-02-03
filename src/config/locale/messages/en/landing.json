@@ -10,7 +10,103 @@
         "height": 100
       },
       "url": "/"
-    }
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "Features",
+          "url": "/#features",
+          "icon": "Sparkles"
+        },
+        {
+          "title": "Gallery",
+          "url": "/showcases",
+          "icon": "Box"
+        },
+        {
+          "title": "Pricing",
+          "url": "/pricing",
+          "icon": "DollarSign"
+        },
+        {
+          "title": "AI Tools",
+          "icon": "RiRobot2Line",
+          "children": [
+            {
+              "title": "AI Image Generator",
+              "description": "Generate images with AI",
+              "url": "/ai-image-generator",
+              "icon": "RiImage2Line"
+            },
+            {
+              "title": "AI Music Generator",
+              "description": "Create beautiful music with AI",
+              "url": "/ai-music-generator",
+              "icon": "RiMusic2Line"
+            },
+            {
+              "title": "AI Video Generator",
+              "description": "Generate videos with AI",
+              "url": "/ai-video-generator",
+              "icon": "RiVideoLine"
+            },
+            {
+              "title": "AI Chatbot",
+              "description": "Chat with AI assistant",
+              "url": "/chat",
+              "icon": "RiMessage2Line"
+            }
+          ]
+        },
+        {
+          "title": "Resources",
+          "icon": "FileText",
+          "children": [
+            {
+              "title": "Blog",
+              "description": "Read our blog posts",
+              "url": "/blog",
+              "icon": "Newspaper"
+            },
+            {
+              "title": "Updates",
+              "description": "View changelog and updates",
+              "url": "/updates",
+              "icon": "Clock"
+            },
+            {
+              "title": "Docs",
+              "description": "Read documentation",
+              "url": "/docs",
+              "target": "_blank",
+              "icon": "BookOpenText"
+            }
+          ]
+        }
+      ]
+    },
+    "buttons": [],
+    "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
+      "items": [
+        {
+          "title": "Billing",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
+        },
+        {
+          "title": "Activity",
+          "url": "/activity",
+          "icon": "Activity"
+        }
+      ]
+    },
+    "show_sign": true,
+    "show_theme": true,
+    "show_locale": true,
+    "topbanner": {}
   },
   "footer": {
     "id": "footer",

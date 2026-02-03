@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { redirect } from '@/core/i18n/navigation';
 import { envConfigs } from '@/config';
 import { defaultLocale } from '@/config/locale';
-import { VerifyEmailPage } from '@/shared/blocks/sign/verify-email';
+import { VerifyEmailPage } from '@/components/blocks/auth/verify-email';
 
 export async function generateMetadata({
   params,
