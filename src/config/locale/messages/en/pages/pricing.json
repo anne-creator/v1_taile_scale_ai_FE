@@ -1,15 +1,16 @@
 {
   "metadata": {
-    "title": "Pricing",
-    "description": "Start with a plan"
+    "title": "Pricing - TaleCraft AI",
+    "description": "Simple, affordable pricing for TaleCraft AI"
   },
   "page": {
-    "title": "ShipAny Pricing",
+    "title": "TaleCraft Pricing",
     "sections": {
       "pricing": {
         "id": "pricing",
-        "title": "Pricing",
-        "description": "Get all features of ShipAny, Ship your AI SaaS startups fast.",
+        "block": "pricing",
+        "title": "Simple Affordable Pricing",
+        "description": "70% off for 1st month, then $39/month",
         "groups": [
           {
             "name": "one-time",

@@ -1,148 +1,80 @@
 {
   "metadata": {
-    "title": "Showcases",
-    "description": "Awesome projects built with ShipAny"
+    "title": "Gallery - TaleCraft AI",
+    "description": "Explore stunning story illustrations created with TaleCraft AI"
   },
   "page": {
-    "title": "Showcases",
+    "title": "Guide Gallery",
     "sections": {
       "showcases": {
         "id": "showcases",
-        "title": "AI SaaS Startups built with ShipAny",
-        "description": "Easy to use and fast to ship.",
-        "groups": [
-          {
-            "name": "all",
-            "title": "All"
-          },
-          {
-            "name": "ai-chatbot",
-            "title": "AI Chatbot"
-          },
-          {
-            "name": "ai-image",
-            "title": "AI Image"
-          },
-          {
-            "name": "ai-video",
-            "title": "AI Video"
-          },
-          {
-            "name": "ai-audio",
-            "title": "AI Audio"
-          },
-          {
-            "name": "ai-music",
-            "title": "AI Music"
-          },
-          {
-            "name": "ai-coding",
-            "title": "AI Coding"
-          },
-          {
-            "name": "other",
-            "title": "Other"
-          }
-        ],
+        "block": "showcases",
+        "title": "Guide Gallery",
+        "description": "Explore stunning illustrations created with TaleCraft. Every image tells a story.",
         "items": [
           {
-            "title": "ThinkAny",
-            "description": "AI Search Engine",
-            "url": "https://thinkany.ai",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/7.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1577720086808-ee62b140bc0e?w=800",
+              "alt": "Fairy tale castle"
             },
-            "group": "ai-chatbot"
+            "description": "Fairy tale castle in the clouds",
+            "title": "Watercolor Dreams"
           },
           {
-            "title": "HeyBeauty",
-            "description": "AI Virtual Try On",
-            "url": "https://heybeauty.ai",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/5.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1760355493926-5a38d4341fd4?w=800",
+              "alt": "Magical forest"
             },
-            "group": "ai-image"
+            "description": "Magical forest adventure",
+            "title": "Storybook Classic"
           },
           {
-            "title": "AI Wallpaper",
-            "description": "AI Wallpaper Generator",
-            "url": "https://aiwallpaper.shop",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/1.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1631061184412-b18f5fb1dc70?w=800",
+              "alt": "Whimsical animals"
             },
-            "group": "ai-image"
+            "description": "Whimsical animal friends",
+            "title": "Bright & Bold"
           },
           {
-            "title": "AI Cover",
-            "description": "AI Cover Generator",
-            "url": "https://aicover.design",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/2.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1743356816344-397d510977ea?w=800",
+              "alt": "Character portraits"
             },
-            "group": "ai-image"
+            "description": "Character portrait collection",
+            "title": "Character Focus"
           },
           {
-            "title": "GPTs Works",
-            "description": "GPTs Directory",
-            "url": "https://gpts.works",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/3.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1610308700652-d931026f7eec?w=800",
+              "alt": "Dragon illustration"
             },
-            "group": "other"
+            "description": "A brave knight in an enchanted forest",
+            "title": "Fantasy Adventure"
           },
           {
-            "title": "Melodisco",
-            "description": "AI Music Player",
-            "url": "https://melodis.co",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/4.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1577720086808-ee62b140bc0e?w=800",
+              "alt": "Castle in clouds"
             },
-            "group": "ai-music"
+            "description": "Floating castle in magical clouds",
+            "title": "Sky Kingdom"
           },
           {
-            "title": "Pagen",
-            "description": "AI Landing Page Generator",
-            "url": "https://pagen.so",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/6.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1760355493926-5a38d4341fd4?w=800",
+              "alt": "Forest path"
             },
-            "group": "ai-coding"
+            "description": "Enchanted forest path with glowing mushrooms",
+            "title": "Mystical Woods"
           },
           {
-            "title": "SoraFM",
-            "description": "AI Video Generator",
-            "url": "https://sorafm.trys.ai",
-            "target": "_blank",
             "image": {
-              "src": "/imgs/cases/8.png",
-              "alt": "showcases"
+              "src": "https://images.unsplash.com/photo-1631061184412-b18f5fb1dc70?w=800",
+              "alt": "Cute animals"
             },
-            "group": "ai-video"
-          },
-          {
-            "title": "PodLM",
-            "description": "AI Podcast Generator",
-            "url": "https://podlm.ai",
-            "target": "_blank",
-            "image": {
-              "src": "/imgs/cases/9.png",
-              "alt": "showcases"
-            },
-            "group": "ai-audio"
+            "description": "Friendly woodland creatures gathering",
+            "title": "Animal Friends"
           }
         ]
       }
