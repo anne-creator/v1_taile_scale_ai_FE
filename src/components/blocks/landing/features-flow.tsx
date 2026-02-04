@@ -7,6 +7,11 @@ import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 
 /**
+ * Shared easing curve - use `as const` to ensure tuple type for motion
+ */
+const easeOutExpo = [0.22, 1, 0.36, 1] as const;
+
+/**
  * Animation variants using staggerChildren pattern
  * per code_principle.md: "Block 作为'指挥官'，负责编排子组件的动画时机（如 staggerChildren）"
  */
@@ -28,7 +33,7 @@ const itemVariants = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      ease: easeOutExpo,
     },
   },
 };
@@ -40,7 +45,7 @@ const imageVariants = {
     scale: 1,
     transition: {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: easeOutExpo,
     },
   },
 };
@@ -52,7 +57,7 @@ const textVariants = {
     x: 0,
     transition: {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: easeOutExpo,
     },
   },
 };
@@ -65,7 +70,7 @@ const headerVariants = {
     filter: 'blur(0px)',
     transition: {
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
+      ease: easeOutExpo,
     },
   },
 };
