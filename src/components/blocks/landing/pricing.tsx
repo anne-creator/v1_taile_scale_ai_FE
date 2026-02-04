@@ -4,6 +4,7 @@ import { Check, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/hooks/use-checkout';
+import { usePromoEligibility } from '@/hooks/use-promo-eligibility';
 import { useAuth } from '@/providers/auth-provider';
 import { useUI } from '@/providers/ui-provider';
 import { cn } from '@/shared/lib/utils';
@@ -28,6 +29,12 @@ export function Pricing({
   const { user } = useAuth();
   const { setIsShowSignModal } = useUI();
   const { actions, isLoading, error } = useCheckout();
+  const { isEligible: isPromoEligible, isLoading: isPromoLoading } =
+    usePromoEligibility();
+
+  // Show promo pricing if: not logged in, or loading, or eligible
+  // Hide promo pricing only when: logged in AND not eligible
+  const showPromo = !user || isPromoLoading || isPromoEligible !== false;
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -67,7 +74,9 @@ export function Pricing({
             {section.title || 'Simple Affordable Pricing'}
           </h2>
           <p className="text-lg text-muted-foreground">
-            {section.description || 'Limited time offer for new subscribers'}
+            {showPromo
+              ? section.description || 'Limited time offer for new subscribers'
+              : 'Professional plan for unlimited creativity'}
           </p>
         </div>
 
@@ -82,23 +91,41 @@ export function Pricing({
             <div className="grid md:grid-cols-3 gap-8 items-start">
               {/* Left: Price */}
               <div className="text-center md:text-left">
-                {/* Discount Badge */}
-                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-brand-yellow rounded-full">
-                  <span className="text-sm font-bold text-brand-yellow-foreground">70% OFF</span>
-                  <span className="text-xs text-brand-yellow-foreground/70">1st month</span>
-                </div>
-                
+                {/* Discount Badge - only show for promo eligible users */}
+                {showPromo && (
+                  <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-brand-yellow rounded-full">
+                    <span className="text-sm font-bold text-brand-yellow-foreground">
+                      70% OFF
+                    </span>
+                    <span className="text-xs text-brand-yellow-foreground/70">
+                      1st month
+                    </span>
+                  </div>
+                )}
+
                 {/* Price Display */}
                 <div className="flex items-baseline justify-center md:justify-start gap-2">
-                  <span className="text-5xl md:text-6xl font-bold">$11.7</span>
-                  <span className="text-muted-foreground line-through">$39</span>
+                  {showPromo ? (
+                    <>
+                      <span className="text-5xl md:text-6xl font-bold">
+                        $11.7
+                      </span>
+                      <span className="text-muted-foreground line-through">
+                        $39
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-5xl md:text-6xl font-bold">$39</span>
+                  )}
                   <span className="text-muted-foreground">/month</span>
                 </div>
-                
-                {/* Renewal Note */}
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Then $39/mo
-                </p>
+
+                {/* Renewal Note - only show for promo eligible users */}
+                {showPromo && (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Then $39/mo
+                  </p>
+                )}
               </div>
 
               {/* Middle: Features */}

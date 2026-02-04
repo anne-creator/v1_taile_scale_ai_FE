@@ -59,7 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const userRef = useRef<User | null>(null);
-  const [isCheckSign, setIsCheckSign] = useState(false);
+  
+  // Track if component has mounted (for hydration safety)
+  // This prevents hydration mismatch by ensuring server and client initial render are identical
+  const [hasMounted, setHasMounted] = useState(false);
+  
+  // Initialize as true to match server/client initial state and prevent hydration mismatch
+  // This ensures loading state is shown until session check completes
+  const [isCheckSign, setIsCheckSign] = useState(true);
 
   // Get session from Better Auth
   const { data: session, isPending } = useSession();
@@ -68,13 +75,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // In dev (React StrictMode) effects can run twice; ensure we don't spam getSession().
   const didFallbackSyncRef = useRef(false);
 
-  // Update isCheckSign based on session loading state
+  // Set mounted state after hydration
   useEffect(() => {
-    setIsCheckSign(isPending);
-  }, [isPending]);
+    setHasMounted(true);
+  }, []);
 
-  // Sync session user to local state
+  // Update isCheckSign based on session loading state
+  // Only set to false when: 1) component has mounted, and 2) session check is complete
   useEffect(() => {
+    if (hasMounted && !isPending) {
+      setIsCheckSign(false);
+    }
+  }, [hasMounted, isPending]);
+
+  // Timeout fallback: if session check takes too long, stop showing loading
+  // This prevents infinite loading if useSession() gets stuck
+  useEffect(() => {
+    if (!hasMounted) return;
+    
+    const timeout = setTimeout(() => {
+      if (isCheckSign) {
+        console.log('[AuthProvider] Session check timeout, stopping loading state');
+        setIsCheckSign(false);
+      }
+    }, 3000); // 3 seconds timeout
+    
+    return () => clearTimeout(timeout);
+  }, [hasMounted, isCheckSign]);
+
+  // Sync session user to local state (only after mount to avoid hydration issues)
+  useEffect(() => {
+    if (!hasMounted) return;
+    
     const currentUserId = user?.id;
     const sessionUserId = (sessionUser as any)?.id;
 
@@ -85,11 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionUser?.id, (sessionUser as any)?.email, user?.id]);
+  }, [hasMounted, sessionUser?.id, (sessionUser as any)?.email, user?.id]);
 
   // Fallback: if the session cookie is present but useSession lags, do a single refresh.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!hasMounted) return;
     if (didFallbackSyncRef.current) return;
     // Only run when useSession is done but still no user.
     if (isPending) return;
@@ -109,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPending, sessionUser, user?.id]);
+  }, [hasMounted, isPending, sessionUser, user?.id]);
 
   // Keep userRef in sync
   useEffect(() => {

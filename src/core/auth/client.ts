@@ -80,8 +80,11 @@ const AUTH_GET_SESSION_MIN_INTERVAL_MS =
   Number(process.env.NEXT_PUBLIC_AUTH_GET_SESSION_MIN_INTERVAL_MS) || 1000;
 
 // create default auth client, without plugins
+// NOTE: We intentionally omit baseURL to use relative paths on the client.
+// This avoids port mismatch issues when dev server runs on a different port
+// than configured in .env (e.g., 3002 instead of 3000).
+// Better Auth will use the current page's origin for requests.
 export const authClient = createAuthClient({
-  baseURL: envConfigs.auth_url,
   fetchOptions: {
     // Avoid amplifying request storms (e.g. during env/db switching in dev).
     // IMPORTANT: auth mutations (sign-in/sign-up) must be non-retriable,
@@ -99,7 +102,6 @@ export const { useSession, signIn, signUp, signOut } = authClient;
 // get auth client with plugins
 export function getAuthClient(configs: Record<string, string>) {
   const authClient = createAuthClient({
-    baseURL: envConfigs.auth_url,
     plugins: getAuthPlugins(configs),
     fetchOptions: {
       // Avoid amplifying request storms (e.g. during env/db switching in dev).

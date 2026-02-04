@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
+import { StripeProvider } from '@/extensions/payment/stripe';
 import {
   PaymentInterval,
   PaymentOrder,
@@ -171,11 +172,25 @@ export async function POST(req: Request) {
     }
 
     // get preset promotion code for product_id
-    const promotionCode = await getPromotionCode(
+    let promotionCode = await getPromotionCode(
       product_id,
       paymentProviderName,
       checkoutCurrency
     );
+
+    // If there's a promotion code and using Stripe, check if user is a new customer
+    // Only apply promotion code to new customers (no prior transactions)
+    if (promotionCode && paymentProviderName === 'stripe') {
+      const stripeProvider = paymentProvider as StripeProvider;
+      const isNew = await stripeProvider.isNewCustomer(user.email);
+      if (!isNew) {
+        console.log(
+          'User has prior transactions, skipping promotion code for:',
+          user.email
+        );
+        promotionCode = undefined;
+      }
+    }
 
     // build checkout price with correct amount for selected currency
     const checkoutPrice: PaymentPrice = {
@@ -291,6 +306,44 @@ export async function POST(req: Request) {
 
       return respData(result.checkoutInfo);
     } catch (e: any) {
+      // If error is related to promotion code, retry without discount
+      if (
+        checkoutOrder.discount &&
+        e.message?.toLowerCase().includes('promotion')
+      ) {
+        console.log(
+          'Promotion code failed, retrying without discount:',
+          e.message
+        );
+        delete checkoutOrder.discount;
+
+        try {
+          const retryResult = await paymentProvider.createPayment({
+            order: checkoutOrder,
+          });
+
+          // update order status to created, waiting for payment
+          await updateOrderByOrderNo(orderNo, {
+            status: OrderStatus.CREATED,
+            checkoutInfo: JSON.stringify(retryResult.checkoutParams),
+            checkoutResult: JSON.stringify(retryResult.checkoutResult),
+            checkoutUrl: retryResult.checkoutInfo.checkoutUrl,
+            paymentSessionId: retryResult.checkoutInfo.sessionId,
+            paymentProvider: retryResult.provider,
+            discountCode: '', // Clear discount code since retry succeeded without it
+          });
+
+          return respData(retryResult.checkoutInfo);
+        } catch (retryError: any) {
+          // Retry also failed, update order and return error
+          await updateOrderByOrderNo(orderNo, {
+            status: OrderStatus.COMPLETED, // means checkout failed
+            checkoutInfo: JSON.stringify(checkoutOrder),
+          });
+          return respErr('checkout failed: ' + retryError.message);
+        }
+      }
+
       // update order status to completed, means checkout failed
       await updateOrderByOrderNo(orderNo, {
         status: OrderStatus.COMPLETED, // means checkout failed

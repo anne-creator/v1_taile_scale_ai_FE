@@ -356,6 +356,37 @@ export class StripeProvider implements PaymentProvider {
     }
   }
 
+  /**
+   * Check if a customer is new (has no prior transactions)
+   * Used to determine if promotion codes should be applied
+   */
+  async isNewCustomer(email: string): Promise<boolean> {
+    try {
+      // Find existing customer by email
+      const customers = await this.client.customers.list({
+        email: email,
+        limit: 1,
+      });
+
+      if (customers.data.length === 0) {
+        return true; // No customer record, is a new customer
+      }
+
+      const customerId = customers.data[0].id;
+
+      // Check if customer has any prior transactions (charges)
+      const charges = await this.client.charges.list({
+        customer: customerId,
+        limit: 1,
+      });
+
+      return charges.data.length === 0;
+    } catch (e) {
+      console.log('check new customer failed:', e);
+      return true; // On failure, default to trying to apply promotion code
+    }
+  }
+
   private mapStripeEventType(eventType: string): PaymentEventType {
     switch (eventType) {
       case 'checkout.session.completed':
