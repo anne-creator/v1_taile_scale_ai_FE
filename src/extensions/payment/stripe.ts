@@ -343,10 +343,16 @@ export class StripeProvider implements PaymentProvider {
         throw new Error('subscriptionId is required');
       }
 
-      const subscription =
-        await this.client.subscriptions.cancel(subscriptionId);
+      // Use cancel_at_period_end instead of immediate cancel
+      // This allows user to continue using the subscription until the current period ends
+      const subscription = await this.client.subscriptions.update(
+        subscriptionId,
+        {
+          cancel_at_period_end: true,
+        }
+      );
 
-      if (!subscription.canceled_at) {
+      if (!subscription.cancel_at_period_end) {
         throw new Error('Cancel subscription failed');
       }
 

@@ -197,26 +197,38 @@ export default async function BillingPage({
 
   let buttons: ButtonType[] = [];
   if (currentSubscription) {
-    buttons = [
-      {
-        title: t('view.buttons.adjust'),
-        url: '/pricing',
-        target: '_blank',
-        icon: 'Pencil',
-        size: 'sm',
-      },
-    ];
-    if (currentSubscription.paymentUserId) {
-      buttons.push({
-        title: t('view.buttons.manage'),
-        url: `/settings/billing/retrieve?subscription_no=${currentSubscription.subscriptionNo}`,
-        target: '_blank',
-        icon: 'Settings',
-        size: 'sm',
-        variant: 'outline',
-      });
+    if (
+      currentSubscription.status === SubscriptionStatus.ACTIVE ||
+      currentSubscription.status === SubscriptionStatus.TRIALING
+    ) {
+      // ACTIVE/TRIALING: Only show Manage Subscription button
+      if (currentSubscription.paymentUserId) {
+        buttons = [
+          {
+            title: t('view.buttons.manage'),
+            url: `/settings/billing/retrieve?subscription_no=${currentSubscription.subscriptionNo}`,
+            target: '_blank',
+            icon: 'Settings',
+            size: 'sm',
+          },
+        ];
+      }
+    } else if (
+      currentSubscription.status === SubscriptionStatus.PENDING_CANCEL
+    ) {
+      // PENDING_CANCEL: Show Subscribe button (to re-subscribe)
+      buttons = [
+        {
+          title: t('view.buttons.subscribe'),
+          url: '/pricing',
+          target: '_blank',
+          icon: 'ArrowUpRight',
+          size: 'sm',
+        },
+      ];
     }
   } else {
+    // No subscription: Show Subscribe button
     buttons = [
       {
         title: t('view.buttons.subscribe'),
@@ -250,15 +262,17 @@ export default async function BillingPage({
                   ),
                 })}
               </div>
-            ) : (
-              <div className="text-destructive mt-4 text-sm font-normal">
-                {t('view.end_tip', {
-                  date: moment(currentSubscription?.canceledEndAt).format(
-                    'YYYY-MM-DD'
-                  ),
+            ) : currentSubscription?.status ===
+              SubscriptionStatus.PENDING_CANCEL ? (
+              <div className="text-muted-foreground mt-4 text-sm font-normal">
+                {t('view.canceled_tip', {
+                  date: moment(
+                    currentSubscription?.canceledEndAt ||
+                      currentSubscription?.currentPeriodEnd
+                  ).format('YYYY-MM-DD'),
                 })}
               </div>
-            )}
+            ) : null}
           </>
         ) : null}
       </PanelCard>

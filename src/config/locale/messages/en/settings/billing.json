@@ -14,6 +14,7 @@
   "view": {
     "title": "Current Plan",
     "tip": "Your subscription will auto renew on {date}",
+    "canceled_tip": "Subscription has been canceled, current cycle is available until {date}",
     "end_tip": "Your subscription will be auto canceled on {date}",
     "no_subscription": "No plan",
     "buttons": {

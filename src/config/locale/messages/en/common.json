@@ -14,6 +14,8 @@
     "password_title": "Password",
     "password_placeholder": "Input your password here",
     "forgot_password": "Forgot password?",
+    "forgot_password_email_required": "Please enter your email first",
+    "forgot_password_sent": "Password reset email sent. Please check your inbox.",
     "or": "Or",
     "continue": "Continue",
     "no_account": "Don't have an account?",

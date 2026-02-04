@@ -14,6 +14,7 @@
   "view": {
     "title": "当前计划",
     "tip": "你的订阅将在 {date} 自动续费",
+    "canceled_tip": "订阅已取消，当前周期可用至 {date}",
     "end_tip": "你的订阅将在 {date} 自动取消",
     "no_subscription": "未订阅",
     "buttons": {

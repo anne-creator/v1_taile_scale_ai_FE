@@ -14,6 +14,8 @@
     "password_title": "密码",
     "password_placeholder": "请输入您的密码",
     "forgot_password": "忘记密码？",
+    "forgot_password_email_required": "请先输入您的邮箱",
+    "forgot_password_sent": "密码重置邮件已发送，请查收。",
     "or": "或",
     "continue": "继续",
     "no_account": "还没有账户？",

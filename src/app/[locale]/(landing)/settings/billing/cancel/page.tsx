@@ -104,8 +104,14 @@ export default async function CancelBillingPage({
       throw new Error('cancel subscription failed');
     }
 
+    // Use the actual status from Stripe (PENDING_CANCEL when cancel_at_period_end=true)
+    const subscriptionInfo = result.subscriptionInfo;
     await updateSubscriptionBySubscriptionNo(subscription.subscriptionNo, {
-      status: SubscriptionStatus.CANCELED,
+      status: subscriptionInfo?.status || SubscriptionStatus.PENDING_CANCEL,
+      canceledAt: subscriptionInfo?.canceledAt,
+      canceledEndAt: subscriptionInfo?.canceledEndAt,
+      canceledReason: subscriptionInfo?.canceledReason || '',
+      canceledReasonType: subscriptionInfo?.canceledReasonType || '',
     });
 
     return {

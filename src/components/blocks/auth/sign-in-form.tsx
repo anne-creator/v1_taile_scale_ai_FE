@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { authClient, signIn } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
 import { defaultLocale } from '@/config/locale';
+import { envConfigs } from '@/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,9 +30,30 @@ export function SignInForm({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
   const { refreshUser } = useAuth();
   const { configs, setIsShowSignModal } = useUI();
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error(t('forgot_password_email_required') || 'Please enter your email first');
+      return;
+    }
+
+    setForgotPasswordLoading(true);
+    try {
+      await authClient.forgetPassword({
+        email,
+        redirectTo: `${envConfigs.app_url}/reset-password`,
+      });
+      toast.success(t('forgot_password_sent') || 'Password reset email sent. Please check your inbox.');
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to send password reset email');
+    } finally {
+      setForgotPasswordLoading(false);
+    }
+  };
 
   const isGoogleAuthEnabled = configs.google_auth_enabled === 'true';
   const isGithubAuthEnabled = configs.github_auth_enabled === 'true';
@@ -150,12 +172,21 @@ export function SignInForm({
             </div>
 
             <div className="grid gap-2">
-              {/* <div className="flex items-center">
-              <Label htmlFor="password">{t("password_title")}</Label>
-              <Link href="#" className="ml-auto inline-block text-sm underline">
-                Forgot your password?
-              </Link>
-            </div> */}
+              <div className="flex items-center">
+                <Label htmlFor="password">{t('password_title')}</Label>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={forgotPasswordLoading}
+                  className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-primary disabled:opacity-50"
+                >
+                  {forgotPasswordLoading ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    t('forgot_password')
+                  )}
+                </button>
+              </div>
 
               <Input
                 id="password"

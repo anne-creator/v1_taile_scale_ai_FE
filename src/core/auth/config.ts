@@ -5,6 +5,7 @@ import { getLocale } from 'next-intl/server';
 import { db } from '@/core/db';
 import { envConfigs } from '@/config';
 import * as schema from '@/config/db/schema';
+import { ResetPasswordEmail } from '@/components/blocks/email/reset-password';
 import { VerifyEmail } from '@/components/blocks/email/verify-email';
 import {
   getCookieFromCtx,
@@ -169,6 +170,29 @@ export async function getAuthOptions(configs: Record<string, string>) {
       requireEmailVerification: emailVerificationEnabled,
       // Avoid creating a session immediately after sign up when verification is required.
       autoSignIn: emailVerificationEnabled ? false : true,
+      sendResetPassword: async (
+        { user, url }: { user: any; url: string; token: string },
+        _request: Request
+      ) => {
+        try {
+          const emailService = await getEmailService(configs as any);
+          const logoUrl = envConfigs.app_logo?.startsWith('http')
+            ? envConfigs.app_logo
+            : `${envConfigs.app_url}${envConfigs.app_logo?.startsWith('/') ? '' : '/'}${envConfigs.app_logo || ''}`;
+
+          await emailService.sendEmail({
+            to: user.email,
+            subject: `Reset your password - ${envConfigs.app_name}`,
+            react: ResetPasswordEmail({
+              appName: envConfigs.app_name,
+              logoUrl,
+              url,
+            }),
+          });
+        } catch (e) {
+          console.log('send reset password email failed:', e);
+        }
+      },
     },
     ...(emailVerificationEnabled
       ? {
