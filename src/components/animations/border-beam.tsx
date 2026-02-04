@@ -12,9 +12,9 @@ import { motion, MotionStyle, Transition } from "motion/react";
  */
 interface BorderBeamProps {
   /**
-   * Children to wrap with border beam effect
+   * Children to wrap with border beam effect (optional for standalone decoration)
    */
-  children: ReactNode;
+  children?: ReactNode;
   /**
    * The size of the border beam.
    */
