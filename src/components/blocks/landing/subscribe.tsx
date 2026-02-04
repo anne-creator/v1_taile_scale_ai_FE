@@ -2,12 +2,21 @@
 
 import { useState } from 'react';
 import { Loader2, Mail, SendHorizonal } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { ScrollAnimation } from '@/components/ui/scroll-animation';
+import { useSubscribe } from '@/hooks/use-subscribe';
 import { cn } from '@/shared/lib/utils';
 import type { Section } from '@/shared/types/blocks/landing';
+
+/**
+ * Subscribe Block (Level 4)
+ *
+ * Following code_principle.md:
+ * - Block only CONSUME context (call actions), not MANAGE state for fetch logic
+ * - Subscription logic is managed by useSubscribe hook
+ * - Only local UI state (email input) is managed here (acceptable for form inputs)
+ */
 
 export function Subscribe({
   section,
@@ -16,54 +25,30 @@ export function Subscribe({
   section: Section;
   className?: string;
 }) {
+  // Local UI state for controlled input (acceptable per code_principle.md L2.5)
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { actions, isLoading } = useSubscribe();
 
   const handleSubscribe = async () => {
-    if (!email) {
-      return;
-    }
-
     if (!section.submit?.action) {
       return;
     }
 
-    try {
-      setLoading(true);
-      const resp = await fetch(section.submit.action, {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      });
-
-      if (!resp.ok) {
-        throw new Error(`request failed with status ${resp.status}`);
-      }
-
-      const { code, message, data } = await resp.json();
-      if (code !== 0) {
-        throw new Error(message);
-      }
-
-      setLoading(false);
-
-      if (message) {
-        toast.success(message);
-      }
-    } catch (e: any) {
-      setLoading(false);
-      toast.error(e.message || 'subscribe failed');
+    const success = await actions.subscribe(email, section.submit.action);
+    if (success) {
+      setEmail(''); // Clear input on success
     }
   };
 
   return (
     <section
       id={section.id}
-      className={cn('py-16 md:py-24', section.className, className)}
+      className={cn('py-section-md', section.className, className)}
     >
       <div className="mx-auto max-w-5xl px-6">
         <div className="text-center">
           <ScrollAnimation>
-            <h2 className="text-4xl font-semibold text-balance lg:text-5xl">
+            <h2 className="text-h2 text-balance">
               {section.title}
             </h2>
           </ScrollAnimation>
@@ -96,10 +81,10 @@ export function Subscribe({
                       aria-label="submit"
                       className="rounded-(--radius)"
                       onClick={handleSubscribe}
-                      disabled={loading}
+                      disabled={isLoading}
                       type="submit"
                     >
-                      {loading ? (
+                      {isLoading ? (
                         <Loader2 className="animate-spin" />
                       ) : (
                         <span className="hidden md:block">

@@ -1,9 +1,20 @@
 "use client";
 
+import { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 import { motion, MotionStyle, Transition } from "motion/react";
 
+/**
+ * BorderBeam - Level 2 Animation Wrapper
+ * 
+ * Wraps children and adds an animated beam effect around the border.
+ * Following code_principle.md: Must accept children and apply effects.
+ */
 interface BorderBeamProps {
+  /**
+   * Children to wrap with border beam effect
+   */
+  children: ReactNode;
   /**
    * The size of the border beam.
    */
@@ -29,9 +40,13 @@ interface BorderBeamProps {
    */
   transition?: Transition;
   /**
-   * The class name of the border beam.
+   * The class name of the wrapper container.
    */
   className?: string;
+  /**
+   * The class name of the beam element.
+   */
+  beamClassName?: string;
   /**
    * The style of the border beam.
    */
@@ -51,12 +66,14 @@ interface BorderBeamProps {
 }
 
 export const BorderBeam = ({
+  children,
   className,
+  beamClassName,
   size = 50,
   delay = 0,
   duration = 6,
-  colorFrom = "#ffaa40",
-  colorTo = "#9c40ff",
+  colorFrom = "var(--brand-yellow)",
+  colorTo = "var(--primary)",
   transition,
   style,
   reverse = false,
@@ -64,43 +81,46 @@ export const BorderBeam = ({
   borderWidth = 1,
 }: BorderBeamProps) => {
   return (
-    <div
-      className="pointer-events-none absolute inset-0 rounded-[inherit] border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)] border-(length:--border-beam-width)"
-      style={
-        {
-          "--border-beam-width": `${borderWidth}px`,
-        } as React.CSSProperties
-      }
-    >
-      <motion.div
-        className={cn(
-          "absolute aspect-square",
-          "bg-gradient-to-l from-[var(--color-from)] via-[var(--color-to)] to-transparent",
-          className
-        )}
+    <div className={cn("relative", className)}>
+      {children}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-[inherit] border-transparent [mask-clip:padding-box,border-box] [mask-composite:intersect] [mask-image:linear-gradient(transparent,transparent),linear-gradient(#000,#000)] border-(length:--border-beam-width)"
         style={
           {
-            width: size,
-            offsetPath: `rect(0 auto auto 0 round ${size}px)`,
-            "--color-from": colorFrom,
-            "--color-to": colorTo,
-            ...style,
-          } as MotionStyle
+            "--border-beam-width": `${borderWidth}px`,
+          } as React.CSSProperties
         }
-        initial={{ offsetDistance: `${initialOffset}%` }}
-        animate={{
-          offsetDistance: reverse
-            ? [`${100 - initialOffset}%`, `${-initialOffset}%`]
-            : [`${initialOffset}%`, `${100 + initialOffset}%`],
-        }}
-        transition={{
-          repeat: Infinity,
-          ease: "linear",
-          duration,
-          delay: -delay,
-          ...transition,
-        }}
-      />
+      >
+        <motion.div
+          className={cn(
+            "absolute aspect-square",
+            "bg-gradient-to-l from-[var(--color-from)] via-[var(--color-to)] to-transparent",
+            beamClassName
+          )}
+          style={
+            {
+              width: size,
+              offsetPath: `rect(0 auto auto 0 round ${size}px)`,
+              "--color-from": colorFrom,
+              "--color-to": colorTo,
+              ...style,
+            } as MotionStyle
+          }
+          initial={{ offsetDistance: `${initialOffset}%` }}
+          animate={{
+            offsetDistance: reverse
+              ? [`${100 - initialOffset}%`, `${-initialOffset}%`]
+              : [`${initialOffset}%`, `${100 + initialOffset}%`],
+          }}
+          transition={{
+            repeat: Infinity,
+            ease: "linear",
+            duration,
+            delay: -delay,
+            ...transition,
+          }}
+        />
+      </div>
     </div>
   );
 };

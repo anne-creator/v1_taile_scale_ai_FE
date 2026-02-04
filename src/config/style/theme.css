@@ -51,6 +51,53 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  
+  /* Section Spacing Tokens */
+  --section-gap-sm: 3rem;    /* 48px */
+  --section-gap-md: 5rem;    /* 80px */
+  --section-gap-lg: 8rem;    /* 128px */
+  --section-gap-xl: 12rem;   /* 192px */
+  
+  /* Typography - Font Sizes (responsive with clamp) */
+  --font-size-h1: clamp(2rem, 5vw, 3rem);      /* 32px - 48px */
+  --font-size-h2: clamp(1.5rem, 4vw, 2.25rem); /* 24px - 36px */
+  --font-size-h3: clamp(1.25rem, 3vw, 1.5rem); /* 20px - 24px */
+  --font-size-h4: clamp(1rem, 2vw, 1.25rem);   /* 16px - 20px */
+  
+  /* Typography - Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Typography - Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Animation - Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  /* Animation - Easing Functions */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Brand Colors - Yellow Accent */
+  --brand-yellow: oklch(0.89 0.18 90);           /* #FFC928 equivalent */
+  --brand-yellow-hover: oklch(0.91 0.16 92);     /* #FFD54F equivalent */
+  --brand-yellow-foreground: oklch(0.15 0.02 280); /* #030213 equivalent */
+  
+  /* Brand Colors - Dark */
+  --brand-dark: oklch(0.15 0.02 280);            /* #030213 */
+  --brand-dark-soft: oklch(0.22 0.01 260);       /* #1e1e1e */
+  
+  /* Loader/Progress */
+  --brand-loader: oklch(0.55 0.20 275);          /* #6466F1 */
 }
 
 .dark {
@@ -157,4 +204,47 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+
+  /* Section Spacing - for use with h-section-* or py-section-* */
+  --spacing-section-sm: var(--section-gap-sm);
+  --spacing-section-md: var(--section-gap-md);
+  --spacing-section-lg: var(--section-gap-lg);
+  --spacing-section-xl: var(--section-gap-xl);
+  
+  /* Typography - Font Sizes */
+  --text-h1: var(--font-size-h1);
+  --text-h2: var(--font-size-h2);
+  --text-h3: var(--font-size-h3);
+  --text-h4: var(--font-size-h4);
+  
+  /* Typography - Line Heights */
+  --leading-tight: var(--line-height-tight);
+  --leading-normal: var(--line-height-normal);
+  --leading-relaxed: var(--line-height-relaxed);
+  
+  /* Typography - Font Weights */
+  --font-normal: var(--font-weight-normal);
+  --font-medium: var(--font-weight-medium);
+  --font-semibold: var(--font-weight-semibold);
+  --font-bold: var(--font-weight-bold);
+  
+  /* Animation - Durations (for use with transition-*) */
+  --transition-duration-fast: var(--duration-fast);
+  --transition-duration-normal: var(--duration-normal);
+  --transition-duration-slow: var(--duration-slow);
+  --transition-duration-slower: var(--duration-slower);
+  
+  /* Animation - Easing (for use with transition-*) */
+  --transition-timing-in: var(--ease-in);
+  --transition-timing-out: var(--ease-out);
+  --transition-timing-in-out: var(--ease-in-out);
+  --transition-timing-spring: var(--ease-spring);
+  
+  /* Brand Colors */
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-yellow-hover: var(--brand-yellow-hover);
+  --color-brand-yellow-foreground: var(--brand-yellow-foreground);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-dark-soft: var(--brand-dark-soft);
+  --color-brand-loader: var(--brand-loader);
 }

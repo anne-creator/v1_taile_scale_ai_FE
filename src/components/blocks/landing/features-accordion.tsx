@@ -10,7 +10,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from '@/components/compound/accordion';
 import { ScrollAnimation } from '@/components/ui/scroll-animation';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
@@ -36,7 +36,7 @@ export function FeaturesAccordion({
     // overflow-x-hidden to prevent horizontal scroll
     <section
       className={cn(
-        'overflow-x-hidden py-16 md:py-24',
+        'overflow-x-hidden py-section-md',
         section.className,
         className
       )}

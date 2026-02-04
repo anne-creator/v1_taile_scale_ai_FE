@@ -20,7 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/compound/dropdown-menu';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useAuth } from '@/shared/contexts/auth';
+import { useAuth } from '@/providers/auth-provider';
 import { useChatContext } from '@/shared/contexts/chat';
 
 export function ChatLibrary({}) {

@@ -11,8 +11,8 @@ import { defaultLocale } from '@/config/locale';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 
 import { SocialProviders } from './social-providers';
 

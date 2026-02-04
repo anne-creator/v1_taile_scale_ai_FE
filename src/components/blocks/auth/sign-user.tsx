@@ -19,9 +19,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+} from '@/components/compound/dropdown-menu';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 import { cn } from '@/shared/lib/utils';
 import { User as UserType } from '@/shared/models/user';
 import { NavItem, UserNav } from '@/shared/types/blocks/common';

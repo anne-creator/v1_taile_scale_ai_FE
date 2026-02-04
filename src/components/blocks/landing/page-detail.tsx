@@ -8,7 +8,7 @@ import '@/config/style/docs.css';
 export async function PageDetail({ post }: { post: PostType }) {
   return (
     <section id={post.id}>
-      <div className="py-24 md:py-32">
+      <div className="py-section-lg">
         <div className="mx-auto w-full max-w-4xl px-6 md:px-8">
           <div className="mt-16 text-center">
             <h1 className="text-foreground mx-auto mb-4 w-full text-xl font-bold md:max-w-4xl md:text-4xl">

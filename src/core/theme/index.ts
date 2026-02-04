@@ -1,20 +1,3 @@
-import { envConfigs } from '@/config';
-import { defaultTheme } from '@/config/theme';
-
-/**
- * get active theme
- * @deprecated Theme system is being phased out. Use direct imports from @/components/
- */
-export function getActiveTheme(): string {
-  const theme = envConfigs.theme as string;
-
-  if (theme) {
-    return theme;
-  }
-
-  return defaultTheme;
-}
-
 /**
  * convert kebab-case to PascalCase
  */
@@ -26,114 +9,32 @@ function kebabToPascalCase(str: string): string {
 }
 
 /**
- * load theme page
- * Now loads from @/components/pages/ with fallback to legacy @/themes/
+ * load page component from @/components/pages/
  */
-export async function getThemePage(pageName: string, theme?: string) {
-  try {
-    // Try new location first: @/components/pages/
-    const module = await import(`@/components/pages/${pageName}`);
-    return module.default;
-  } catch {
-    // Fallback to legacy theme system
-    const loadTheme = theme || getActiveTheme();
-    try {
-      const module = await import(`@/themes/${loadTheme}/pages/${pageName}`);
-      return module.default;
-    } catch (error) {
-      // fallback to default theme
-      if (loadTheme !== defaultTheme) {
-        try {
-          const fallbackModule = await import(
-            `@/themes/${defaultTheme}/pages/${pageName}`
-          );
-          return fallbackModule.default;
-        } catch (fallbackError) {
-          throw fallbackError;
-        }
-      }
-      throw error;
-    }
-  }
+export async function getThemePage(pageName: string) {
+  const module = await import(`@/components/pages/${pageName}`);
+  return module.default;
 }
 
 /**
- * load theme layout
- * Now loads from @/components/layouts/ with fallback to legacy @/themes/
+ * load layout component from @/components/layouts/
  */
-export async function getThemeLayout(layoutName: string, theme?: string) {
-  try {
-    // Try new location first: @/components/layouts/
-    const module = await import(`@/components/layouts/${layoutName}`);
-    return module.default;
-  } catch {
-    // Fallback to legacy theme system
-    const loadTheme = theme || getActiveTheme();
-    try {
-      const module = await import(`@/themes/${loadTheme}/layouts/${layoutName}`);
-      return module.default;
-    } catch (error) {
-      // fallback to default theme
-      if (loadTheme !== defaultTheme) {
-        try {
-          const fallbackModule = await import(
-            `@/themes/${defaultTheme}/layouts/${layoutName}`
-          );
-          return fallbackModule.default;
-        } catch (fallbackError) {
-          throw fallbackError;
-        }
-      }
-      throw error;
-    }
-  }
+export async function getThemeLayout(layoutName: string) {
+  const module = await import(`@/components/layouts/${layoutName}`);
+  return module.default;
 }
 
 /**
- * load theme block
- * Now loads from @/components/blocks/landing/ with fallback to legacy @/themes/
+ * load block component from @/components/blocks/landing/
  */
-export async function getThemeBlock(blockName: string, theme?: string) {
+export async function getThemeBlock(blockName: string) {
   const pascalCaseName = kebabToPascalCase(blockName);
+  const module = await import(`@/components/blocks/landing/${blockName}`);
+  const component = module[pascalCaseName] || module[blockName] || module.default;
 
-  try {
-    // Try new location first: @/components/blocks/landing/
-    const module = await import(`@/components/blocks/landing/${blockName}`);
-    const component = module[pascalCaseName] || module[blockName] || module.default;
-    if (component) {
-      return component;
-    }
+  if (!component) {
     throw new Error(`No valid export found in block "${blockName}"`);
-  } catch {
-    // Fallback to legacy theme system
-    const loadTheme = theme || getActiveTheme();
-    try {
-      const module = await import(`@/themes/${loadTheme}/blocks/${blockName}`);
-      const component = module[pascalCaseName] || module[blockName];
-      if (!component) {
-        throw new Error(`No valid export found in block "${blockName}"`);
-      }
-      return component;
-    } catch (error) {
-      // fallback to default theme
-      if (loadTheme !== defaultTheme) {
-        try {
-          const fallbackModule = await import(
-            `@/themes/${defaultTheme}/blocks/${blockName}`
-          );
-          const fallbackComponent =
-            fallbackModule[pascalCaseName] || fallbackModule[blockName];
-          if (!fallbackComponent) {
-            throw new Error(
-              `No valid export found in fallback block "${blockName}"`
-            );
-          }
-          return fallbackComponent;
-        } catch (fallbackError) {
-          throw fallbackError;
-        }
-      }
-      throw error;
-    }
   }
+
+  return component;
 }

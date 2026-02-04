@@ -12,11 +12,11 @@ export async function POST(req: Request) {
       return respErr('no auth, please sign in');
     }
 
-    // check if user is admin
-    const isAdmin = await hasPermission(user.id, PERMISSIONS.ADMIN_ACCESS);
-
-    // get remaining credits
-    const remainingCredits = await getRemainingCredits(user.id);
+    // Fetch admin status and credits in parallel (per code_principle.md)
+    const [isAdmin, remainingCredits] = await Promise.all([
+      hasPermission(user.id, PERMISSIONS.ADMIN_ACCESS),
+      getRemainingCredits(user.id),
+    ]);
 
     return respData({ ...user, isAdmin, credits: { remainingCredits } });
   } catch (e) {

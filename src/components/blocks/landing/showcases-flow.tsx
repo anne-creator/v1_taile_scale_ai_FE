@@ -65,7 +65,7 @@ export function ShowcasesFlow({
   return (
     <section
       id={section.id || section.name}
-      className={cn('py-24 md:py-36', section.className, className)}
+      className={cn('py-section-lg', section.className, className)}
     >
       <motion.div
         className="container mb-12 text-center"
@@ -125,7 +125,7 @@ export function ShowcasesFlow({
                   key={group.name}
                   onClick={() => setSelectedGroup(group.name)}
                   className={cn(
-                    'relative rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
+                    'relative rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150',
                     isSelected
                       ? ''
                       : 'border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground border'

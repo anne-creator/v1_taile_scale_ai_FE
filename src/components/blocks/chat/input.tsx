@@ -33,7 +33,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@/components/compound/tooltip';
 import { useChatContext } from '@/shared/contexts/chat';
 import { ChatModel } from '@/shared/types/chat';
 

@@ -8,7 +8,7 @@ import {
   Tabs as TabsComponent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/components/compound/tabs';
 import { cn } from '@/shared/lib/utils';
 import { Tab } from '@/shared/types/blocks/common';
 

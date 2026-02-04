@@ -5,7 +5,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from '@/components/compound/accordion';
 import { ScrollAnimation } from '@/components/ui/scroll-animation';
 import { Section } from '@/shared/types/blocks/landing';
 
@@ -17,11 +17,11 @@ export function Faq({
   className?: string;
 }) {
   return (
-    <section id={section.id} className={`py-16 md:py-24 ${className}`}>
+    <section id={section.id} className={`py-section-md ${className}`}>
       <div className={`mx-auto max-w-full px-4 md:max-w-3xl md:px-8`}>
         <ScrollAnimation>
           <div className="mx-auto max-w-2xl text-center text-balance">
-            <h2 className="text-foreground mb-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="text-foreground text-h2 mb-4 tracking-tight">
               {section.title}
             </h2>
             <p className="text-muted-foreground mb-6 md:mb-12 lg:mb-16">

@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { UIMessage, UseChatHelpers } from '@ai-sdk/react';
+import { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -9,11 +8,20 @@ import { useRouter } from '@/core/i18n/navigation';
 import { LocaleSelector } from '@/components/custom';
 import { PromptInputMessage } from '@/components/custom/ai/prompt-input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 import { useChatContext } from '@/shared/contexts/chat';
 
 import { ChatInput } from './input';
+
+/**
+ * ChatGenerator Block (Level 4)
+ *
+ * Following code_principle.md:
+ * - Block only CONSUME context (call actions), not MANAGE state for fetch logic
+ * - All createNewChat logic is managed by ChatContext
+ * - This component is purely for UI rendering
+ */
 
 export function ChatGenerator() {
   const router = useRouter();
@@ -23,53 +31,13 @@ export function ChatGenerator() {
 
   const { user } = useAuth();
   const { setIsShowSignModal } = useUI();
-  const { chats, setChats, setChat } = useChatContext();
-
-  const [status, setStatus] = useState<UseChatHelpers<UIMessage>['status']>();
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchNewChat = async (
-    msg: PromptInputMessage,
-    body: Record<string, any>
-  ) => {
-    setStatus('submitted');
-    setError(null);
-
-    try {
-      const resp: Response = await fetch('/api/chat/new', {
-        method: 'POST',
-        body: JSON.stringify({ message: msg, body: body }),
-      });
-      if (!resp.ok) {
-        throw new Error(`request failed with status: ${resp.status}`);
-      }
-      const { code, message, data } = await resp.json();
-      if (code !== 0) {
-        throw new Error(message);
-      }
-
-      const { id } = data;
-      if (!id) {
-        throw new Error('failed to create chat');
-      }
-
-      setChats([data, ...chats]);
-
-      const path = `/chat/${id}`;
-      router.push(path, {
-        locale,
-      });
-      // setStatus(undefined);
-      // setError(null);
-    } catch (e: any) {
-      const message =
-        e instanceof Error ? e.message : 'request failed, please try again';
-      setStatus('error');
-      setError(message);
-      toast.error(message);
-      throw e instanceof Error ? e : new Error(message);
-    }
-  };
+  const {
+    createChatStatus: status,
+    createChatError: error,
+    setChat,
+    createNewChat,
+    clearCreateChatError,
+  } = useChatContext();
 
   const handleSubmit = async (
     message: PromptInputMessage,
@@ -93,12 +61,16 @@ export function ChatGenerator() {
       return;
     }
 
-    await fetchNewChat(message, body);
+    const newChat = await createNewChat(message, body);
+    if (newChat?.id) {
+      const path = `/chat/${newChat.id}`;
+      router.push(path, { locale });
+    }
   };
 
   useEffect(() => {
     setChat(null);
-  }, []);
+  }, [setChat]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -113,11 +85,8 @@ export function ChatGenerator() {
           error={error}
           handleSubmit={handleSubmit}
           onInputChange={() => {
-            if (status === 'error') {
-              setStatus(undefined);
-            }
-            if (error) {
-              setError(null);
+            if (status === 'error' || error) {
+              clearCreateChatError();
             }
           }}
           status={status}

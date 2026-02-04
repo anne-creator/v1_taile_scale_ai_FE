@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/compound/tooltip";
 import { cn } from "@/shared/lib/utils";
 import type { FileUIPart, UIMessage } from "ai";
 import {

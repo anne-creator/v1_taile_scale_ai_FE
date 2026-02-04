@@ -1,8 +1,19 @@
+import { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 
+/**
+ * RetroGrid - Level 2 Animation Wrapper
+ * 
+ * Wraps children and adds an animated retro grid background effect.
+ * Following code_principle.md: Must accept children and apply effects.
+ */
 interface RetroGridProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * Additional CSS classes to apply to the grid container
+   * Children to wrap with retro grid effect
+   */
+  children?: ReactNode;
+  /**
+   * Additional CSS classes to apply to the wrapper container
    */
   className?: string;
   /**
@@ -33,6 +44,7 @@ interface RetroGridProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function RetroGrid({
+  children,
   className,
   angle = 65,
   cellSize = 60,
@@ -50,20 +62,19 @@ export function RetroGrid({
   } as React.CSSProperties;
 
   return (
-    <div
-      className={cn(
-        "pointer-events-none absolute size-full overflow-hidden [perspective:200px]",
-        `opacity-[var(--opacity)]`,
-        className
-      )}
-      style={gridStyles}
-      {...props}
-    >
-      <div className="absolute inset-0 [transform:rotateX(var(--grid-angle))]">
-        <div className="animate-grid [background-image:linear-gradient(to_right,var(--light-line)_1px,transparent_0),linear-gradient(to_bottom,var(--light-line)_1px,transparent_0)] [background-repeat:repeat] [background-size:var(--cell-size)_var(--cell-size)] [height:300vh] [inset:0%_0px] [margin-left:-200%] [transform-origin:100%_0_0] [width:600vw] dark:[background-image:linear-gradient(to_right,var(--dark-line)_1px,transparent_0),linear-gradient(to_bottom,var(--dark-line)_1px,transparent_0)]" />
+    <div className={cn("relative overflow-hidden", className)} {...props}>
+      {/* Retro grid effect layer */}
+      <div
+        className="pointer-events-none absolute inset-0 size-full overflow-hidden [perspective:200px] opacity-[var(--opacity)]"
+        style={gridStyles}
+      >
+        <div className="absolute inset-0 [transform:rotateX(var(--grid-angle))]">
+          <div className="animate-grid [background-image:linear-gradient(to_right,var(--light-line)_1px,transparent_0),linear-gradient(to_bottom,var(--light-line)_1px,transparent_0)] [background-repeat:repeat] [background-size:var(--cell-size)_var(--cell-size)] [height:300vh] [inset:0%_0px] [margin-left:-200%] [transform-origin:100%_0_0] [width:600vw] dark:[background-image:linear-gradient(to_right,var(--dark-line)_1px,transparent_0),linear-gradient(to_bottom,var(--dark-line)_1px,transparent_0)]" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-90% dark:from-black" />
       </div>
-
-      <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent to-90% dark:from-black" />
+      {/* Children content layer */}
+      {children && <div className="relative z-10">{children}</div>}
     </div>
   );
 }

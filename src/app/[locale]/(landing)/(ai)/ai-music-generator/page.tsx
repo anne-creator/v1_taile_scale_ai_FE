@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { getThemePage } from '@/core/theme';
-import { MusicGenerator } from '@/components/blocks/generator';
+import { MusicGeneratorWithProvider } from '@/components/blocks/generator';
 import { getMetadata } from '@/shared/lib/seo';
 import { DynamicPage } from '@/shared/types/blocks/landing';
 
@@ -35,7 +35,7 @@ export default async function AiMusicGeneratorPage({
         },
       },
       generator: {
-        component: <MusicGenerator srOnlyTitle={t.raw('generator.title')} />,
+        component: <MusicGeneratorWithProvider srOnlyTitle={t.raw('generator.title')} />,
       },
     },
   };

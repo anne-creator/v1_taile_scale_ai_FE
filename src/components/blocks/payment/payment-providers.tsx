@@ -11,7 +11,7 @@ import { signIn } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import { defaultLocale } from '@/config/locale';
 import { Button } from '@/components/ui/button';
-import { useUI } from '@/shared/contexts/ui';
+import { useUI } from '@/providers/ui-provider';
 import { cn } from '@/shared/lib/utils';
 import { Button as ButtonType } from '@/shared/types/blocks/common';
 import { PricingItem } from '@/shared/types/blocks/pricing';

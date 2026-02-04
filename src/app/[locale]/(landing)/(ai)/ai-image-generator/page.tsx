@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { getThemePage } from '@/core/theme';
-import { ImageGenerator } from '@/components/blocks/generator';
+import { ImageGeneratorWithProvider } from '@/components/blocks/generator';
 import { getMetadata } from '@/shared/lib/seo';
 import { DynamicPage } from '@/shared/types/blocks/landing';
 
@@ -35,7 +35,7 @@ export default async function AiImageGeneratorPage({
         },
       },
       generator: {
-        component: <ImageGenerator srOnlyTitle={t.raw('generator.title')} />,
+        component: <ImageGeneratorWithProvider srOnlyTitle={t.raw('generator.title')} />,
       },
     },
   };

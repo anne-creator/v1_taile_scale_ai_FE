@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @plugin 'tailwindcss-animate';
 
 @layer base {
@@ -115,5 +127,57 @@ pre {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Typography Utility Classes - Level 0 Design Tokens */
+@layer utilities {
+  .text-h1 {
+    font-size: var(--font-size-h1);
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-h2 {
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-tight);
+    font-weight: var(--font-weight-semibold);
+  }
+  .text-h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-semibold);
+  }
+  .text-h4 {
+    font-size: var(--font-size-h4);
+    line-height: var(--line-height-normal);
+    font-weight: var(--font-weight-medium);
+  }
+  
+  /* Animation Duration Utilities */
+  .duration-token-fast {
+    transition-duration: var(--duration-fast);
+  }
+  .duration-token-normal {
+    transition-duration: var(--duration-normal);
+  }
+  .duration-token-slow {
+    transition-duration: var(--duration-slow);
+  }
+  .duration-token-slower {
+    transition-duration: var(--duration-slower);
+  }
+  
+  /* Animation Easing Utilities */
+  .ease-token-in {
+    transition-timing-function: var(--ease-in);
+  }
+  .ease-token-out {
+    transition-timing-function: var(--ease-out);
+  }
+  .ease-token-in-out {
+    transition-timing-function: var(--ease-in-out);
+  }
+  .ease-token-spring {
+    transition-timing-function: var(--ease-spring);
   }
 }

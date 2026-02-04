@@ -8,12 +8,12 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command";
+} from "@/components/compound/command";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/compound/dialog";
 import { cn } from "@/shared/lib/utils";
 import type { ComponentProps } from "react";
 

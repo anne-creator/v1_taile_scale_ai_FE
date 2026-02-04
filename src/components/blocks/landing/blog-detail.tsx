@@ -44,7 +44,7 @@ export function BlogDetail({ post }: { post: PostType }) {
   return (
     <TOCProvider toc={post.toc || []}>
       <section id={post.id}>
-        <div className="py-24 md:py-32">
+        <div className="py-section-lg">
           <div className="mx-auto w-full max-w-7xl px-6 md:px-8">
             <Crumb items={crumbItems} />
 

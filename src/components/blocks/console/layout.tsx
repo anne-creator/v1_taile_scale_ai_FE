@@ -11,7 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
+} from '@/components/compound/sheet';
 import { Nav } from '@/shared/types/blocks/common';
 
 export function ConsoleLayout({
@@ -87,7 +87,7 @@ export function ConsoleLayout({
       {/* Page Header */}
       <div className="border-border">
         <div className="container">
-          <div className="flex items-center gap-4 py-8">
+          <div className="flex items-center gap-4 py-section-sm">
             {/* Mobile Menu Trigger */}
             <Sheet>
               <SheetTrigger asChild>
@@ -112,7 +112,7 @@ export function ConsoleLayout({
 
       {/* Main Content */}
       <div className="container">
-        <div className="flex flex-wrap gap-8 py-8">
+        <div className="flex flex-wrap gap-8 py-section-sm">
           {/* Left Sidebar (Desktop) */}
           <div className="hidden w-64 flex-shrink-0 md:block">
             {/* Search Box */}

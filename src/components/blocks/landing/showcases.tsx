@@ -51,7 +51,7 @@ function GalleryCard({ image }: { image: GalleryImage }) {
       className="group relative w-full aspect-square [perspective:1000px] cursor-pointer"
       onDoubleClick={handleCopy}
     >
-      <div className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+      <div className="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
         {/* Front */}
         <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] rounded-lg overflow-hidden shadow-sm">
           <img
@@ -62,7 +62,7 @@ function GalleryCard({ image }: { image: GalleryImage }) {
         </div>
 
         {/* Back */}
-        <div className="absolute inset-0 w-full h-full bg-[#1e1e1e] text-white p-6 [transform:rotateY(180deg)] [backface-visibility:hidden] rounded-lg overflow-hidden flex flex-col justify-center items-center text-center">
+        <div className="absolute inset-0 w-full h-full bg-brand-dark-soft text-white p-6 [transform:rotateY(180deg)] [backface-visibility:hidden] rounded-lg overflow-hidden flex flex-col justify-center items-center text-center">
           <p className="text-sm font-medium mb-4 text-gray-200">
             "{image.prompt}"
           </p>
@@ -109,11 +109,11 @@ export function Showcases({
   return (
     <section
       id={section.id || 'gallery'}
-      className={cn('py-12 bg-muted/30', section.className, className)}
+      className={cn('py-section-sm bg-muted/30', section.className, className)}
     >
       <div className="container max-w-7xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl mb-4 font-bold">
+          <h2 className="text-h2 mb-4">
             {section.title || 'Guide Gallery'}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

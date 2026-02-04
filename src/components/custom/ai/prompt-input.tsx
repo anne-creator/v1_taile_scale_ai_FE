@@ -9,18 +9,18 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command";
+} from "@/components/compound/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/compound/dropdown-menu";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card";
+} from "@/components/compound/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
@@ -33,7 +33,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/compound/select";
 import { cn } from "@/shared/lib/utils";
 import type { ChatStatus, FileUIPart } from "ai";
 import {
@@ -285,7 +285,7 @@ export function PromptInputAttachment({
       <HoverCardTrigger asChild>
         <div
           className={cn(
-            "group relative flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+            "group relative flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-colors duration-150 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
             className
           )}
           key={data.id}
@@ -1165,7 +1165,7 @@ export const PromptInputSpeechButton = ({
   return (
     <PromptInputButton
       className={cn(
-        "relative transition-all duration-200",
+        "relative transition-colors duration-200",
         isListening && "animate-pulse bg-accent text-accent-foreground",
         className
       )}

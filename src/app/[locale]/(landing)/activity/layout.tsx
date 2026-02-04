@@ -23,7 +23,7 @@ export default async function ActivityLayout({
       title={title}
       nav={nav}
       topNav={topNav}
-      className="py-16 md:py-20"
+      className="py-section-md"
     >
       {children}
     </ConsoleLayout>

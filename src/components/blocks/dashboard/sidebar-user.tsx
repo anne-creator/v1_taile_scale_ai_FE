@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 
 import { signOut } from '@/core/auth/client';
 import { Link, useRouter } from '@/core/i18n/navigation';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 import { SmartIcon } from '@/components/custom';
 import { SignModal } from '@/components/blocks/auth/sign-modal';
 import {
@@ -24,7 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/compound/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,

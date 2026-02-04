@@ -20,5 +20,6 @@ import * as generator from './generator';
 import * as email from './email';
 import * as payment from './payment';
 import * as console from './console';
+import * as common from './common';
 
-export { landing, dashboard, chat, auth, form, table, panel, generator, email, payment, console };
+export { landing, dashboard, chat, auth, form, table, panel, generator, email, payment, console, common };

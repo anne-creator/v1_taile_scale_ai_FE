@@ -14,10 +14,10 @@ export function Updates({
   return (
     <section
       id={section.id}
-      className={cn('py-24 md:py-36', section.className, className)}
+      className={cn('py-section-lg', section.className, className)}
     >
       <div className="mx-auto mb-12 text-center">
-        <h1 className="mb-6 text-3xl font-bold text-pretty lg:text-4xl">
+        <h1 className="text-h1 mb-6 text-pretty">
           {section.title}
         </h1>
         <p className="text-muted-foreground mb-4 max-w-xl lg:max-w-none lg:text-lg">

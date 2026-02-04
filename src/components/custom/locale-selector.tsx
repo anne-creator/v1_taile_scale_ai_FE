@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/compound/dropdown-menu';
 import { cacheSet } from '@/shared/lib/cache';
 
 export function LocaleSelector({

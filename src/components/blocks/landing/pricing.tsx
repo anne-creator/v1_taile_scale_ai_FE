@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+import { useCheckout } from '@/hooks/use-checkout';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
+
+/**
+ * Pricing Block (Level 4)
+ *
+ * Following code_principle.md:
+ * - Block only CONSUME context (call actions), not MANAGE state (define useState)
+ * - All checkout logic is managed by useCheckout hook
+ * - This component is purely for UI rendering
+ */
 
 export function Pricing({
   section,
@@ -17,9 +26,8 @@ export function Pricing({
   className?: string;
 }) {
   const { user } = useAuth();
-  const { setIsShowSignModal, setIsShowPaymentModal } = useUI();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { setIsShowSignModal } = useUI();
+  const { actions, isLoading, error } = useCheckout();
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -27,43 +35,15 @@ export function Pricing({
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    const result = await actions.checkout('pro-monthly');
 
-    try {
-      // Get Stripe checkout URL
-      const resp = await fetch('/api/payment/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId: 'price_default', // You can make this configurable
-        }),
-      });
+    if (result.shouldRedirectToBilling) {
+      window.location.href = '/settings/billing';
+      return;
+    }
 
-      if (!resp.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { code, data, message } = await resp.json();
-      
-      if (code !== 0) {
-        // If user already has subscription, show billing page
-        if (message?.includes('subscription') || message?.includes('active')) {
-          window.location.href = '/settings/billing';
-          return;
-        }
-        throw new Error(message || 'Failed to create checkout');
-      }
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to start checkout. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (result.checkoutUrl) {
+      window.location.href = result.checkoutUrl;
     }
   };
 
@@ -79,15 +59,15 @@ export function Pricing({
   return (
     <section
       id={section.id || 'pricing'}
-      className={cn('py-12 bg-muted/50', section.className, className)}
+      className={cn('py-section-sm bg-muted/50', section.className, className)}
     >
       <div className="container max-w-6xl">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-1">
+          <h2 className="text-h2 mb-4">
             {section.title || 'Simple Affordable Pricing'}
           </h2>
           <p className="text-lg text-muted-foreground">
-            {section.description || '70% off for 1st month, then $39/month'}
+            {section.description || 'Limited time offer for new subscribers'}
           </p>
         </div>
 
@@ -102,15 +82,23 @@ export function Pricing({
             <div className="grid md:grid-cols-3 gap-8 items-start">
               {/* Left: Price */}
               <div className="text-center md:text-left">
-                <div className="mb-2">
-                  <div className="flex items-baseline justify-center md:justify-start gap-2">
-                    <span className="text-5xl md:text-6xl font-bold">$11.7</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                  <div className="mt-2 inline-block px-3 py-1 bg-muted rounded">
-                    <span className="text-sm text-foreground">$39/month after 1st month</span>
-                  </div>
+                {/* Discount Badge */}
+                <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-brand-yellow rounded-full">
+                  <span className="text-sm font-bold text-brand-yellow-foreground">70% OFF</span>
+                  <span className="text-xs text-brand-yellow-foreground/70">1st month</span>
                 </div>
+                
+                {/* Price Display */}
+                <div className="flex items-baseline justify-center md:justify-start gap-2">
+                  <span className="text-5xl md:text-6xl font-bold">$11.7</span>
+                  <span className="text-muted-foreground line-through">$39</span>
+                  <span className="text-muted-foreground">/month</span>
+                </div>
+                
+                {/* Renewal Note */}
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Then $39/mo
+                </p>
               </div>
 
               {/* Middle: Features */}
@@ -119,8 +107,8 @@ export function Pricing({
                 <div className="space-y-3">
                   {features.slice(0, 3).map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#FFC928] flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 text-[#030213]" />
+                      <div className="w-5 h-5 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 text-brand-yellow-foreground" />
                       </div>
                       <span className={cn('text-sm', feature.bold && 'font-bold')}>
                         {feature.text}
@@ -135,8 +123,8 @@ export function Pricing({
                 <div className="space-y-3 mb-6">
                   {features.slice(3).map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#FFC928] flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 text-[#030213]" />
+                      <div className="w-5 h-5 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 text-brand-yellow-foreground" />
                       </div>
                       <span className="text-sm">{feature.text}</span>
                     </div>
@@ -144,7 +132,8 @@ export function Pricing({
                 </div>
                 <Button
                   size="lg"
-                  className="w-full bg-[#FFC928] hover:bg-[#FFD54F] text-[#030213]"
+                  variant="brand"
+                  className="w-full"
                   onClick={handleSubscribe}
                   disabled={isLoading}
                 >

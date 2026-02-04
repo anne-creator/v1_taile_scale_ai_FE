@@ -3,10 +3,10 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 
 import { routing } from '@/core/i18n/config';
-import { ThemeProvider } from '@/core/theme/provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from '@/shared/contexts/auth';
-import { UIProvider } from '@/shared/contexts/ui';
+import { AuthProvider } from '@/providers/auth-provider';
+import { UIProvider } from '@/providers/ui-provider';
 import { getMetadata } from '@/shared/lib/seo';
 
 export const generateMetadata = getMetadata();

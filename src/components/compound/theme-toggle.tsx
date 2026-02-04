@@ -11,7 +11,13 @@ import {
   ToggleGroupItem,
 } from '@/components/ui/toggle-group';
 
-export function ThemeToggler({
+/**
+ * ThemeToggle - Level 2.5 Compound Component
+ * 
+ * Manages internal UI state (current theme) and provides
+ * multiple presentation variants. No business logic.
+ */
+export function ThemeToggle({
   type = 'icon',
   className,
 }: {
@@ -74,3 +80,6 @@ export function ThemeToggler({
 
   return <AnimatedThemeToggler className={className} />;
 }
+
+// Backward compatibility alias
+export const ThemeToggler = ThemeToggle;

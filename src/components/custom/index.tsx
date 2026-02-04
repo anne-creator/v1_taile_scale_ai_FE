@@ -12,11 +12,13 @@ export * from './crumb';
 export * from './tabs';
 export * from './page-header';
 export * from './section-header';
+export * from './section-spacer';
 
 // Locale & Theme
 export * from './locale-detector';
 export * from './locale-selector';
-export * from './theme-toggler';
+// ThemeToggler moved to compound/ (Level 2.5) - re-export for backward compatibility
+export { ThemeToggle, ThemeToggler } from '@/components/compound/theme-toggle';
 export * from './top-banner';
 
 // Media

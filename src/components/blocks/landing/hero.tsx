@@ -23,9 +23,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useAuth } from '@/shared/contexts/auth';
-import { useUI } from '@/shared/contexts/ui';
+} from '@/components/compound/select';
+import { useAuth } from '@/providers/auth-provider';
+import { useUI } from '@/providers/ui-provider';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
@@ -90,7 +90,7 @@ export function Hero({
   body: JSON.stringify({
     prompt: "${codePrompt}",
     style: "children_book",
-    aspect_ratio: "16:9"
+    aspect_ratio: "${aspectRatio}"
   })
 });
 
@@ -106,7 +106,7 @@ headers = {
 data = {
     "prompt": "${codePrompt}",
     "style": "children_book",
-    "aspect_ratio": "16:9"
+    "aspect_ratio": "${aspectRatio}"
 }
 
 response = requests.post(url, headers=headers, json=data)
@@ -118,7 +118,7 @@ print(result["image_url"])`,
   -d '{
     "prompt": "${codePrompt}",
     "style": "children_book",
-    "aspect_ratio": "16:9"
+    "aspect_ratio": "${aspectRatio}"
   }'`
   };
 
@@ -134,13 +134,32 @@ print(result["image_url"])`,
       return;
     }
     setIsGeneratingKey(true);
-    // For now, direct user to API Keys page
-    // In production, you could create a key via API
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const resp = await fetch('/api/apikey/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Landing Page Key' }),
+      });
+
+      const { code, message, data } = await resp.json();
+      if (code !== 0) {
+        throw new Error(message || 'Failed to create API key');
+      }
+
+      // Fill the API key input with the new key
+      if (data?.key) {
+        setApiKey(data.key);
+        // Also save to localStorage
+        apiKeyStorage.setKey(data.key);
+      }
+    } catch (error: any) {
+      console.error('Generate API key error:', error);
+      setError(error.message || 'Failed to generate API key');
+    } finally {
       setIsGeneratingKey(false);
-      // Show message to go to API Keys page
-      setError('Please visit API Keys page to create a new key');
-    }, 500);
+    }
   };
 
   const pollTaskStatus = useCallback(async (id: string): Promise<boolean> => {
@@ -201,23 +220,28 @@ print(result["image_url"])`,
       return;
     }
 
+    // Require API key in all modes
+    if (!apiKey.trim()) {
+      setError('Please generate or enter an API key first');
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     setGeneratedImage(null);
 
     try {
-      const resp = await fetch('/api/ai/generate', {
+      // Use public API with API key authentication
+      const resp = await fetch('/api/v1/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
         body: JSON.stringify({
-          mediaType: AIMediaType.IMAGE,
-          scene: 'text-to-image',
-          provider: 'replicate',
-          model: 'black-forest-labs/flux-schnell',
           prompt: currentPrompt,
-          options: {
-            aspect_ratio: userMode === 'creators' ? aspectRatio : '16:9',
-          },
+          style: 'children_book',
+          aspect_ratio: aspectRatio,
         }),
       });
 
@@ -240,7 +264,15 @@ print(result["image_url"])`,
 
       setTaskId(newTaskId);
 
-      // Poll for result
+      // Check if the task is already completed (synchronous providers like Gemini)
+      if (data.status === 'success' && data.image_url) {
+        setGeneratedImage(data.image_url);
+        setIsGenerating(false);
+        setTaskId(null);
+        return;
+      }
+
+      // Poll for result (for async providers like Replicate, Fal, etc.)
       const poll = async () => {
         const done = await pollTaskStatus(newTaskId);
         if (!done) {
@@ -361,7 +393,7 @@ print(result["image_url"])`,
   return (
     <section
       id={section.id}
-      className={cn('pt-8 pb-16', section.className, className)}
+      className={cn('py-section-sm', section.className, className)}
     >
       <QuotaModal />
 
@@ -374,7 +406,7 @@ print(result["image_url"])`,
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-md transition-colors',
                 userMode === 'developers'
-                  ? 'bg-background shadow-sm border-b-2 border-[#FFC928]'
+                  ? 'bg-background shadow-sm border-b-2 border-brand-yellow'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -385,7 +417,7 @@ print(result["image_url"])`,
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-md transition-colors',
                 userMode === 'creators'
-                  ? 'bg-background shadow-sm border-b-2 border-[#FFC928]'
+                  ? 'bg-background shadow-sm border-b-2 border-brand-yellow'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -417,7 +449,7 @@ print(result["image_url"])`,
             {userMode === 'developers' ? (
               <>
                 {/* Code Snippet */}
-                <div className="bg-[#1e1e1e] rounded-lg p-4 relative">
+                <div className="bg-brand-dark-soft rounded-lg p-4 relative">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex gap-1">
                       {(['typescript', 'python', 'curl'] as CodeLanguage[]).map((lang) => (
@@ -427,7 +459,7 @@ print(result["image_url"])`,
                           className={cn(
                             'text-xs px-3 py-1.5 rounded transition-colors',
                             codeLanguage === lang
-                              ? 'bg-[#FFC928] text-[#030213]'
+                              ? 'bg-brand-yellow text-brand-yellow-foreground'
                               : 'text-gray-400 hover:text-gray-200'
                           )}
                         >
@@ -461,6 +493,28 @@ print(result["image_url"])`,
                   </p>
                 </div>
 
+                {/* Aspect Ratio */}
+                <div>
+                  <label className="block text-sm mb-2">Aspect Ratio</label>
+                  <div className="flex gap-2">
+                    {(['16:9', '1:1', '4:3'] as AspectRatio[]).map((ratio) => (
+                      <button
+                        key={ratio}
+                        onClick={() => setAspectRatio(ratio)}
+                        disabled={isGenerating}
+                        className={cn(
+                          'px-4 py-2 border rounded-lg transition-colors text-sm',
+                          aspectRatio === ratio
+                            ? 'bg-brand-yellow text-brand-yellow-foreground border-brand-yellow'
+                            : 'border-border hover:border-brand-yellow/50'
+                        )}
+                      >
+                        {ratio}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* API Key Input */}
                 <div>
                   <label className="block text-sm mb-2">Your API Key</label>
@@ -482,7 +536,7 @@ print(result["image_url"])`,
                       ) : (
                         <>
                           <Wand2 className="w-4 h-4 mr-1" />
-                          Generate
+                          Generate Key
                         </>
                       )}
                     </Button>
@@ -493,9 +547,10 @@ print(result["image_url"])`,
                 {/* Generate Illustration Button */}
                 <Button
                   size="lg"
-                  className="w-full bg-[#FFC928] hover:bg-[#FFD54F] text-[#030213]"
+                  variant="brand"
+                  className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating}
+                  disabled={isGenerating || !apiKey.trim()}
                 >
                   {isGenerating ? (
                     <>
@@ -550,8 +605,8 @@ print(result["image_url"])`,
                         className={cn(
                           'px-4 py-2 border rounded-lg transition-colors text-sm',
                           aspectRatio === ratio
-                            ? 'bg-[#FFC928] text-[#030213] border-[#FFC928]'
-                            : 'border-border hover:border-[#FFC928]/50'
+                            ? 'bg-brand-yellow text-brand-yellow-foreground border-brand-yellow'
+                            : 'border-border hover:border-brand-yellow/50'
                         )}
                       >
                         {ratio}
@@ -560,12 +615,42 @@ print(result["image_url"])`,
                   </div>
                 </div>
 
+                {/* API Key Input */}
+                <div>
+                  <label className="block text-sm mb-2">Your API Key</label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="password"
+                      placeholder="sk-••••••••••••••••"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={handleGenerateApiKey}
+                      disabled={isGeneratingKey}
+                    >
+                      {isGeneratingKey ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Wand2 className="w-4 h-4 mr-1" />
+                          Generate Key
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+                </div>
+
                 {/* Generate Button */}
                 <Button
                   size="lg"
-                  className="w-full bg-[#FFC928] hover:bg-[#FFD54F] text-[#030213]"
+                  variant="brand"
+                  className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || !prompt.trim()}
+                  disabled={isGenerating || !prompt.trim() || !apiKey.trim()}
                 >
                   {isGenerating ? (
                     <>
@@ -584,11 +669,21 @@ print(result["image_url"])`,
           </div>
 
           {/* Right Panel - Generated Image */}
-          <div className="relative rounded-xl overflow-hidden border bg-muted aspect-[4/3] lg:aspect-auto lg:min-h-[500px]">
+          <div 
+            className={cn(
+              "relative rounded-xl overflow-hidden border bg-muted",
+              aspectRatio === '16:9' && "aspect-[16/9]",
+              aspectRatio === '1:1' && "aspect-square",
+              aspectRatio === '4:3' && "aspect-[4/3]"
+            )}
+          >
             {isGenerating ? (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
                 <div className="text-center">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
+                  <Loader2 
+                    className="w-8 h-8 mx-auto mb-2 text-gray-400" 
+                    style={{ animation: 'spin 1s linear infinite' }}
+                  />
                   <p className="text-sm text-muted-foreground">Creating your illustration...</p>
                 </div>
               </div>
@@ -605,7 +700,7 @@ print(result["image_url"])`,
             {/* Gallery link overlay */}
             <Link
               href="/showcases"
-              className="absolute top-4 right-4 flex items-center gap-1.5 text-sm font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full text-[#FFC928] hover:bg-black/60 transition-colors"
+              className="absolute top-4 right-4 flex items-center gap-1.5 text-sm font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full text-brand-yellow hover:bg-black/60 transition-colors"
             >
               Check guide gallery for inspiration
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -616,7 +711,7 @@ print(result["image_url"])`,
               <button
                 onClick={handleDownload}
                 className={cn(
-                  "absolute bottom-4 right-4 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all",
+                  "absolute bottom-4 right-4 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-200",
                   isImageHovered ? "opacity-100" : "opacity-0"
                 )}
                 title="Download image"

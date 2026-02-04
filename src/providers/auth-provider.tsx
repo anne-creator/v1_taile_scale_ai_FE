@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -14,9 +15,20 @@ import { authClient, signIn, signOut, useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
 import { User } from '@/shared/models/user';
 
-export interface AuthContextType {
+/**
+ * Auth Context - Global Authentication Provider
+ * 
+ * Following code_principle.md: Provider uses { state, actions } interface
+ */
+
+// State interface
+export interface AuthState {
   user: User | null;
   isCheckSign: boolean;
+}
+
+// Actions interface
+export interface AuthActions {
   login: (
     email: string,
     password: string,
@@ -27,7 +39,16 @@ export interface AuthContextType {
   showOneTap: (configs: Record<string, string>) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Combined context type following { state, actions } pattern
+export interface AuthContextValue {
+  state: AuthState;
+  actions: AuthActions;
+}
+
+// Legacy flat interface for backward compatibility
+export interface AuthContextType extends AuthState, AuthActions {}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 function extractSessionUser(data: any): User | null {
   const u = data?.user ?? data?.data?.user ?? null;
@@ -194,9 +215,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Fetch extended user info and credits
-    await fetchUserInfo();
-    await fetchUserCredits();
+    // Fetch extended user info and credits in parallel (per code_principle.md)
+    await Promise.all([fetchUserInfo(), fetchUserCredits()]);
   }, [fetchUserInfo, fetchUserCredits]);
 
   const showOneTap = useCallback(
@@ -220,22 +240,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const value = {
-    user,
-    isCheckSign,
-    login,
-    logout,
-    refreshUser,
-    showOneTap,
-  };
+  const state: AuthState = useMemo(
+    () => ({
+      user,
+      isCheckSign,
+    }),
+    [user, isCheckSign]
+  );
+
+  const actions: AuthActions = useMemo(
+    () => ({
+      login,
+      logout,
+      refreshUser,
+      showOneTap,
+    }),
+    [login, logout, refreshUser, showOneTap]
+  );
+
+  const value: AuthContextValue = useMemo(
+    () => ({ state, actions }),
+    [state, actions]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+/**
+ * Hook to access Auth context
+ * 
+ * Recommended usage (following code_principle.md):
+ * ```tsx
+ * const { state, actions } = useAuth();
+ * // state.user, actions.login()
+ * ```
+ * 
+ * Legacy usage (still supported for backward compatibility):
+ * ```tsx
+ * const { user, login } = useAuth();
+ * ```
+ */
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  // Return flattened interface for backward compatibility
+  return {
+    ...context.state,
+    ...context.actions,
+  };
+}
+
+/**
+ * Hook to access Auth context with { state, actions } interface
+ * Preferred usage following code_principle.md
+ */
+export function useAuthContext(): AuthContextValue {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 }

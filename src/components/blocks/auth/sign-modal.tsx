@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/compound/dialog';
 import {
   Drawer,
   DrawerClose,
@@ -18,8 +18,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from '@/components/ui/drawer';
-import { useUI } from '@/shared/contexts/ui';
+} from '@/components/compound/drawer';
+import { useUI } from '@/providers/ui-provider';
 import { useMediaQuery } from '@/shared/hooks/use-media-query';
 
 import { SignInForm } from './sign-in-form';

@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/components/compound/dropdown-menu';
 import { NavItem } from '@/shared/types/blocks/common';
 
 export function Dropdown({

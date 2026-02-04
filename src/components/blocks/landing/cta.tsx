@@ -17,12 +17,12 @@ export function Cta({
   return (
     <section
       id={section.id}
-      className={cn('py-16 md:py-24', section.className, className)}
+      className={cn('py-section-md', section.className, className)}
     >
       <div className="container">
         <div className="text-center">
           <ScrollAnimation>
-            <h2 className="text-4xl font-semibold text-balance lg:text-5xl">
+            <h2 className="text-h2 text-balance">
               {section.title}
             </h2>
           </ScrollAnimation>

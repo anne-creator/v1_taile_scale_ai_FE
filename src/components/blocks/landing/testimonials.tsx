@@ -42,12 +42,12 @@ export function Testimonials({
   return (
     <section
       id={section.id}
-      className={`py-16 md:py-24 ${section.className} ${className}`}
+      className={`py-section-md ${section.className} ${className}`}
     >
       <div className="container">
         <ScrollAnimation>
           <div className="mx-auto max-w-2xl text-center text-balance">
-            <h2 className="text-foreground mb-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            <h2 className="text-foreground text-h2 mb-4 tracking-tight">
               {section.title}
             </h2>
             <p className="text-muted-foreground mb-6 md:mb-12 lg:mb-16">

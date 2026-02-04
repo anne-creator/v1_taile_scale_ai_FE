@@ -1,10 +1,9 @@
 'use client';
 
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { IconHistory } from '@tabler/icons-react';
 import moment from 'moment';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 import { Link, usePathname, useRouter } from '@/core/i18n/navigation';
 import { LocaleSelector, Pagination } from '@/components/custom';
@@ -14,51 +13,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/shared/contexts/auth';
+import { useChatHistory } from '@/hooks/use-chat-history';
+import { useAuth } from '@/providers/auth-provider';
 
-type ChatListItem = {
-  id: string;
-  title?: string | null;
-  createdAt?: string | Date | null;
-  model?: string | null;
-  provider?: string | null;
-};
-
-type ChatListResponse = {
-  list: ChatListItem[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-};
-
-function formatDate(value: string | Date | null | undefined, locale: string) {
-  if (!value) {
-    return '';
-  }
-
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
+/**
+ * ChatHistory Block (Level 4)
+ *
+ * Following code_principle.md:
+ * - Block only CONSUME context (call actions), not MANAGE state for fetch logic
+ * - All fetch logic is managed by useChatHistory hook
+ * - This component handles URL state and UI rendering
+ */
 
 export function ChatHistory() {
   const t = useTranslations('ai.chat.history');
-  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, isCheckSign } = useAuth();
+  const { data, actions, isLoading, error } = useChatHistory();
 
+  // URL state
   const page = useMemo(() => {
     const value = Number(searchParams.get('page') || '1');
     return Number.isFinite(value) && value > 0 ? value : 1;
@@ -69,11 +44,8 @@ export function ChatHistory() {
     return Number.isFinite(value) && value > 0 ? value : 10;
   }, [searchParams]);
 
-  const [chats, setChats] = useState<ChatListItem[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [hasMore, setHasMore] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  // Derived state
+  const { chats, total } = data;
 
   const totalPages = useMemo(() => {
     if (limit <= 0) {
@@ -116,58 +88,18 @@ export function ChatHistory() {
     [pathname, router, searchParams]
   );
 
-  const fetchChats = useCallback(async () => {
-    if (!user) {
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const resp = await fetch('/api/chat/list', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ page, limit }),
-      });
-
-      if (!resp.ok) {
-        throw new Error(`request failed with status ${resp.status}`);
-      }
-
-      const json = (await resp.json()) as {
-        code: number;
-        message?: string;
-        data?: ChatListResponse;
-      };
-
-      if (json.code !== 0 || !json.data) {
-        throw new Error(json.message || 'unknown error');
-      }
-
-      setChats(json.data.list || []);
-      setTotal(json.data.total || 0);
-      setHasMore(Boolean(json.data.hasMore));
-    } catch (err) {
-      console.error('fetch chat history failed:', err);
-      setError(t('error'));
-    } finally {
-      setLoading(false);
-    }
-  }, [limit, page, t, user]);
-
+  // Fetch chats when user or pagination changes
   useEffect(() => {
     if (!user || isCheckSign) {
       return;
     }
-    fetchChats();
-  }, [fetchChats, isCheckSign, user]);
+    actions.fetchChats(page, limit);
+  }, [actions, isCheckSign, limit, page, user]);
 
+  // Redirect to last page if current page is out of bounds
   useEffect(() => {
     if (
-      !loading &&
+      !isLoading &&
       user &&
       total > 0 &&
       chats.length === 0 &&
@@ -175,10 +107,10 @@ export function ChatHistory() {
     ) {
       handlePageChange(totalPages);
     }
-  }, [chats.length, handlePageChange, loading, page, total, totalPages, user]);
+  }, [chats.length, handlePageChange, isLoading, page, total, totalPages, user]);
 
   const handleRetry = () => {
-    fetchChats();
+    actions.fetchChats(page, limit);
   };
 
   const handleLimitSelect = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -215,7 +147,7 @@ export function ChatHistory() {
       return <Empty message={t('signin')} />;
     }
 
-    if (loading) {
+    if (isLoading) {
       return (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 6 }).map((_, idx) => (
@@ -227,7 +159,7 @@ export function ChatHistory() {
 
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-4 py-section-md text-center">
           <p className="text-destructive">{error}</p>
           <Button onClick={handleRetry} variant="outline">
             {t('retry')}
@@ -276,7 +208,7 @@ export function ChatHistory() {
     );
   };
 
-  const showFooter = user && !loading && chats.length > 0;
+  const showFooter = user && !isLoading && chats.length > 0;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">

@@ -11,7 +11,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/compound/select';
 import { Filter as FilterType } from '@/shared/types/blocks/common';
 
 export function Filter({ filter }: { filter: FilterType }) {

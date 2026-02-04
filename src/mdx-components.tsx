@@ -7,7 +7,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from '@/components/compound/accordion';
 import { cn } from '@/shared/lib/utils';
 
 // Custom link component with nofollow for external links

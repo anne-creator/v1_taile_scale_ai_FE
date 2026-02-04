@@ -231,8 +231,16 @@ components/
 ├── custom/                # Level 3: Custom Components (including SectionSpacer)
 └── blocks/                # Level 4: Blocks
 
+providers/                 # 可复用业务模块: Global State Providers
+├── auth-provider.tsx      # Auth 模块 (全站共享)
+└── index.ts               # 统一导出
+
+hooks/                     # 可复用业务模块: 独立 Hooks
+├── use-payment.ts         # Payment 模块 (单页面使用)
+└── index.ts               # 统一导出
+
 app/
-├── layout.tsx             # Global layout, theme provider
+├── layout.tsx             # Global layout, 引入 Providers
 ├── template.tsx           # Route transition animations
 └── page.tsx               # Level 5: Pure assembly
 ```
@@ -366,6 +374,162 @@ export function Header() {
 
 ---
 
+## 可复用业务模块 (Reusable Business Modules)
+
+### 目标
+
+将 Auth、Payment 等业务功能封装成**独立、可复用的模块**，可以轻松复制到其他项目中使用，就像复用 Button 组件一样。
+
+### 何时用 Provider vs 独立 Hook
+
+| 类型 | 何时使用 | 目录 | 示例 |
+|-----|---------|------|------|
+| **Provider** | 状态需要**全站共享**（多个页面/组件都要读取） | `providers/` | Auth（Header、Profile、Settings 都需要知道用户信息） |
+| **独立 Hook** | 状态**只在调用处**使用（不需要全站知道） | `hooks/` | Payment（只在结账页使用） |
+
+### 当前模块清单
+
+| 模块 | 类型 | 文件 | 说明 |
+|-----|------|------|------|
+| Auth | Provider | `providers/auth-provider.tsx` | 登录、登出、用户信息（全站共享） |
+| Payment | Hook | `hooks/use-payment.ts` | 支付处理（单页面使用） |
+
+### 封装设计原则
+
+**1. 自包含 (Self-contained)**
+- 模块内部包含所有需要的类型定义、API 调用、状态管理
+- 外部只需要 import 一个文件即可使用
+
+**2. 配置化 (Configurable)**
+- 通过参数/环境变量配置 API endpoints、keys 等
+- 不硬编码项目特定的值
+
+**3. 接口统一 (Consistent Interface)**
+- Provider 模式使用 `{ state, actions, meta? }` 接口
+- Hook 模式返回 `{ data, actions, isLoading, error }` 接口
+
+### Provider 模块结构示例 (Auth)
+
+```
+providers/
+└── auth-provider.tsx
+```
+
+```tsx
+// providers/auth-provider.tsx
+'use client'
+
+interface AuthState {
+  user: User | null
+  isAuthenticated: boolean
+}
+
+interface AuthActions {
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  refreshToken: () => Promise<void>
+}
+
+interface AuthContextValue {
+  state: AuthState
+  actions: AuthActions
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  
+  const actions: AuthActions = useMemo(() => ({
+    login: async (email, password) => {
+      const user = await authAPI.login(email, password)
+      setUser(user)
+    },
+    logout: async () => {
+      await authAPI.logout()
+      setUser(null)
+    },
+    refreshToken: async () => { /* ... */ }
+  }), [])
+  
+  const state: AuthState = {
+    user,
+    isAuthenticated: !!user
+  }
+  
+  return (
+    <AuthContext value={{ state, actions }}>
+      {children}
+    </AuthContext>
+  )
+}
+
+export function useAuth() {
+  const context = use(AuthContext)
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
+  return context
+}
+```
+
+### 独立 Hook 模块结构示例 (Payment)
+
+```
+hooks/
+└── use-payment.ts
+```
+
+```tsx
+// hooks/use-payment.ts
+'use client'
+
+interface PaymentActions {
+  processPayment: (amount: number, cardToken: string) => Promise<PaymentResult>
+  validateCard: (cardNumber: string) => ValidationResult
+}
+
+interface UsePaymentReturn {
+  actions: PaymentActions
+  isProcessing: boolean
+  error: Error | null
+}
+
+export function usePayment(): UsePaymentReturn {
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  
+  const actions: PaymentActions = useMemo(() => ({
+    processPayment: async (amount, cardToken) => {
+      setIsProcessing(true)
+      setError(null)
+      try {
+        return await paymentAPI.charge(amount, cardToken)
+      } catch (e) {
+        setError(e as Error)
+        throw e
+      } finally {
+        setIsProcessing(false)
+      }
+    },
+    validateCard: (cardNumber) => {
+      // validation logic
+      return { isValid: true }
+    }
+  }), [])
+  
+  return { actions, isProcessing, error }
+}
+```
+
+### 复用到新项目的步骤
+
+1. **复制文件**：将 `providers/auth-provider.tsx` 或 `hooks/use-payment.ts` 复制到新项目
+2. **配置环境**：修改 API endpoints（如果使用环境变量则无需修改）
+3. **引入使用**：
+   - Provider：在 `layout.tsx` 中 wrap
+   - Hook：在需要的组件中 import
+
+---
+
 ## Skills 优先级筛选
 
 ### P0: 必须遵守
@@ -418,3 +582,9 @@ export function Header() {
 - [ ] Independent fetches use `Promise.all()` for parallelism
 - [ ] Async components are wrapped in `<Suspense>` with skeleton fallback
 - [ ] No data fetching logic in L1-L4 components (only via props or context)
+
+**Reusable Modules:**
+- [ ] Module is self-contained (types, API calls, state in one file)
+- [ ] No hardcoded project-specific values (use env vars or config)
+- [ ] Provider uses `{ state, actions, meta? }` interface
+- [ ] Hook returns `{ actions, isLoading, error }` or similar consistent interface

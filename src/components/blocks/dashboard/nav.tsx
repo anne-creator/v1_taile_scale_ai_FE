@@ -9,7 +9,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+} from '@/components/compound/collapsible';
 import {
   SidebarGroup,
   SidebarGroupContent,

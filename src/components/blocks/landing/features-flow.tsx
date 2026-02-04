@@ -6,23 +6,69 @@ import { LazyImage } from '@/components/custom';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 
-const createFadeInVariant = (delay: number) => ({
-  initial: {
-    opacity: 0,
-    y: 20,
-    filter: 'blur(6px)',
+/**
+ * Animation variants using staggerChildren pattern
+ * per code_principle.md: "Block 作为'指挥官'，负责编排子组件的动画时机（如 staggerChildren）"
+ */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
   },
-  animate: {
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const imageVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const textVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const headerVariants = {
+  hidden: { opacity: 0, y: 20, filter: 'blur(6px)' },
+  visible: {
     opacity: 1,
     y: 0,
     filter: 'blur(0px)',
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+    },
   },
-  transition: {
-    duration: 0.6,
-    delay,
-    ease: [0.22, 1, 0.36, 1] as const,
-  },
-});
+};
 
 export function FeaturesFlow({ section }: { section: Section }) {
   if (!section.items || section.items.length === 0) {
@@ -32,58 +78,46 @@ export function FeaturesFlow({ section }: { section: Section }) {
   return (
     <section
       id={section.id || section.name}
-      className={cn('py-16 md:py-24', section.className)}
+      className={cn('py-section-md', section.className)}
     >
       <motion.div
         className="container mb-12 text-center"
-        {...createFadeInVariant(0)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={headerVariants}
       >
         {section.sr_only_title && (
           <h1 className="sr-only">{section.sr_only_title}</h1>
         )}
-        <h2 className="mx-auto mb-6 max-w-full text-3xl font-bold text-pretty md:max-w-5xl lg:text-4xl">
+        <h2 className="mx-auto mb-6 max-w-full text-h2 text-pretty md:max-w-5xl">
           {section.title}
         </h2>
         <p className="text-muted-foreground text-md mx-auto mb-4 max-w-full md:max-w-5xl">
           {section.description}
         </p>
       </motion.div>
-      <div className="container flex flex-col items-center justify-center space-y-8 px-6 md:space-y-16">
+      
+      <motion.div 
+        className="container flex flex-col items-center justify-center space-y-8 px-6 md:space-y-16"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: '-100px' }}
+        variants={containerVariants}
+      >
         {section.items.map((item, index) => {
           const isImageRight = item.image_position === 'right';
           return (
             <motion.div
               key={index}
               className={cn(
-                'grid items-center gap-6 py-16 sm:grid-cols-2 md:gap-12 lg:gap-24',
+                'grid items-center gap-6 py-section-md sm:grid-cols-2 md:gap-12 lg:gap-24',
                 isImageRight &&
                   'sm:[&>*:first-child]:order-2 sm:[&>*:last-child]:order-1'
               )}
-              initial={{
-                opacity: 0,
-                y: 30,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{
-                duration: 0.6,
-                delay: index * 0.15,
-                ease: [0.22, 1, 0.36, 1] as const,
-              }}
+              variants={itemVariants}
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.15 + 0.2,
-                  ease: [0.22, 1, 0.36, 1] as const,
-                }}
-              >
+              <motion.div variants={imageVariants}>
                 <LazyImage
                   src={item.image?.src ?? ''}
                   className="rounded-2xl"
@@ -93,16 +127,12 @@ export function FeaturesFlow({ section }: { section: Section }) {
 
               <motion.div
                 className="relative space-y-4"
-                initial={{ opacity: 0, x: isImageRight ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.15 + 0.3,
-                  ease: [0.22, 1, 0.36, 1] as const,
+                variants={{
+                  ...textVariants,
+                  hidden: { ...textVariants.hidden, x: isImageRight ? -20 : 20 },
                 }}
               >
-                <h3 className="text-xl font-medium md:text-2xl lg:text-2xl">
+                <h3 className="text-h3">
                   {item.title}
                 </h3>
                 <p className="text-muted-foreground">{item.description}</p>
@@ -110,7 +140,7 @@ export function FeaturesFlow({ section }: { section: Section }) {
             </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 }

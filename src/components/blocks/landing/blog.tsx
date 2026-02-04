@@ -42,13 +42,13 @@ export function Blog({
   return (
     <section
       id={section.id}
-      className={cn('py-24 md:py-36', section.className, className)}
+      className={cn('py-section-lg', section.className, className)}
     >
       <div className="mx-auto mb-12 text-center">
         {section.sr_only_title && (
           <h1 className="sr-only">{section.sr_only_title}</h1>
         )}
-        <h2 className="mb-6 text-3xl font-bold text-pretty lg:text-4xl">
+        <h2 className="text-h2 mb-6 text-pretty">
           {section.title}
         </h2>
         <p className="text-muted-foreground mb-4 max-w-xl lg:max-w-none lg:text-lg">

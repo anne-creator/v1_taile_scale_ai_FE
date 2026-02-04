@@ -13,7 +13,7 @@ export function FeaturesMedia({ section }: { section: Section }) {
   return (
     <section
       id={section.id || section.name}
-      className={cn('py-16 md:py-24', section.className)}
+      className={cn('py-section-md', section.className)}
     >
       <div className="container flex flex-col items-center justify-center space-y-8 px-6 md:space-y-16">
         <motion.div
