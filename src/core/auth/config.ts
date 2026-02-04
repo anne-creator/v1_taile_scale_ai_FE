@@ -29,7 +29,24 @@ const authOptions = {
   appName: envConfigs.app_name,
   baseURL: envConfigs.auth_url,
   secret: envConfigs.auth_secret,
-  trustedOrigins: envConfigs.app_url ? [envConfigs.app_url] : [],
+  // In development, trust common localhost ports to handle automatic port switching
+  // (e.g., when port 3000 is occupied and Next.js uses 3002)
+  trustedOrigins: (() => {
+    const origins: string[] = [];
+    if (envConfigs.app_url) {
+      origins.push(envConfigs.app_url);
+    }
+    // In development, add localhost ports 3000-3010
+    if (process.env.NODE_ENV !== 'production') {
+      for (let port = 3000; port <= 3010; port++) {
+        const localhostOrigin = `http://localhost:${port}`;
+        if (!origins.includes(localhostOrigin)) {
+          origins.push(localhostOrigin);
+        }
+      }
+    }
+    return origins;
+  })(),
   user: {
     // Allow persisting custom columns on user table.
     // Without this, better-auth may ignore extra properties during create/update.

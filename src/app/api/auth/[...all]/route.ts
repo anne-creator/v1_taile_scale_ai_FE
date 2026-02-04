@@ -45,10 +45,16 @@ export async function GET(request: Request) {
 }
 
 export async function OPTIONS(request: Request) {
+  // In development, allow any origin to handle port switching
+  // In production, use configured app URL
+  const allowOrigin = process.env.NODE_ENV !== 'production'
+    ? '*'
+    : (process.env.NEXT_PUBLIC_APP_URL || '*');
+  
   return new Response(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': process.env.NEXT_PUBLIC_APP_URL || '*',
+      'Access-Control-Allow-Origin': allowOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Allow-Credentials': 'true',
