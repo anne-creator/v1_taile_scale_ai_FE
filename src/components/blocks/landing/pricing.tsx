@@ -29,16 +29,28 @@ export function Pricing({
   const { user } = useAuth();
   const { setIsShowSignModal } = useUI();
   const { actions, isLoading, error } = useCheckout();
-  const { isEligible: isPromoEligible, isLoading: isPromoLoading } =
-    usePromoEligibility();
+  const {
+    isEligible: isPromoEligible,
+    hasActiveSubscription,
+    subscriptionNo,
+    isLoading: isPromoLoading,
+  } = usePromoEligibility();
 
   // Show promo pricing if: not logged in, or loading, or eligible
-  // Hide promo pricing only when: logged in AND not eligible
-  const showPromo = !user || isPromoLoading || isPromoEligible !== false;
+  // Hide promo pricing only when: logged in AND not eligible, OR already subscribed
+  const showPromo =
+    !hasActiveSubscription &&
+    (!user || isPromoLoading || isPromoEligible !== false);
 
   const handleSubscribe = async () => {
     if (!user) {
       setIsShowSignModal(true);
+      return;
+    }
+
+    // If already subscribed, go to Stripe management portal
+    if (hasActiveSubscription && subscriptionNo) {
+      window.location.href = `/settings/billing/retrieve?subscription_no=${subscriptionNo}`;
       return;
     }
 
@@ -93,11 +105,11 @@ export function Pricing({
               <div className="text-center md:text-left">
                 {/* Discount Badge - only show for promo eligible users */}
                 {showPromo && (
-                  <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-brand-yellow rounded-full">
-                    <span className="text-sm font-bold text-brand-yellow-foreground">
+                  <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-primary rounded-full">
+                    <span className="text-sm font-bold text-primary-foreground">
                       70% OFF
                     </span>
-                    <span className="text-xs text-brand-yellow-foreground/70">
+                    <span className="text-xs text-primary-foreground/70">
                       1st month
                     </span>
                   </div>
@@ -134,8 +146,8 @@ export function Pricing({
                 <div className="space-y-3">
                   {features.slice(0, 3).map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 text-brand-yellow-foreground" />
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 text-primary-foreground" />
                       </div>
                       <span className={cn('text-sm', feature.bold && 'font-bold')}>
                         {feature.text}
@@ -150,8 +162,8 @@ export function Pricing({
                 <div className="space-y-3 mb-6">
                   {features.slice(3).map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 text-brand-yellow-foreground" />
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 text-primary-foreground" />
                       </div>
                       <span className="text-sm">{feature.text}</span>
                     </div>
@@ -159,7 +171,7 @@ export function Pricing({
                 </div>
                 <Button
                   size="lg"
-                  variant="brand"
+                  variant="default"
                   className="w-full"
                   onClick={handleSubscribe}
                   disabled={isLoading}
@@ -169,6 +181,8 @@ export function Pricing({
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Loading...
                     </>
+                  ) : hasActiveSubscription ? (
+                    'Manage Subscription'
                   ) : (
                     'Subscribe'
                   )}

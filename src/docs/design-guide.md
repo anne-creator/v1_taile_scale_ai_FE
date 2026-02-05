@@ -22,7 +22,8 @@
 |-------|------------|-----------|------|
 | `--background` | oklch(0.98...) | oklch(0.27...) | 页面背景 |
 | `--foreground` | oklch(0.34...) | oklch(0.81...) | 文本颜色 |
-| `--primary` | oklch(0.62...) | oklch(0.67...) | 主要操作 |
+| `--primary` | oklch(0.62...) | oklch(0.67...) | 主要操作 (Orange) |
+| `--primary-hover` | oklch(0.56...) | oklch(0.61...) | 主要操作悬停 |
 | `--secondary` | oklch(0.92...) | oklch(0.98...) | 次要操作 |
 | `--muted` | oklch(0.93...) | oklch(0.22...) | 静音背景 |
 | `--accent` | oklch(0.92...) | oklch(0.21...) | 强调色 |
@@ -31,13 +32,10 @@
 | `--input` | oklch(0.76...) | oklch(0.43...) | 输入框 |
 | `--ring` | oklch(0.62...) | oklch(0.67...) | 焦点环 |
 
-#### Brand Colors
+#### Brand Colors (Dark Tones)
 
 | Token | 值 | Tailwind Class | 用途 |
 |-------|-----|----------------|------|
-| `--brand-yellow` | oklch(0.89 0.18 90) | `bg-brand-yellow` | 品牌主色 |
-| `--brand-yellow-hover` | oklch(0.91 0.16 92) | `hover:bg-brand-yellow-hover` | 品牌悬停色 |
-| `--brand-yellow-foreground` | oklch(0.15 0.02 280) | `text-brand-yellow-foreground` | 品牌色上文字 |
 | `--brand-dark` | oklch(0.15 0.02 280) | `bg-brand-dark` | 深色品牌色 |
 | `--brand-dark-soft` | oklch(0.22 0.01 260) | `bg-brand-dark-soft` | 柔和深色 |
 | `--brand-loader` | oklch(0.55 0.20 275) | - | 加载器颜色 |
@@ -162,19 +160,18 @@
 
 | Variant | 样式 | 使用场景 |
 |---------|------|----------|
-| `default` | `bg-primary text-primary-foreground` | 主要操作 |
+| `default` | `bg-primary text-primary-foreground` | 主要操作 (Orange) |
 | `destructive` | `bg-destructive text-white` | 危险操作 |
 | `outline` | `border bg-background` | 次要操作 |
 | `secondary` | `bg-secondary text-secondary-foreground` | 辅助操作 |
 | `ghost` | `hover:bg-accent` | 不显眼操作 |
 | `link` | `text-primary underline` | 链接样式 |
-| **`brand`** | `bg-brand-yellow text-brand-yellow-foreground` | **品牌强调** |
 
 **使用示例:**
 ```tsx
-<Button variant="brand">Subscribe Now</Button>
-<Button variant="default">Submit</Button>
+<Button variant="default">Subscribe Now</Button>
 <Button variant="outline">Cancel</Button>
+<Button variant="secondary">Learn More</Button>
 ```
 
 ---
@@ -187,7 +184,7 @@
 
 | 组件 | 用途 | 默认颜色 |
 |------|------|----------|
-| `BorderBeam` | 边框光束效果 | `var(--brand-yellow)` |
+| `BorderBeam` | 边框光束效果 | `var(--primary)` |
 | `Particles` | 粒子效果 | `var(--foreground)` |
 | `Meteors` | 流星效果 | `foreground/50` |
 | `Ripple` | 涟漪效果 | 使用 semantic tokens |
@@ -291,10 +288,10 @@ export default function Page() {
 ```css
 /* 颜色 */
 bg-background bg-foreground bg-primary bg-secondary bg-muted bg-accent
-bg-brand-yellow bg-brand-dark bg-brand-dark-soft
+bg-brand-dark bg-brand-dark-soft
 
 /* 文字 */
-text-foreground text-muted-foreground text-primary text-brand-yellow-foreground
+text-foreground text-muted-foreground text-primary text-primary-foreground
 
 /* 间距 */
 py-section-sm py-section-md py-section-lg py-section-xl
@@ -303,12 +300,12 @@ py-section-sm py-section-md py-section-lg py-section-xl
 text-h1 text-h2 text-h3 text-h4
 
 /* 按钮 */
-<Button variant="default|destructive|outline|secondary|ghost|link|brand" />
+<Button variant="default|destructive|outline|secondary|ghost|link" />
 ```
 
 ### 修改指南
 
-1. **修改品牌色**: 编辑 `theme.css` 中的 `--brand-*` 变量
+1. **修改主色**: 编辑 `theme.css` 中的 `--primary` 和 `--primary-hover` 变量
 2. **修改间距**: 编辑 `theme.css` 中的 `--section-gap-*` 变量
 3. **修改字体大小**: 编辑 `theme.css` 中的 `--font-size-*` 变量
 4. **添加按钮变体**: 编辑 `button.tsx` 中的 `buttonVariants`

@@ -199,9 +199,10 @@ export default async function BillingPage({
   if (currentSubscription) {
     if (
       currentSubscription.status === SubscriptionStatus.ACTIVE ||
-      currentSubscription.status === SubscriptionStatus.TRIALING
+      currentSubscription.status === SubscriptionStatus.TRIALING ||
+      currentSubscription.status === SubscriptionStatus.PENDING_CANCEL
     ) {
-      // ACTIVE/TRIALING: Only show Manage Subscription button
+      // ACTIVE/TRIALING/PENDING_CANCEL (still within cycle): Show Manage Subscription button
       if (currentSubscription.paymentUserId) {
         buttons = [
           {
@@ -213,27 +214,13 @@ export default async function BillingPage({
           },
         ];
       }
-    } else if (
-      currentSubscription.status === SubscriptionStatus.PENDING_CANCEL
-    ) {
-      // PENDING_CANCEL: Show Subscribe button (to re-subscribe)
-      buttons = [
-        {
-          title: t('view.buttons.subscribe'),
-          url: '/pricing',
-          target: '_blank',
-          icon: 'ArrowUpRight',
-          size: 'sm',
-        },
-      ];
     }
   } else {
-    // No subscription: Show Subscribe button
+    // No subscription: Show Subscribe button → direct checkout
     buttons = [
       {
         title: t('view.buttons.subscribe'),
-        url: '/pricing',
-        target: '_blank',
+        url: '/settings/billing/subscribe',
         icon: 'ArrowUpRight',
         size: 'sm',
       },
@@ -251,29 +238,16 @@ export default async function BillingPage({
         <div className="text-primary text-3xl font-bold">
           {currentSubscription?.planName || t('view.no_subscription')}
         </div>
-        {currentSubscription ? (
-          <>
-            {currentSubscription?.status === SubscriptionStatus.ACTIVE ||
-            currentSubscription?.status === SubscriptionStatus.TRIALING ? (
-              <div className="text-muted-foreground mt-4 text-sm font-normal">
-                {t('view.tip', {
-                  date: moment(currentSubscription?.currentPeriodEnd).format(
-                    'YYYY-MM-DD'
-                  ),
-                })}
-              </div>
-            ) : currentSubscription?.status ===
-              SubscriptionStatus.PENDING_CANCEL ? (
-              <div className="text-muted-foreground mt-4 text-sm font-normal">
-                {t('view.canceled_tip', {
-                  date: moment(
-                    currentSubscription?.canceledEndAt ||
-                      currentSubscription?.currentPeriodEnd
-                  ).format('YYYY-MM-DD'),
-                })}
-              </div>
-            ) : null}
-          </>
+        {currentSubscription?.status ===
+        SubscriptionStatus.PENDING_CANCEL ? (
+          <div className="text-muted-foreground mt-4 text-sm font-normal">
+            {t('view.canceled_tip', {
+              date: moment(
+                currentSubscription?.canceledEndAt ||
+                  currentSubscription?.currentPeriodEnd
+              ).format('YYYY-MM-DD'),
+            })}
+          </div>
         ) : null}
       </PanelCard>
       <TableCard title={t('list.title')} tabs={tabs} table={table} />

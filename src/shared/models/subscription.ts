@@ -165,6 +165,15 @@ export async function getCurrentSubscription(userId: string) {
     .orderBy(desc(subscription.createdAt))
     .limit(1);
 
+  // For PENDING_CANCEL: check if subscription cycle has actually ended
+  // This serves as a fallback in case Stripe's deletion webhook is delayed
+  if (result?.status === SubscriptionStatus.PENDING_CANCEL) {
+    const endDate = result.canceledEndAt || result.currentPeriodEnd;
+    if (endDate && new Date(endDate) < new Date()) {
+      return undefined;
+    }
+  }
+
   return result;
 }
 

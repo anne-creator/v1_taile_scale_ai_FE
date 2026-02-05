@@ -406,7 +406,7 @@ print(result["image_url"])`,
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-md transition-colors',
                 userMode === 'developers'
-                  ? 'bg-background shadow-sm border-b-2 border-brand-yellow'
+                  ? 'bg-background shadow-sm border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -417,7 +417,7 @@ print(result["image_url"])`,
               className={cn(
                 'px-4 py-2 text-sm font-medium rounded-md transition-colors',
                 userMode === 'creators'
-                  ? 'bg-background shadow-sm border-b-2 border-brand-yellow'
+                  ? 'bg-background shadow-sm border-b-2 border-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -459,7 +459,7 @@ print(result["image_url"])`,
                           className={cn(
                             'text-xs px-3 py-1.5 rounded transition-colors',
                             codeLanguage === lang
-                              ? 'bg-brand-yellow text-brand-yellow-foreground'
+                              ? 'bg-primary text-primary-foreground'
                               : 'text-gray-400 hover:text-gray-200'
                           )}
                         >
@@ -505,8 +505,8 @@ print(result["image_url"])`,
                         className={cn(
                           'px-4 py-2 border rounded-lg transition-colors text-sm',
                           aspectRatio === ratio
-                            ? 'bg-brand-yellow text-brand-yellow-foreground border-brand-yellow'
-                            : 'border-border hover:border-brand-yellow/50'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border hover:border-primary/50'
                         )}
                       >
                         {ratio}
@@ -547,7 +547,7 @@ print(result["image_url"])`,
                 {/* Generate Illustration Button */}
                 <Button
                   size="lg"
-                  variant="brand"
+                  variant="default"
                   className="w-full"
                   onClick={handleGenerate}
                   disabled={isGenerating || !apiKey.trim()}
@@ -605,8 +605,8 @@ print(result["image_url"])`,
                         className={cn(
                           'px-4 py-2 border rounded-lg transition-colors text-sm',
                           aspectRatio === ratio
-                            ? 'bg-brand-yellow text-brand-yellow-foreground border-brand-yellow'
-                            : 'border-border hover:border-brand-yellow/50'
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border hover:border-primary/50'
                         )}
                       >
                         {ratio}
@@ -647,7 +647,7 @@ print(result["image_url"])`,
                 {/* Generate Button */}
                 <Button
                   size="lg"
-                  variant="brand"
+                  variant="default"
                   className="w-full"
                   onClick={handleGenerate}
                   disabled={isGenerating || !prompt.trim() || !apiKey.trim()}
@@ -700,7 +700,7 @@ print(result["image_url"])`,
             {/* Gallery link overlay */}
             <Link
               href="/showcases"
-              className="absolute top-4 right-4 flex items-center gap-1.5 text-sm font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full text-brand-yellow hover:bg-black/60 transition-colors"
+              className="absolute top-4 right-4 flex items-center gap-1.5 text-sm font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full text-primary hover:bg-black/60 transition-colors"
             >
               Check guide gallery for inspiration
               <ArrowUpRight className="w-3.5 h-3.5" />
