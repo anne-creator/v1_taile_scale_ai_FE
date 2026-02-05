@@ -56,7 +56,7 @@ export async function OPTIONS(request: Request) {
     headers: {
       'Access-Control-Allow-Origin': allowOrigin,
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token',
       'Access-Control-Allow-Credentials': 'true',
     },
   });

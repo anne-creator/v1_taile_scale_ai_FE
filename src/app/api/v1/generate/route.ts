@@ -1,27 +1,40 @@
-import { envConfigs } from '@/config';
 import { AIMediaType, AITaskStatus } from '@/extensions/ai';
 import { getUuid } from '@/shared/lib/hash';
 import { respData, respErr } from '@/shared/lib/resp';
 import { createAITask, NewAITask } from '@/shared/models/ai_task';
 import { findApikeyByKey } from '@/shared/models/apikey';
+import { getAllConfigs } from '@/shared/models/config';
 import { getRemainingCredits } from '@/shared/models/credit';
 import { findUserById } from '@/shared/models/user';
-import { getAIService } from '@/shared/services/ai';
+import {
+  generateIllustration,
+  DEFAULT_IMAGE_MODEL,
+} from '@/core-services/image-generation';
 
 /**
- * Public API for generating images
- * Requires X-API-Key header for authentication
+ * Public API for generating watercolor illustrations.
+ *
+ * This endpoint uses the core-services image generation module which:
+ * - Includes pre-configured system messages (style prompt + 5 reference images)
+ * - User only needs to provide a scene description
+ *
+ * Requires X-API-Key header for authentication.
+ *
+ * @example
+ * POST /api/v1/generate
+ * Headers: { "X-API-Key": "your-api-key" }
+ * Body: { "prompt": "A hedgehog reading a book in a cozy library" }
  */
 export async function POST(request: Request) {
   try {
-    // Get API key from header
-    const apiKey = request.headers.get('X-API-Key');
-    if (!apiKey) {
+    // Get API key from header (user's API key for authentication)
+    const userApiKey = request.headers.get('X-API-Key');
+    if (!userApiKey) {
       return respErr('API key is required. Please provide X-API-Key header.');
     }
 
     // Validate API key
-    const apikeyRecord = await findApikeyByKey(apiKey);
+    const apikeyRecord = await findApikeyByKey(userApiKey);
     if (!apikeyRecord) {
       return respErr('Invalid API key');
     }
@@ -34,27 +47,31 @@ export async function POST(request: Request) {
 
     // Parse request body
     const body = await request.json();
-    const { prompt, style, aspect_ratio } = body;
+    const { prompt } = body;
 
     if (!prompt) {
       return respErr('prompt is required');
     }
 
+    // Get configs from database and environment
+    const configs = await getAllConfigs();
+
+    // Get Gemini API key from configs (database) or environment
+    const geminiApiKey =
+      configs.gemini_api_key ||
+      process.env.GEMINI_IMAGE_API_KEY ||
+      process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      return respErr('Image generation service is not configured');
+    }
+
     // Default values
     const provider = 'gemini';
-    const model = 'gemini-2.0-flash-exp-image-generation';
+    const model = DEFAULT_IMAGE_MODEL;
     const mediaType = AIMediaType.IMAGE;
     const scene = 'text-to-image';
 
-    const aiService = await getAIService();
-
-    // Check AI provider
-    const aiProvider = aiService.getProvider(provider);
-    if (!aiProvider) {
-      return respErr('AI provider not available');
-    }
-
-    // Cost credits for image generation
+    // Cost credits for illustration generation
     const costCredits = 2;
 
     // Check credits
@@ -63,20 +80,13 @@ export async function POST(request: Request) {
       return respErr('insufficient credits');
     }
 
-    const callbackUrl = `${envConfigs.app_url}/api/ai/notify/${provider}`;
-
-    const params: any = {
-      mediaType,
+    // Generate illustration using core-services
+    // This automatically includes system prompt + reference images
+    const result = await generateIllustration({
+      userPrompt: prompt,
+      apiKey: geminiApiKey,
       model,
-      prompt,
-      callbackUrl,
-    };
-
-    // Generate content
-    const result = await aiProvider.generate({ params });
-    if (!result?.taskId) {
-      return respErr('Generation failed');
-    }
+    });
 
     // Create AI task record
     const newAITask: NewAITask = {
@@ -87,29 +97,24 @@ export async function POST(request: Request) {
       model,
       prompt,
       scene,
-      options: JSON.stringify({ style, aspect_ratio }),
-      status: result.taskStatus,
+      options: null,
+      status: AITaskStatus.SUCCESS,
       costCredits,
       taskId: result.taskId,
-      taskInfo: result.taskInfo ? JSON.stringify(result.taskInfo) : null,
-      taskResult: result.taskResult ? JSON.stringify(result.taskResult) : null,
+      taskInfo: JSON.stringify({
+        images: [{ imageUrl: result.imageUrl, imageType: result.mimeType }],
+        status: 'success',
+        createTime: result.createdAt,
+      }),
+      taskResult: null,
     };
     await createAITask(newAITask);
 
-    // For synchronous providers (like Gemini), return the image URL directly
-    if (result.taskStatus === AITaskStatus.SUCCESS && result.taskInfo?.images?.[0]?.imageUrl) {
-      return respData({
-        id: newAITask.id,
-        status: 'success',
-        image_url: result.taskInfo.images[0].imageUrl,
-      });
-    }
-
-    // For async providers, return task ID for polling
+    // Return the generated image URL
     return respData({
       id: newAITask.id,
-      status: 'processing',
-      message: 'Image is being generated. Poll /api/v1/status/{id} for result.',
+      status: 'success',
+      image_url: result.imageUrl,
     });
   } catch (e: any) {
     console.error('v1/generate failed', e);

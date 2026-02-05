@@ -38,4 +38,12 @@ export const envConfigs: ConfigMap = {
   version: packageJson.version,
   locale_detect_enabled:
     process.env.NEXT_PUBLIC_LOCALE_DETECT_ENABLED ?? 'false',
+
+  // Core Services - Image Generation
+  // API key for Gemini image generation (Nano Banana Pro / gemini-3-pro-image-preview)
+  gemini_image_api_key:
+    process.env.GEMINI_IMAGE_API_KEY || process.env.GEMINI_API_KEY || '',
+  // Model for image generation (default: gemini-3-pro-image-preview)
+  gemini_image_model:
+    process.env.GEMINI_IMAGE_MODEL || 'gemini-3-pro-image-preview',
 };
