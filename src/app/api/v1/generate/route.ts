@@ -23,7 +23,7 @@ import {
  * @example
  * POST /api/v1/generate
  * Headers: { "X-API-Key": "your-api-key" }
- * Body: { "prompt": "A hedgehog reading a book in a cozy library" }
+ * Body: { "prompt": "A hedgehog reading a book in a cozy library", "style": "children_book", "aspect_ratio": "16:9" }
  */
 export async function POST(request: Request) {
   try {
@@ -47,10 +47,23 @@ export async function POST(request: Request) {
 
     // Parse request body
     const body = await request.json();
-    const { prompt } = body;
+    const { prompt, style, aspect_ratio } = body;
 
     if (!prompt) {
       return respErr('prompt is required');
+    }
+
+    // Validate style if provided (currently only children_book is supported)
+    const validStyles = ['children_book'];
+    const illustrationStyle = style || 'children_book';
+    if (!validStyles.includes(illustrationStyle)) {
+      return respErr(`Unsupported style: "${style}". Supported styles: ${validStyles.join(', ')}`);
+    }
+
+    // Validate aspect_ratio if provided
+    const validAspectRatios = ['1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9'];
+    if (aspect_ratio && !validAspectRatios.includes(aspect_ratio)) {
+      return respErr(`Unsupported aspect_ratio: "${aspect_ratio}". Supported: ${validAspectRatios.join(', ')}`);
     }
 
     // Get configs from database and environment
@@ -86,6 +99,8 @@ export async function POST(request: Request) {
       userPrompt: prompt,
       apiKey: geminiApiKey,
       model,
+      style: illustrationStyle,
+      aspectRatio: aspect_ratio,
     });
 
     // Create AI task record
@@ -97,7 +112,7 @@ export async function POST(request: Request) {
       model,
       prompt,
       scene,
-      options: null,
+      options: JSON.stringify({ style: illustrationStyle, aspect_ratio: aspect_ratio || '1:1' }),
       status: AITaskStatus.SUCCESS,
       costCredits,
       taskId: result.taskId,

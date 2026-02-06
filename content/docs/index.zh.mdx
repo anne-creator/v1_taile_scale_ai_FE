@@ -1,7 +1,42 @@
 ---
-title: 介绍
+title: 快速开始
+description: 开始使用 TaleCraft AI — 通过文字描述生成精美的水彩风格插画。
 ---
 
-## 什么是 YourAppName?
+### 1. 获取 API Key
 
-YourAppName 是一个基于 NextJS 的 AI SaaS 开发框架，内置丰富的组件和 AI SDK，帮助你快速完成 AI SaaS 项目开发。
+登录你的 TaleCraft 账户，前往 **设置 → API Keys**，创建一个新的密钥。
+
+### 2. 发送第一个请求
+
+```bash
+curl -X POST https://talescaleai.com/api/v1/generate \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A hedgehog reading a book in a cozy library",
+    "style": "children_book",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### 3. 获取图片
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "success",
+    "image_url": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/example.jpeg"
+  }
+}
+```
+
+`image_url` 字段包含生成插画的直接链接。
+
+## 下一步
+
+- [API 参考](/docs/api-reference) — 完整的端点文档和代码示例
+- [Prompt 指南](/docs/prompt-guide) — 学习如何编写有效的提示词以获得更好的结果

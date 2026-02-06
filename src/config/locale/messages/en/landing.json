@@ -17,6 +17,11 @@
           "title": "Gallery",
           "url": "/showcases",
           "icon": "Box"
+        },
+        {
+          "title": "Docs",
+          "url": "/docs",
+          "icon": "BookOpen"
         }
       ]
     },

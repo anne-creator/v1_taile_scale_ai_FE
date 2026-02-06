@@ -94,8 +94,8 @@ export function Hero({
   })
 });
 
-const data = await response.json();
-console.log(data.image_url);`,
+const result = await response.json();
+console.log(result.data.image_url);`,
     python: `import requests
 
 url = "https://talescaleai.com/api/v1/generate"
@@ -111,7 +111,7 @@ data = {
 
 response = requests.post(url, headers=headers, json=data)
 result = response.json()
-print(result["image_url"])`,
+print(result["data"]["image_url"])`,
     curl: `curl -X POST https://talescaleai.com/api/v1/generate \\
   -H "X-API-Key: ${apiKey || 'YOUR_API_KEY'}" \\
   -H "Content-Type: application/json" \\

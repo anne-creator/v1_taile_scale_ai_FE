@@ -116,6 +116,8 @@ export async function generateIllustration({
   userPrompt,
   apiKey,
   model = DEFAULT_IMAGE_MODEL,
+  style: _style,
+  aspectRatio,
 }: GenerateIllustrationParams): Promise<GenerationResult> {
   if (!userPrompt?.trim()) {
     throw new Error('User prompt is required');
@@ -135,14 +137,21 @@ export async function generateIllustration({
   const apiUrl = `${GEMINI_API_BASE_URL}/${model}:generateContent?key=${apiKey}`;
 
   // Build request payload
+  const generationConfig: Record<string, unknown> = {
+    response_modalities: ['TEXT', 'IMAGE'],
+  };
+
+  // Add aspect ratio if specified
+  if (aspectRatio) {
+    generationConfig.aspectRatio = aspectRatio;
+  }
+
   const payload = {
     contents: {
       role: 'user',
       parts,
     },
-    generation_config: {
-      response_modalities: ['TEXT', 'IMAGE'],
-    },
+    generation_config: generationConfig,
   };
 
   // Call Gemini API

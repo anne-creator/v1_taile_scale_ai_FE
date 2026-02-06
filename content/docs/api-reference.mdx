@@ -1,0 +1,165 @@
+---
+title: API Reference
+description: Complete reference for the TaleCraft AI illustration generation API.
+---
+
+## Endpoint
+
+```
+POST https://talescaleai.com/api/v1/generate
+```
+
+## Authentication
+
+All requests require an API key passed via the `X-API-Key` header.
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `X-API-Key` | Yes | Your personal API key from the dashboard |
+| `Content-Type` | Yes | Must be `application/json` |
+
+### Getting Your API Key
+
+1. Log in to your TaleCraft AI account
+2. Navigate to **Settings → API Keys**
+3. Click **Create New API Key**
+4. Copy and securely store your key
+
+> **Security**: Keep your API key confidential. Do not expose it in client-side code or public repositories.
+
+## Request Body
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `prompt` | string | Yes | — | Scene description for the illustration |
+| `style` | string | No | `"children_book"` | Illustration style. Currently supported: `children_book` |
+| `aspect_ratio` | string | No | `"1:1"` | Image aspect ratio |
+
+### Supported Aspect Ratios
+
+| Value | Description |
+|-------|-------------|
+| `1:1` | Square (default) |
+| `2:3` | Portrait |
+| `3:2` | Landscape |
+| `3:4` | Portrait (taller) |
+| `4:3` | Landscape (wider) |
+| `9:16` | Vertical / mobile |
+| `16:9` | Widescreen |
+
+## Response
+
+### Success
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "id": "9da9465c-a56c-4614-81af-257aaccb2646",
+    "status": "success",
+    "image_url": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6188896c-ee02-4e70-881b-483bcbb1739c.jpeg"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | number | `0` indicates success |
+| `message` | string | `"ok"` on success |
+| `data.id` | string | Unique task ID (UUID) |
+| `data.status` | string | `"success"` for successful generation |
+| `data.image_url` | string | Direct URL to the generated image |
+
+### Error
+
+```json
+{
+  "code": -1,
+  "message": "Error description"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `code` | number | `-1` indicates error |
+| `message` | string | Human-readable error description |
+
+## Error Messages
+
+| Message | Cause | Solution |
+|---------|-------|----------|
+| `API key is required. Please provide X-API-Key header.` | Missing header | Add `X-API-Key` header |
+| `Invalid API key` | Key not found or revoked | Check your key is correct and active |
+| `prompt is required` | Empty or missing prompt | Provide a non-empty `prompt` field |
+| `Unsupported style` | Invalid style value | Use `children_book` |
+| `Unsupported aspect_ratio` | Invalid ratio value | Use a supported ratio (see table above) |
+| `insufficient credits` | No remaining credits | Purchase more credits |
+| `Generation failed` | AI model error | Retry or modify your prompt |
+
+## Code Examples
+
+### cURL
+
+```bash
+curl -X POST https://talescaleai.com/api/v1/generate \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A brave knight in an enchanted forest",
+    "style": "children_book",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### TypeScript / JavaScript
+
+```typescript
+const response = await fetch('https://talescaleai.com/api/v1/generate', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    prompt: 'A brave knight in an enchanted forest',
+    style: 'children_book',
+    aspect_ratio: '16:9'
+  })
+});
+
+const result = await response.json();
+
+if (result.code !== 0) {
+  throw new Error(result.message);
+}
+
+console.log(result.data.image_url);
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.post(
+    'https://talescaleai.com/api/v1/generate',
+    headers={
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'prompt': 'A brave knight in an enchanted forest',
+        'style': 'children_book',
+        'aspect_ratio': '16:9'
+    }
+)
+
+result = response.json()
+
+if result['code'] != 0:
+    raise Exception(result['message'])
+
+print(result['data']['image_url'])
+```
+

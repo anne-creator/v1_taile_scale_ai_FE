@@ -1,0 +1,232 @@
+---
+title: Prompt 指南
+description: 学习如何为 TaleCraft AI 编写有效的提示词，生成精美的水彩风格插画。
+---
+
+一个好的提示词决定了生成图片是平庸还是惊艳。本指南将提示词拆解为六大要素，并附有 12 个可直接使用的示例及真实生成结果。
+
+## 优质 Prompt 的六大要素
+
+### 1. 主体 (Subject)
+
+画面中"谁"或"什么"的详细描述。包括外观、服装、配饰、物种和任何显著特征。
+
+**弱：** "一只兔子"
+**强：** "一只棕色小兔子，戴着织纹蓝色围巾和圆形黄铜眼镜"
+
+### 2. 动作 (Action)
+
+主体正在做什么。动作为画面注入叙事感和活力，让场景生动而非静止。
+
+**弱：** "一只狐狸在森林里"
+**强：** "一只狐狸小心翼翼地在苔藓木头上保持平衡，同时伸手去摘野黑莓"
+
+### 3. 环境 (Environment)
+
+物理和视觉背景——地点、建筑、植被、天气、季节和周围的物体。
+
+**弱：** "在一个房间里"
+**强：** "在一间杂乱的药剂师商店里，架子上摆满了玻璃罐，干草从横梁上垂下，阳光透过布满灰尘的窗户洒进来"
+
+### 4. 艺术风格 (Art Style)
+
+插画的美学方向。虽然 TaleCraft 已经内置了水彩基础风格，但你可以引导画面的情绪和参考方向。
+
+**示例：**
+- "温暖舒适的故事书氛围"
+- "奇幻而略带超现实的梦境感"
+- "柔和的田园场景，类似碧翠丝·波特的风格"
+
+### 5. 光照 (Lighting)
+
+光的质感、方向、情绪和类型。光照对插画的情感基调有巨大影响。
+
+**示例：**
+- "柔和的金色午后阳光透过窗户洒进"
+- "清冷的蓝色月光与前景温暖的烛光交织"
+- "斑驳的阳光透过森林树冠过滤"
+- "壁炉中噼啪作响的火光形成温暖的轮廓光"
+
+### 6. 细节 (Details)
+
+镜头选择、颗粒感、特定的图形元素、纹理和精细收尾。
+
+**示例：**
+- "浅景深，背景柔和地虚化"
+- "可见的纸张纹理和水彩在边缘的渗透"
+- "微小细节：桌上的面包屑、杯中升起的蒸汽"
+- "柔和的大地色调配以温暖的琥珀色点缀"
+
+## 组合六要素
+
+一个完整的提示词将六大要素自然地融合为一段描述：
+
+> **主体：** 一只穿着拼布围裙的年轻獾
+> **动作：** 搅拌一大锅铜锅汤
+> **环境：** 在石头小屋的厨房里，墙上挂着干薰衣草束，窗外是雪覆盖的草地
+> **风格：** 温暖怀旧的故事书插画
+> **光照：** 壁炉的金色傍晚光线投下长长的影子
+> **细节：** 可见的水彩纹理，锅中升起的蒸汽卷曲，壁炉旁有一只猫在睡觉
+
+**组合 prompt：**
+"A young badger in a patchwork apron stirring a large copper pot of soup in a stone cottage kitchen, bundles of dried lavender on the walls and a window overlooking a snowy meadow, warm and nostalgic storybook illustration style, golden evening fireplace light casting long shadows, visible watercolor texture with steam curling from the pot and a cat sleeping by the hearth"
+
+---
+
+## 12 个示例 Prompt 及生成结果
+
+以下每个示例均使用 TaleCraft API 生成，参数为 `style: "children_book"`，`aspect_ratio: "16:9"`。
+
+### 示例 1 — 森林图书馆
+
+**Prompt:**
+```
+A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest with towering moss-covered trees, warm storybook illustration feel, soft dappled golden sunlight filtering through the canopy with dust motes floating in the beams, shallow depth of field with delicate fern details in the foreground
+```
+
+**生成图片：**
+
+![森林图书馆](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg)
+
+---
+
+### 示例 2 — 雨天面包店
+
+**Prompt:**
+```
+A plump hedgehog wearing a flour-dusted apron and a tiny chef's hat, pulling a tray of golden croissants from a brick oven, inside a cozy village bakery with checkered curtains and shelves of fresh bread loaves and pastries, rain streaking down the window outside, warm nostalgic storybook atmosphere, warm amber interior light contrasting with cool blue-grey rain light from the window, fine detail on the flaky pastry textures and a small chalkboard menu on the wall
+```
+
+**生成图片：**
+
+![雨天面包店](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/9d77d49e-b7b5-4b94-8cef-4b95b2672ca8.jpeg)
+
+---
+
+### 示例 3 — 山顶观星
+
+**Prompt:**
+```
+A young fox cub wrapped in an oversized wool blanket with star patterns, lying on its back on a grassy hilltop gazing up at a vast night sky filled with constellations and a bright crescent moon, open rolling countryside with distant village lights twinkling below, dreamlike and slightly surreal children's book aesthetic, cool blue-violet moonlight with tiny warm firefly glows scattered in the grass, visible watercolor paper grain with soft color bleeds at the sky edges
+```
+
+**生成图片：**
+
+![山顶观星](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/94fedacb-986b-475a-914e-1bf97b88d632.jpeg)
+
+---
+
+### 示例 4 — 秋日市集
+
+**Prompt:**
+```
+A cheerful squirrel wearing a tiny corduroy jacket and a flat cap, carrying a woven basket overflowing with acorns and chestnuts, walking through a bustling autumn harvest market with wooden stalls draped in orange and red bunting and pumpkins stacked in pyramids, warm Beatrix Potter storybook charm, rich golden-hour afternoon light with long warm shadows across the cobblestone path, scattered fallen leaves in ochre and crimson and a hand-painted market sign overhead
+```
+
+**生成图片：**
+
+![秋日市集](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6e434201-1532-4f96-adba-ffa8a8ca4bde.jpeg)
+
+---
+
+### 示例 5 — 水下冒险
+
+**Prompt:**
+```
+A small otter wearing a diving helmet made from an upturned glass jar with a brass rim, swimming through a sunlit coral reef alongside a school of tiny striped fish, underwater garden of swaying sea anemones and kelp forests with a sunken ship visible in the far background, whimsical underwater storybook adventure style, shafts of turquoise sunlight piercing down through the water surface creating rippling caustic patterns, air bubbles trailing from the helmet and fine detail on the coral textures
+```
+
+**生成图片：**
+
+![水下冒险](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/63602256-a8d7-4b76-8896-ed8e54d03a16.jpeg)
+
+---
+
+### 示例 6 — 冬日火车站
+
+**Prompt:**
+```
+A small mouse in a long wool overcoat and a red knitted scarf, standing on a snow-covered platform holding a tiny suitcase tied with string, waiting beside an old-fashioned steam locomotive with brass fittings puffing white clouds into the cold air, quiet countryside train station with icicles hanging from the eaves, gentle melancholic storybook mood, diffused overcast winter light with warm golden glow spilling from the train windows, snowflakes drifting slowly and a faded departure board on the wall
+```
+
+**生成图片：**
+
+![冬日火车站](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/53c4b133-ad00-4973-aca8-60c88513f2e2.jpeg)
+
+---
+
+### 示例 7 — 花园茶话会
+
+**Prompt:**
+```
+A graceful swan wearing a pearl necklace and a wide-brimmed sun hat adorned with dried flowers, pouring tea from a porcelain teapot into mismatched vintage cups for a gathering of ducklings in tiny bow ties, in a lush English cottage garden bursting with hollyhocks roses and lavender around a wrought-iron table, elegant pastoral picturebook illustration, soft diffused afternoon sunlight with gentle lens flare through the garden trellis, fine china patterns on the teacups and a three-tier cake stand with petit fours
+```
+
+**生成图片：**
+
+![花园茶话会](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/49bce3d1-5926-4496-a9b2-151fb349c7e4.jpeg)
+
+---
+
+### 示例 8 — 夜晚树屋
+
+**Prompt:**
+```
+Two raccoon siblings in matching striped pajamas, one reading a picture book by lantern light while the other peers through a small brass telescope pointed at the stars, inside a cozy wooden treehouse with a rope ladder dangling below and a patchwork quilt draped over the railing, magical nighttime forest scene, warm amber lantern glow contrasting with cool silver-blue starlight outside the window, hand-drawn map pinned to the wall and a jar of fireflies on the shelf
+```
+
+**生成图片：**
+
+![夜晚树屋](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/5bb9ec44-a0d2-40a1-af9b-be59408b867a.jpeg)
+
+---
+
+### 示例 9 — 海边画家
+
+**Prompt:**
+```
+A tabby cat wearing a loose linen smock speckled with paint, standing before a wooden easel on a sandy beach painting the sunset over the ocean, art supplies scattered on a weathered blanket beside a half-eaten sandwich and a thermos, peaceful coastal scene with gentle waves lapping at the shore and seagulls in the distance, warm impressionist storybook style, intense golden-pink sunset light reflecting off the wet sand with the cat's shadow stretching long behind, visible brushstroke texture on the canvas-within-canvas
+```
+
+**生成图片：**
+
+![海边画家](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/04608447-2d1b-4f5f-a13e-756c71f27be9.jpeg)
+
+---
+
+### 示例 10 — 雨天旧书店
+
+**Prompt:**
+```
+A tall gentle bear wearing a rumpled tweed blazer and reading spectacles, reaching for a book on a high shelf in a cramped second-hand bookshop while a tiny dormouse naps on an open atlas below, floor-to-ceiling shelves overflowing with leather-bound volumes and a rolling library ladder, cozy and cluttered literary storybook atmosphere, soft warm lamplight from a green-shaded desk lamp mixing with grey rain-light from the front window, rain drumming on the glass and a steaming mug of cocoa on the counter
+```
+
+**生成图片：**
+
+![雨天旧书店](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6f73c152-879f-440d-ac54-000b4da55aa3.jpeg)
+
+---
+
+### 示例 11 — 高山远征
+
+**Prompt:**
+```
+A determined young goat wearing a miniature hiking backpack with a compass dangling from the strap, planting a tiny flag at the peak of a snow-dusted mountain, panoramic vista of layered blue mountain ridges fading into the distance with wispy clouds drifting between the peaks, adventurous and triumphant children's book illustration, crisp bright high-altitude sunlight with dramatic cloud shadows sweeping across the valleys below, wind-swept fur and a fluttering flag with fine detail on the rocky summit texture
+```
+
+**生成图片：**
+
+![高山远征](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/34ce02d6-e38e-4666-8c40-881c1adc19dc.jpeg)
+
+---
+
+### 示例 12 — 烛光音乐会
+
+**Prompt:**
+```
+A slender deer wearing a midnight-blue velvet vest with silver buttons, playing a cello with closed eyes and a serene expression in the center of an old stone chapel, rows of lit beeswax candles in iron candelabras lining the aisle and stained-glass windows casting colored light patterns on the floor, intimate and reverent concert hall atmosphere, warm flickering candlelight with multicolored stained-glass reflections, muted earth tones with deep indigo and gold accents and visible watercolor bleed at the vaulted ceiling edges
+```
+
+**生成图片：**
+
+![烛光音乐会](https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/53ef8212-cf6e-4e9d-b484-d7bae9fa0f28.jpeg)

@@ -1,7 +1,42 @@
 ---
-title: Introduction
+title: Getting Started
+description: Get started with TaleCraft AI - generate beautiful watercolor illustrations from text descriptions.
 ---
 
-## What is YourAppName?
+### 1. Get your API key
 
-YourAppName is an AI SaaS development framework based on NextJS, with built-in rich components and AI SDKs to help you quickly complete AI SaaS project development.
+Sign in to your TaleCraft account, go to **Settings → API Keys**, and create a new key.
+
+### 2. Make your first request
+
+```bash
+curl -X POST https://talescaleai.com/api/v1/generate \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A hedgehog reading a book in a cozy library",
+    "style": "children_book",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### 3. Get the image
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "success",
+    "image_url": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/example.jpeg"
+  }
+}
+```
+
+The `image_url` field contains a direct link to your generated illustration.
+
+## Next Steps
+
+- [API Reference](/docs/api-reference) — full endpoint documentation with code examples
+- [Prompt Guide](/docs/prompt-guide) — learn how to write effective prompts for better results

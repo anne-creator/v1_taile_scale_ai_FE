@@ -24,6 +24,20 @@ export interface GenerateIllustrationParams {
    * Defaults to gemini-3-pro-image-preview (Nano Banana Pro).
    */
   model?: string;
+
+  /**
+   * Optional illustration style.
+   * Currently supported: "children_book" (default).
+   * Reserved for future multi-style expansion.
+   */
+  style?: string;
+
+  /**
+   * Optional aspect ratio for the generated image.
+   * Supported values: "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9".
+   * Defaults to "1:1" if not specified.
+   */
+  aspectRatio?: string;
 }
 
 /**

@@ -1,0 +1,160 @@
+---
+title: API 参考
+description: TaleCraft AI 插画生成 API 完整参考文档。
+---
+
+## 端点
+
+```
+POST https://talescaleai.com/api/v1/generate
+```
+
+## 认证
+
+所有请求都需要通过 `X-API-Key` 请求头传递 API Key。
+
+| 请求头 | 必填 | 说明 |
+|--------|------|------|
+| `X-API-Key` | 是 | 从控制面板获取的 API Key |
+| `Content-Type` | 是 | 必须为 `application/json` |
+
+### 获取 API Key
+
+1. 登录你的 TaleCraft AI 账户
+2. 前往 **设置 → API Keys**
+3. 点击 **创建 API Key**
+4. 复制并安全存储
+
+> **安全提示**：请妥善保管你的 API Key，不要在客户端代码或公开仓库中暴露。
+
+## 请求体
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `prompt` | string | 是 | — | 插画场景描述 |
+| `style` | string | 否 | `"children_book"` | 插画风格，目前支持：`children_book` |
+| `aspect_ratio` | string | 否 | `"1:1"` | 图片宽高比 |
+
+### 支持的宽高比
+
+| 值 | 说明 |
+|----|------|
+| `1:1` | 正方形（默认） |
+| `2:3` | 竖版 |
+| `3:2` | 横版 |
+| `3:4` | 竖版（更高） |
+| `4:3` | 横版（更宽） |
+| `9:16` | 竖屏 / 手机 |
+| `16:9` | 宽屏 |
+
+## 响应
+
+### 成功
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "id": "9da9465c-a56c-4614-81af-257aaccb2646",
+    "status": "success",
+    "image_url": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6188896c-ee02-4e70-881b-483bcbb1739c.jpeg"
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `code` | number | `0` 表示成功 |
+| `message` | string | 成功时为 `"ok"` |
+| `data.id` | string | 唯一任务 ID (UUID) |
+| `data.status` | string | 成功生成时为 `"success"` |
+| `data.image_url` | string | 生成图片的直接链接 |
+
+### 错误
+
+```json
+{
+  "code": -1,
+  "message": "错误描述"
+}
+```
+
+## 错误信息
+
+| 错误信息 | 原因 | 解决方案 |
+|----------|------|----------|
+| `API key is required...` | 缺少请求头 | 添加 `X-API-Key` 请求头 |
+| `Invalid API key` | Key 无效或已撤销 | 检查 Key 是否正确且有效 |
+| `prompt is required` | prompt 为空 | 提供非空的 `prompt` 字段 |
+| `Unsupported style` | style 值无效 | 使用 `children_book` |
+| `Unsupported aspect_ratio` | 比例值无效 | 使用支持的比例（见上表） |
+| `insufficient credits` | 积分不足 | 购买更多积分 |
+| `Generation failed` | AI 模型错误 | 重试或修改 prompt |
+
+## 代码示例
+
+### cURL
+
+```bash
+curl -X POST https://talescaleai.com/api/v1/generate \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "A brave knight in an enchanted forest",
+    "style": "children_book",
+    "aspect_ratio": "16:9"
+  }'
+```
+
+### TypeScript / JavaScript
+
+```typescript
+const response = await fetch('https://talescaleai.com/api/v1/generate', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    prompt: 'A brave knight in an enchanted forest',
+    style: 'children_book',
+    aspect_ratio: '16:9'
+  })
+});
+
+const result = await response.json();
+
+if (result.code !== 0) {
+  throw new Error(result.message);
+}
+
+console.log(result.data.image_url);
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.post(
+    'https://talescaleai.com/api/v1/generate',
+    headers={
+        'X-API-Key': 'YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'prompt': 'A brave knight in an enchanted forest',
+        'style': 'children_book',
+        'aspect_ratio': '16:9'
+    }
+)
+
+result = response.json()
+
+if result['code'] != 0:
+    raise Exception(result['message'])
+
+print(result['data']['image_url'])
+```
+

@@ -23,3 +23,9 @@ body {
 .docs a:not([href^='#']) {
   color: var(--primary);
 }
+
+/* Temporarily hide search button */
+[data-search-full],
+[data-search] {
+  display: none !important;
+}

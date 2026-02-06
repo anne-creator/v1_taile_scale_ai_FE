@@ -17,6 +17,11 @@
           "title": "案例展示",
           "url": "/showcases",
           "icon": "Box"
+        },
+        {
+          "title": "文档",
+          "url": "/docs",
+          "icon": "BookOpen"
         }
       ]
     },
