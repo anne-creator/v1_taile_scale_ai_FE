@@ -169,6 +169,19 @@ export function SignUser({
               </>
             )}
 
+            {userNav?.contact && (
+              <>
+                <DropdownMenuItem
+                  className="w-full cursor-default flex-col items-start gap-0 focus:bg-transparent"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <span className="text-sm font-medium">{userNav.contact.label}</span>
+                  <span className="text-xs text-muted-foreground">{userNav.contact.email}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
+
             {userNav?.show_sign_out && (
               <DropdownMenuItem
                 className="w-full cursor-pointer"

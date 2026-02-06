@@ -13,16 +13,6 @@
         "icon": "CreditCard"
       },
       {
-        "title": "Payments",
-        "url": "/settings/payments",
-        "icon": "DollarSign"
-      },
-      {
-        "title": "Credits",
-        "url": "/settings/credits",
-        "icon": "Coins"
-      },
-      {
         "title": "API Keys",
         "url": "/settings/apikeys",
         "icon": "RiKeyLine"
@@ -31,11 +21,6 @@
   },
   "top_nav": {
     "items": [
-      {
-        "title": "Activity",
-        "url": "/activity",
-        "icon": "Activity"
-      },
       {
         "title": "Settings",
         "url": "/settings",

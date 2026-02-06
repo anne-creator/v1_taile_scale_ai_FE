@@ -132,10 +132,10 @@
             "label": "70% off 1st month",
             "features_title": "Includes",
             "features": [
-              "1000 image generations/month",
+              "400 image generations/month",
               "All style models & parameters",
               "99.9% uptime SLA",
-              "$0.05 per additional image",
+              "$0.09 per additional image",
               "Priority API access",
               "Dedicated support channel"
             ],
@@ -154,7 +154,7 @@
             },
             "product_id": "pro-monthly",
             "product_name": "TaleCraft AI Pro Monthly",
-            "credits": 1000,
+            "credits": 400,
             "valid_days": 30,
             "group": "monthly",
             "plan_name": "Pro"

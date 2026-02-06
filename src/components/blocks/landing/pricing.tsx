@@ -67,10 +67,10 @@ export function Pricing({
   };
 
   const features = [
-    { text: '1000 image generations/month', bold: true },
+    { text: '400 image generations/month', bold: true },
     { text: 'All style models & parameters', bold: false },
     { text: '99.9% uptime SLA', bold: false },
-    { text: '$0.05 per additional image', bold: false },
+    { text: '$0.09 per additional image', bold: false },
     { text: 'Priority API access', bold: false },
     { text: 'Dedicated support channel', bold: false },
   ];
@@ -88,7 +88,7 @@ export function Pricing({
           <p className="text-lg text-muted-foreground">
             {showPromo
               ? section.description || 'Limited time offer for new subscribers'
-              : 'Professional plan for unlimited creativity'}
+              : 'Your Personal Illustrator'}
           </p>
         </div>
 

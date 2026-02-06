@@ -158,10 +158,10 @@
             "label": "首月7折",
             "features_title": "包含",
             "features": [
-              "每月 1000 次图片生成",
+              "每月 400 次图片生成",
               "所有风格模型和参数",
               "99.9% 服务可用性",
-              "超出部分 $0.05/张",
+              "超出部分 $0.09/张",
               "优先 API 访问",
               "专属支持渠道"
             ],
@@ -180,7 +180,7 @@
             },
             "product_id": "pro-monthly",
             "product_name": "TaleCraft AI 专业版包月",
-            "credits": 1000,
+            "credits": 400,
             "valid_days": 30,
             "group": "monthly",
             "plan_name": "专业版"

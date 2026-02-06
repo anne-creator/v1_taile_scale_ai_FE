@@ -88,6 +88,10 @@ export interface UserNav extends Nav {
   show_name?: boolean;
   show_credits?: boolean;
   show_sign_out?: boolean;
+  contact?: {
+    label: string;
+    email: string;
+  };
 }
 
 // pagination props for pagination component, used to list data
