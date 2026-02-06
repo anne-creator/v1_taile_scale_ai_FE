@@ -6,16 +6,11 @@ import { db } from '@/core/db';
 import { user } from '@/config/db/schema';
 
 import { Permission, Role } from '../services/rbac';
-import { getRemainingCredits } from './credit';
-
-export interface UserCredits {
-  remainingCredits: number;
-  expiresAt: Date | null;
-}
+import { getQuotaOverview, QuotaOverview } from './quota';
 
 export type User = typeof user.$inferSelect & {
   isAdmin?: boolean;
-  credits?: UserCredits;
+  quota?: QuotaOverview;
   roles?: Role[];
   permissions?: Permission[];
 };
@@ -81,10 +76,8 @@ export async function getUserInfo() {
   return signUser;
 }
 
-export async function getUserCredits(userId: string) {
-  const remainingCredits = await getRemainingCredits(userId);
-
-  return { remainingCredits };
+export async function getUserQuota(userId: string) {
+  return getQuotaOverview(userId);
 }
 
 export async function getSignUser() {

@@ -3,7 +3,7 @@ import { AIMediaType } from '@/extensions/ai';
 import { getUuid } from '@/shared/lib/hash';
 import { respData, respErr } from '@/shared/lib/resp';
 import { createAITask, NewAITask } from '@/shared/models/ai_task';
-import { getRemainingCredits } from '@/shared/models/credit';
+import { canConsumeService } from '@/shared/models/quota';
 import { getUserInfo } from '@/shared/models/user';
 import { getAIService } from '@/shared/services/ai';
 
@@ -39,41 +39,22 @@ export async function POST(request: Request) {
       throw new Error('no auth, please sign in');
     }
 
-    // todo: get cost credits from settings
-    let costCredits = 2;
-
-    if (mediaType === AIMediaType.IMAGE) {
-      // generate image
-      if (scene === 'image-to-image') {
-        costCredits = 4;
-      } else if (scene === 'text-to-image') {
-        costCredits = 2;
-      } else {
-        throw new Error('invalid scene');
-      }
-    } else if (mediaType === AIMediaType.VIDEO) {
-      // generate video
-      if (scene === 'text-to-video') {
-        costCredits = 6;
-      } else if (scene === 'image-to-video') {
-        costCredits = 8;
-      } else if (scene === 'video-to-video') {
-        costCredits = 10;
-      } else {
-        throw new Error('invalid scene');
-      }
-    } else if (mediaType === AIMediaType.MUSIC) {
-      // generate music
-      costCredits = 10;
+    // Determine scene if not provided
+    if (mediaType === AIMediaType.MUSIC && !scene) {
       scene = 'text-to-music';
-    } else {
-      throw new Error('invalid mediaType');
     }
 
-    // check credits
-    const remainingCredits = await getRemainingCredits(user.id);
-    if (remainingCredits < costCredits) {
-      throw new Error('insufficient credits');
+    if (!scene) {
+      throw new Error('invalid scene');
+    }
+
+    // Build the service type key: 'ai-image', 'ai-video', 'ai-music'
+    const serviceType = `ai-${mediaType}`;
+
+    // Check if user has enough quota (cost is looked up from service_cost table)
+    const hasQuota = await canConsumeService(user.id, serviceType, scene);
+    if (!hasQuota) {
+      throw new Error('insufficient quota');
     }
 
     const callbackUrl = `${envConfigs.app_url}/api/ai/notify/${provider}`;
@@ -94,7 +75,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // create ai task
+    // create ai task (quota consumption happens inside createAITask)
     const newAITask: NewAITask = {
       id: getUuid(),
       userId: user.id,
@@ -105,7 +86,6 @@ export async function POST(request: Request) {
       scene,
       options: options ? JSON.stringify(options) : null,
       status: result.taskStatus,
-      costCredits,
       taskId: result.taskId,
       taskInfo: result.taskInfo ? JSON.stringify(result.taskInfo) : null,
       taskResult: result.taskResult ? JSON.stringify(result.taskResult) : null,

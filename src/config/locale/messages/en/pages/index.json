@@ -20,31 +20,35 @@
         "items": [
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1577720086808-ee62b140bc0e?w=800"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg",
+              "alt": "Forest Library"
             },
-            "description": "Fairy tale castle in the clouds",
-            "title": "Watercolor Dreams"
+            "description": "A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest",
+            "title": "Forest Library"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1760355493926-5a38d4341fd4?w=800"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6e434201-1532-4f96-adba-ffa8a8ca4bde.jpeg",
+              "alt": "Autumn Market"
             },
-            "description": "Magical forest adventure",
-            "title": "Storybook Classic"
+            "description": "A cheerful squirrel wearing a tiny corduroy jacket and a flat cap, carrying a woven basket overflowing with acorns and chestnuts, walking through a bustling autumn harvest market with wooden stalls draped in orange and red bunting and pumpkins stacked in pyramids",
+            "title": "Autumn Market"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1631061184412-b18f5fb1dc70?w=800"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/49bce3d1-5926-4496-a9b2-151fb349c7e4.jpeg",
+              "alt": "Garden Tea Party"
             },
-            "description": "Whimsical animal friends",
-            "title": "Bright & Bold"
+            "description": "A graceful swan wearing a pearl necklace and a wide-brimmed sun hat adorned with dried flowers, pouring tea from a porcelain teapot into mismatched vintage cups for a gathering of ducklings in tiny bow ties, in a lush English cottage garden",
+            "title": "Garden Tea Party"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1743356816344-397d510977ea?w=800"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/94fedacb-986b-475a-914e-1bf97b88d632.jpeg",
+              "alt": "Stargazing Hilltop"
             },
-            "description": "Character portrait collection",
-            "title": "Character Focus"
+            "description": "A young fox cub wrapped in an oversized wool blanket with star patterns, lying on its back on a grassy hilltop gazing up at a vast night sky filled with constellations and a bright crescent moon, open rolling countryside with distant village lights twinkling below",
+            "title": "Stargazing Hilltop"
           }
         ]
       },

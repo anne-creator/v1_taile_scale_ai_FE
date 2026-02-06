@@ -128,7 +128,10 @@ export function SignUser({
                   >
                     <Coins />
                     {t('credits_title', {
-                      credits: displayUser.credits?.remainingCredits || 0,
+                      credits: Math.round(
+                        (displayUser.quota?.subscription?.remaining || 0) +
+                          (displayUser.quota?.paygo?.remaining || 0)
+                      ),
                     })}
                   </Link>
                 </DropdownMenuItem>

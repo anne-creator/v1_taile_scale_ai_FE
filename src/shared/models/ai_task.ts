@@ -1,11 +1,11 @@
-import { and, count, desc, eq, sql } from 'drizzle-orm';
+import { and, count, desc, eq } from 'drizzle-orm';
 
 import { db } from '@/core/db';
-import { aiTask, credit } from '@/config/db/schema';
+import { aiTask } from '@/config/db/schema';
 import { AITaskStatus } from '@/extensions/ai';
 import { appendUserToResult, User } from '@/shared/models/user';
 
-import { consumeCredits, CreditStatus } from './credit';
+import { consumeQuota, refundQuota } from './quota';
 
 export type AITask = typeof aiTask.$inferSelect & {
   user?: User;
@@ -18,28 +18,38 @@ export async function createAITask(newAITask: NewAITask) {
     // 1. create task record
     const [taskResult] = await tx.insert(aiTask).values(newAITask).returning();
 
-    if (newAITask.costCredits && newAITask.costCredits > 0) {
-      // 2. consume credits
-      const consumedCredit = await consumeCredits({
-        userId: newAITask.userId,
-        credits: newAITask.costCredits,
-        scene: newAITask.scene,
-        description: `generate ${newAITask.mediaType}`,
-        metadata: JSON.stringify({
-          type: 'ai-task',
-          mediaType: taskResult.mediaType,
-          taskId: taskResult.id,
-        }),
-        tx,
-      });
+    // 2. consume quota for this task
+    if (newAITask.scene) {
+      try {
+        const consumeResult = await consumeQuota({
+          userId: newAITask.userId,
+          serviceType: `ai-${newAITask.mediaType}`,
+          scene: newAITask.scene,
+          description: `generate ${newAITask.mediaType}`,
+          metadata: JSON.stringify({
+            type: 'ai-task',
+            mediaType: taskResult.mediaType,
+            taskId: taskResult.id,
+          }),
+          tx,
+        });
 
-      // 3. update task record with consumed credit id
-      if (consumedCredit && consumedCredit.id) {
-        taskResult.creditId = consumedCredit.id;
-        await tx
-          .update(aiTask)
-          .set({ creditId: consumedCredit.id })
-          .where(eq(aiTask.id, taskResult.id));
+        // 3. update task record with consumed quota id and cost info
+        if (consumeResult && consumeResult.quotaId) {
+          taskResult.quotaId = consumeResult.quotaId;
+          taskResult.costAmount = String(consumeResult.costAmount);
+          taskResult.costMeasurementType = consumeResult.measurementType;
+          await tx
+            .update(aiTask)
+            .set({
+              quotaId: consumeResult.quotaId,
+              costAmount: String(consumeResult.costAmount),
+              costMeasurementType: consumeResult.measurementType,
+            })
+            .where(eq(aiTask.id, taskResult.id));
+        }
+      } catch (e: any) {
+        throw new Error(`Insufficient quota: ${e.message}`);
       }
     }
 
@@ -56,40 +66,9 @@ export async function findAITaskById(id: string) {
 
 export async function updateAITaskById(id: string, updateAITask: UpdateAITask) {
   const result = await db().transaction(async (tx: any) => {
-    // task failed, Revoke credit consumption record
-    if (updateAITask.status === AITaskStatus.FAILED && updateAITask.creditId) {
-      // get consumed credit record
-      const [consumedCredit] = await tx
-        .select()
-        .from(credit)
-        .where(eq(credit.id, updateAITask.creditId));
-      if (consumedCredit && consumedCredit.status === CreditStatus.ACTIVE) {
-        const consumedItems = JSON.parse(consumedCredit.consumedDetail || '[]');
-
-        // console.log('consumedItems', consumedItems);
-
-        // add back consumed credits
-        await Promise.all(
-          consumedItems.map((item: any) => {
-            if (item && item.creditId && item.creditsConsumed > 0) {
-              return tx
-                .update(credit)
-                .set({
-                  remainingCredits: sql`${credit.remainingCredits} + ${item.creditsConsumed}`,
-                })
-                .where(eq(credit.id, item.creditId));
-            }
-          })
-        );
-
-        // delete consumed credit record
-        await tx
-          .update(credit)
-          .set({
-            status: CreditStatus.DELETED,
-          })
-          .where(eq(credit.id, updateAITask.creditId));
-      }
+    // task failed: refund quota consumption
+    if (updateAITask.status === AITaskStatus.FAILED && updateAITask.quotaId) {
+      await refundQuota(updateAITask.quotaId, tx);
     }
 
     // update task

@@ -4,7 +4,7 @@ import { PERMISSIONS, requirePermission } from '@/core/rbac';
 import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
 import { TableCard } from '@/components/blocks/table';
 import { Badge } from '@/components/ui/badge';
-import { getRemainingCredits } from '@/shared/models/credit';
+import { getRemainingQuota } from '@/shared/models/quota';
 import { getUsers, getUsersCount, User } from '@/shared/models/user';
 import { getUserRoles } from '@/shared/services/rbac';
 import { Crumb, Search } from '@/shared/types/blocks/common';
@@ -92,12 +92,12 @@ export default async function AdminUsersPage({
         placeholder: '-',
       },
       {
-        name: 'remainingCredits',
+        name: 'remainingQuota',
         title: t('fields.remaining_credits'),
         callback: async (item: User) => {
-          const credits = await getRemainingCredits(item.id);
+          const remaining = await getRemainingQuota(item.id);
 
-          return <div className="text-green-500">{credits}</div>;
+          return <div className="text-green-500">{remaining}</div>;
         },
       },
       { name: 'createdAt', title: t('fields.created_at'), type: 'time' },

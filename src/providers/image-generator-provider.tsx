@@ -606,11 +606,8 @@ export function ImageGeneratorProvider({
       return;
     }
 
-    const remainingCredits = user?.credits?.remainingCredits ?? 0;
-    if (remainingCredits < costCredits) {
-      toast.error('Insufficient credits. Please top up to keep creating.');
-      return;
-    }
+    // Quota check is done server-side in the API route.
+    // Client-side check removed to avoid stale data issues.
 
     const trimmedPrompt = prompt.trim();
     if (!trimmedPrompt) {

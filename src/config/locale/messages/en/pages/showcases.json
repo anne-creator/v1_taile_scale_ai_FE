@@ -14,67 +14,99 @@
         "items": [
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1577720086808-ee62b140bc0e?w=800",
-              "alt": "Fairy tale castle"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg",
+              "alt": "Forest Library"
             },
-            "description": "Fairy tale castle in the clouds",
-            "title": "Watercolor Dreams"
+            "description": "A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest with towering moss-covered trees, warm storybook illustration feel, soft dappled golden sunlight filtering through the canopy with dust motes floating in the beams, shallow depth of field with delicate fern details in the foreground",
+            "title": "Forest Library"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1760355493926-5a38d4341fd4?w=800",
-              "alt": "Magical forest"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/9d77d49e-b7b5-4b94-8cef-4b95b2672ca8.jpeg",
+              "alt": "Rainy Day Bakery"
             },
-            "description": "Magical forest adventure",
-            "title": "Storybook Classic"
+            "description": "A plump hedgehog wearing a flour-dusted apron and a tiny chef's hat, pulling a tray of golden croissants from a brick oven, inside a cozy village bakery with checkered curtains and shelves of fresh bread loaves and pastries, rain streaking down the window outside, warm nostalgic storybook atmosphere, warm amber interior light contrasting with cool blue-grey rain light from the window, fine detail on the flaky pastry textures and a small chalkboard menu on the wall",
+            "title": "Rainy Day Bakery"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1631061184412-b18f5fb1dc70?w=800",
-              "alt": "Whimsical animals"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/94fedacb-986b-475a-914e-1bf97b88d632.jpeg",
+              "alt": "Stargazing Hilltop"
             },
-            "description": "Whimsical animal friends",
-            "title": "Bright & Bold"
+            "description": "A young fox cub wrapped in an oversized wool blanket with star patterns, lying on its back on a grassy hilltop gazing up at a vast night sky filled with constellations and a bright crescent moon, open rolling countryside with distant village lights twinkling below, dreamlike and slightly surreal children's book aesthetic, cool blue-violet moonlight with tiny warm firefly glows scattered in the grass, visible watercolor paper grain with soft color bleeds at the sky edges",
+            "title": "Stargazing Hilltop"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1743356816344-397d510977ea?w=800",
-              "alt": "Character portraits"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6e434201-1532-4f96-adba-ffa8a8ca4bde.jpeg",
+              "alt": "Autumn Market"
             },
-            "description": "Character portrait collection",
-            "title": "Character Focus"
+            "description": "A cheerful squirrel wearing a tiny corduroy jacket and a flat cap, carrying a woven basket overflowing with acorns and chestnuts, walking through a bustling autumn harvest market with wooden stalls draped in orange and red bunting and pumpkins stacked in pyramids, warm Beatrix Potter storybook charm, rich golden-hour afternoon light with long warm shadows across the cobblestone path, scattered fallen leaves in ochre and crimson and a hand-painted market sign overhead",
+            "title": "Autumn Market"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1610308700652-d931026f7eec?w=800",
-              "alt": "Dragon illustration"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/63602256-a8d7-4b76-8896-ed8e54d03a16.jpeg",
+              "alt": "Underwater Adventure"
             },
-            "description": "A brave knight in an enchanted forest",
-            "title": "Fantasy Adventure"
+            "description": "A small otter wearing a diving helmet made from an upturned glass jar with a brass rim, swimming through a sunlit coral reef alongside a school of tiny striped fish, underwater garden of swaying sea anemones and kelp forests with a sunken ship visible in the far background, whimsical underwater storybook adventure style, shafts of turquoise sunlight piercing down through the water surface creating rippling caustic patterns, air bubbles trailing from the helmet and fine detail on the coral textures",
+            "title": "Underwater Adventure"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1577720086808-ee62b140bc0e?w=800",
-              "alt": "Castle in clouds"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/53c4b133-ad00-4973-aca8-60c88513f2e2.jpeg",
+              "alt": "Winter Train Station"
             },
-            "description": "Floating castle in magical clouds",
-            "title": "Sky Kingdom"
+            "description": "A small mouse in a long wool overcoat and a red knitted scarf, standing on a snow-covered platform holding a tiny suitcase tied with string, waiting beside an old-fashioned steam locomotive with brass fittings puffing white clouds into the cold air, quiet countryside train station with icicles hanging from the eaves, gentle melancholic storybook mood, diffused overcast winter light with warm golden glow spilling from the train windows, snowflakes drifting slowly and a faded departure board on the wall",
+            "title": "Winter Train Station"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1760355493926-5a38d4341fd4?w=800",
-              "alt": "Forest path"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/49bce3d1-5926-4496-a9b2-151fb349c7e4.jpeg",
+              "alt": "Garden Tea Party"
             },
-            "description": "Enchanted forest path with glowing mushrooms",
-            "title": "Mystical Woods"
+            "description": "A graceful swan wearing a pearl necklace and a wide-brimmed sun hat adorned with dried flowers, pouring tea from a porcelain teapot into mismatched vintage cups for a gathering of ducklings in tiny bow ties, in a lush English cottage garden bursting with hollyhocks roses and lavender around a wrought-iron table, elegant pastoral picturebook illustration, soft diffused afternoon sunlight with gentle lens flare through the garden trellis, fine china patterns on the teacups and a three-tier cake stand with petit fours",
+            "title": "Garden Tea Party"
           },
           {
             "image": {
-              "src": "https://images.unsplash.com/photo-1631061184412-b18f5fb1dc70?w=800",
-              "alt": "Cute animals"
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/5bb9ec44-a0d2-40a1-af9b-be59408b867a.jpeg",
+              "alt": "Nighttime Treehouse"
             },
-            "description": "Friendly woodland creatures gathering",
-            "title": "Animal Friends"
+            "description": "Two raccoon siblings in matching striped pajamas, one reading a picture book by lantern light while the other peers through a small brass telescope pointed at the stars, inside a cozy wooden treehouse with a rope ladder dangling below and a patchwork quilt draped over the railing, magical nighttime forest scene, warm amber lantern glow contrasting with cool silver-blue starlight outside the window, hand-drawn map pinned to the wall and a jar of fireflies on the shelf",
+            "title": "Nighttime Treehouse"
+          },
+          {
+            "image": {
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/04608447-2d1b-4f5f-a13e-756c71f27be9.jpeg",
+              "alt": "Seaside Painter"
+            },
+            "description": "A tabby cat wearing a loose linen smock speckled with paint, standing before a wooden easel on a sandy beach painting the sunset over the ocean, art supplies scattered on a weathered blanket beside a half-eaten sandwich and a thermos, peaceful coastal scene with gentle waves lapping at the shore and seagulls in the distance, warm impressionist storybook style, intense golden-pink sunset light reflecting off the wet sand with the cat's shadow stretching long behind, visible brushstroke texture on the canvas-within-canvas",
+            "title": "Seaside Painter"
+          },
+          {
+            "image": {
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/6f73c152-879f-440d-ac54-000b4da55aa3.jpeg",
+              "alt": "Rainy Bookshop"
+            },
+            "description": "A tall gentle bear wearing a rumpled tweed blazer and reading spectacles, reaching for a book on a high shelf in a cramped second-hand bookshop while a tiny dormouse naps on an open atlas below, floor-to-ceiling shelves overflowing with leather-bound volumes and a rolling library ladder, cozy and cluttered literary storybook atmosphere, soft warm lamplight from a green-shaded desk lamp mixing with grey rain-light from the front window, rain drumming on the glass and a steaming mug of cocoa on the counter",
+            "title": "Rainy Bookshop"
+          },
+          {
+            "image": {
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/34ce02d6-e38e-4666-8c40-881c1adc19dc.jpeg",
+              "alt": "Mountain Expedition"
+            },
+            "description": "A determined young goat wearing a miniature hiking backpack with a compass dangling from the strap, planting a tiny flag at the peak of a snow-dusted mountain, panoramic vista of layered blue mountain ridges fading into the distance with wispy clouds drifting between the peaks, adventurous and triumphant children's book illustration, crisp bright high-altitude sunlight with dramatic cloud shadows sweeping across the valleys below, wind-swept fur and a fluttering flag with fine detail on the rocky summit texture",
+            "title": "Mountain Expedition"
+          },
+          {
+            "image": {
+              "src": "https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/53ef8212-cf6e-4e9d-b484-d7bae9fa0f28.jpeg",
+              "alt": "Music by Candlelight"
+            },
+            "description": "A slender deer wearing a midnight-blue velvet vest with silver buttons, playing a cello with closed eyes and a serene expression in the center of an old stone chapel, rows of lit beeswax candles in iron candelabras lining the aisle and stained-glass windows casting colored light patterns on the floor, intimate and reverent concert hall atmosphere, warm flickering candlelight with multicolored stained-glass reflections, muted earth tones with deep indigo and gold accents and visible watercolor bleed at the vaulted ceiling edges",
+            "title": "Music by Candlelight"
           }
         ]
       }

@@ -1,5 +1,6 @@
 import {
   boolean,
+  decimal,
   index,
   int,
   longtext,
@@ -202,8 +203,10 @@ export const order = table(
     subscriptionResult: text('subscription_result'), // provider subscription result
     checkoutUrl: text('checkout_url'), // checkout url
     callbackUrl: text('callback_url'), // callback url, after handle callback
-    creditsAmount: int('credits_amount'), // credits amount
-    creditsValidDays: int('credits_valid_days'), // credits validity days
+    quotaPoolType: varchar('quota_pool_type', { length: 50 }), // 'subscription' | 'paygo'
+    quotaMeasurementType: varchar('quota_measurement_type', { length: 50 }), // 'dollar' | 'unit'
+    quotaAmount: decimal('quota_amount', { precision: 12, scale: 4 }), // quota amount to grant
+    quotaValidDays: int('quota_valid_days'), // quota validity days
     planName: varchar191('plan_name'), // subscription plan name
     paymentProductId: varchar191('payment_product_id'), // payment product id
     invoiceId: varchar191('invoice_id'),
@@ -260,8 +263,10 @@ export const subscription = table(
     planName: varchar191('plan_name'),
     billingUrl: text('billing_url'),
     productName: varchar('product_name', { length: 255 }), // subscription product name
-    creditsAmount: int('credits_amount'), // subscription credits amount
-    creditsValidDays: int('credits_valid_days'), // subscription credits valid days
+    quotaPoolType: varchar('quota_pool_type', { length: 50 }), // 'subscription' | 'paygo'
+    quotaMeasurementType: varchar('quota_measurement_type', { length: 50 }), // 'dollar' | 'unit'
+    quotaAmount: decimal('quota_amount', { precision: 12, scale: 4 }), // quota amount per period
+    quotaValidDays: int('quota_valid_days'), // quota validity days
     paymentProductId: varchar191('payment_product_id'), // subscription payment product id
     paymentUserId: varchar191('payment_user_id'), // subscription payment user id
     canceledAt: timestamp('canceled_at'), // subscription canceled apply at
@@ -288,46 +293,69 @@ export const subscription = table(
   ]
 );
 
-export const credit = table(
-  'credit',
+export const quota = table(
+  'quota',
   {
     id: varchar191('id').primaryKey(),
     userId: varchar191('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }), // user id
-    userEmail: varchar191('user_email'), // user email
+      .references(() => user.id, { onDelete: 'cascade' }),
+    userEmail: varchar191('user_email'),
+    poolType: varchar('pool_type', { length: 50 }).notNull(), // 'subscription' | 'paygo'
+    measurementType: varchar('measurement_type', { length: 50 }).notNull(), // 'dollar' | 'unit'
     orderNo: varchar191('order_no'), // payment order no
     subscriptionNo: varchar191('subscription_no'), // subscription no
-    transactionNo: varchar191('transaction_no').unique().notNull(), // transaction no
-    transactionType: varchar('transaction_type', { length: 50 }).notNull(), // transaction type, grant / consume
-    transactionScene: varchar('transaction_scene', { length: 50 }), // transaction scene, payment / subscription / gift / award
-    credits: int('credits').notNull(), // credits amount, n or -n
-    remainingCredits: int('remaining_credits').notNull().default(0), // remaining credits amount
-    description: text('description'), // transaction description
-    expiresAt: timestamp('expires_at'), // transaction expires at
-    status: varchar('status', { length: 50 }).notNull(), // transaction status
+    transactionNo: varchar191('transaction_no').unique().notNull(),
+    transactionType: varchar('transaction_type', { length: 50 }).notNull(), // 'grant' | 'consume'
+    transactionScene: varchar('transaction_scene', { length: 50 }), // 'subscription' | 'payment' | 'renewal' | 'gift' | 'reward'
+    amount: decimal('amount', { precision: 12, scale: 4 }).notNull(), // positive=grant, negative=consume
+    remainingAmount: decimal('remaining_amount', { precision: 12, scale: 4 })
+      .notNull()
+      .default('0'), // grant records only: remaining balance
+    description: text('description'),
+    expiresAt: timestamp('expires_at'),
+    status: varchar('status', { length: 50 }).notNull(), // 'active' | 'expired' | 'deleted'
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
     deletedAt: timestamp('deleted_at'),
-    consumedDetail: text('consumed_detail'), // consumed detail
-    metadata: text('metadata'), // transaction metadata
+    consumedDetail: text('consumed_detail'), // JSON: consumed pool details
+    metadata: text('metadata'),
   },
   (table) => [
-    // Critical composite index for credit consumption (FIFO queue)
-    // Query: WHERE userId = ? AND transactionType = 'grant' AND status = 'active'
-    //        AND remainingCredits > 0 ORDER BY expiresAt
-    // Can also be used for: WHERE userId = ? (left-prefix)
-    index('idx_credit_consume_fifo').on(
+    // Critical composite index for quota consumption (FIFO by pool type then expiry)
+    index('idx_quota_consume_fifo').on(
       table.userId,
+      table.poolType,
       table.status,
       table.transactionType,
-      table.remainingCredits,
+      table.remainingAmount,
       table.expiresAt
     ),
-    // Query credits by order number
-    index('idx_credit_order_no').on(table.orderNo),
-    // Query credits by subscription number
-    index('idx_credit_subscription_no').on(table.subscriptionNo),
+    // Query quota by order number (idempotency check)
+    index('idx_quota_order_no').on(table.orderNo),
+    // Query quota by subscription number
+    index('idx_quota_subscription_no').on(table.subscriptionNo),
+  ]
+);
+
+export const serviceCost = table(
+  'service_cost',
+  {
+    id: varchar191('id').primaryKey(),
+    serviceType: varchar('service_type', { length: 100 }).notNull(), // 'ai-image' | 'ai-video' | 'ai-music' | 'ai-chat'
+    scene: varchar('scene', { length: 100 }).notNull().default(''), // 'text-to-image' | 'image-to-image' | ''
+    dollarCost: decimal('dollar_cost', { precision: 8, scale: 4 })
+      .notNull()
+      .default('0'), // cost in dollars, e.g. 0.05
+    unitCost: int('unit_cost').notNull().default(1), // cost in units, e.g. 1
+    displayName: varchar('display_name', { length: 255 }),
+    description: text('description'),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_service_cost_type_scene').on(table.serviceType, table.scene),
   ]
 );
 
@@ -457,9 +485,14 @@ export const aiTask = table(
     taskId: varchar191('task_id'), // provider task id
     taskInfo: longtext('task_info'), // provider task info
     taskResult: longtext('task_result'), // provider task result
-    costCredits: int('cost_credits').notNull().default(0),
+    costAmount: decimal('cost_amount', { precision: 12, scale: 4 })
+      .notNull()
+      .default('0'), // cost amount consumed
+    costMeasurementType: varchar('cost_measurement_type', { length: 50 })
+      .notNull()
+      .default('unit'), // 'dollar' | 'unit'
     scene: varchar('scene', { length: 100 }).notNull().default(''),
-    creditId: varchar191('credit_id'), // credit consumption record id
+    quotaId: varchar191('quota_id'), // quota consumption record id
   },
   (table) => [
     // Composite: Query user's AI tasks by status

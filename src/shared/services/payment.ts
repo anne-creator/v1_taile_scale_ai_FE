@@ -13,14 +13,6 @@ import { getSnowId, getUuid } from '@/shared/lib/hash';
 import { Configs, getAllConfigs } from '@/shared/models/config';
 
 import {
-  calculateCreditExpirationTime,
-  CreditStatus,
-  CreditTransactionScene,
-  CreditTransactionType,
-  NewCredit,
-} from '../models/credit';
-import {
-  findOrderByOrderNo,
   NewOrder,
   Order,
   OrderStatus,
@@ -29,6 +21,15 @@ import {
   updateOrderInTransaction,
   updateSubscriptionInTransaction,
 } from '../models/order';
+import {
+  calculateQuotaExpirationTime,
+  NewQuota,
+  QuotaMeasurementType,
+  QuotaPoolType,
+  QuotaStatus,
+  QuotaTransactionScene,
+  QuotaTransactionType,
+} from '../models/quota';
 import {
   NewSubscription,
   Subscription,
@@ -201,8 +202,10 @@ export async function handleCheckoutSuccess({
         billingUrl: subscriptionInfo.billingUrl,
         planName: order.planName || order.productName,
         productName: order.productName,
-        creditsAmount: order.creditsAmount,
-        creditsValidDays: order.creditsValidDays,
+        quotaPoolType: order.quotaPoolType,
+        quotaMeasurementType: order.quotaMeasurementType,
+        quotaAmount: order.quotaAmount,
+        quotaValidDays: order.quotaValidDays,
         paymentProductId: order.paymentProductId,
         paymentUserId: session.paymentInfo?.paymentUserId,
       };
@@ -214,35 +217,39 @@ export async function handleCheckoutSuccess({
       );
     }
 
-    // grant credit for order
-    let newCredit: NewCredit | undefined = undefined;
-    if (order.creditsAmount && order.creditsAmount > 0) {
-      const credits = order.creditsAmount;
-      const expiresAt =
-        credits > 0
-          ? calculateCreditExpirationTime({
-              creditsValidDays: order.creditsValidDays || 0,
-              currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
-            })
-          : null;
+    // grant quota for order
+    let newQuota: NewQuota | undefined = undefined;
+    const quotaAmount = parseFloat(order.quotaAmount || '0');
+    if (quotaAmount > 0) {
+      const expiresAt = calculateQuotaExpirationTime({
+        validDays: order.quotaValidDays || 0,
+        currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
+      });
 
-      newCredit = {
+      newQuota = {
         id: getUuid(),
         userId: order.userId,
         userEmail: order.userEmail,
+        poolType:
+          order.quotaPoolType ||
+          (order.paymentType === PaymentType.SUBSCRIPTION
+            ? QuotaPoolType.SUBSCRIPTION
+            : QuotaPoolType.PAYGO),
+        measurementType:
+          order.quotaMeasurementType || QuotaMeasurementType.UNIT,
         orderNo: order.orderNo,
         subscriptionNo: newSubscription?.subscriptionNo,
         transactionNo: getSnowId(),
-        transactionType: CreditTransactionType.GRANT,
+        transactionType: QuotaTransactionType.GRANT,
         transactionScene:
           order.paymentType === PaymentType.SUBSCRIPTION
-            ? CreditTransactionScene.SUBSCRIPTION
-            : CreditTransactionScene.PAYMENT,
-        credits: credits,
-        remainingCredits: credits,
-        description: `Grant credit`,
+            ? QuotaTransactionScene.SUBSCRIPTION
+            : QuotaTransactionScene.PAYMENT,
+        amount: String(quotaAmount),
+        remainingAmount: String(quotaAmount),
+        description: `Grant quota`,
         expiresAt: expiresAt,
-        status: CreditStatus.ACTIVE,
+        status: QuotaStatus.ACTIVE,
       };
     }
 
@@ -250,7 +257,7 @@ export async function handleCheckoutSuccess({
       orderNo,
       updateOrder,
       newSubscription,
-      newCredit,
+      newQuota,
     });
   } else if (
     session.paymentStatus === PaymentStatus.FAILED ||
@@ -339,8 +346,10 @@ export async function handlePaymentSuccess({
         planName: order.planName || order.productName,
         billingUrl: subscriptionInfo.billingUrl,
         productName: order.productName,
-        creditsAmount: order.creditsAmount,
-        creditsValidDays: order.creditsValidDays,
+        quotaPoolType: order.quotaPoolType,
+        quotaMeasurementType: order.quotaMeasurementType,
+        quotaAmount: order.quotaAmount,
+        quotaValidDays: order.quotaValidDays,
         paymentProductId: order.paymentProductId,
         paymentUserId: session.paymentInfo?.paymentUserId,
       };
@@ -351,35 +360,39 @@ export async function handlePaymentSuccess({
       );
     }
 
-    // grant credit for order
-    let newCredit: NewCredit | undefined = undefined;
-    if (order.creditsAmount && order.creditsAmount > 0) {
-      const credits = order.creditsAmount;
-      const expiresAt =
-        credits > 0
-          ? calculateCreditExpirationTime({
-              creditsValidDays: order.creditsValidDays || 0,
-              currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
-            })
-          : null;
+    // grant quota for order
+    let newQuota: NewQuota | undefined = undefined;
+    const quotaAmount = parseFloat(order.quotaAmount || '0');
+    if (quotaAmount > 0) {
+      const expiresAt = calculateQuotaExpirationTime({
+        validDays: order.quotaValidDays || 0,
+        currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
+      });
 
-      newCredit = {
+      newQuota = {
         id: getUuid(),
         userId: order.userId,
         userEmail: order.userEmail,
+        poolType:
+          order.quotaPoolType ||
+          (order.paymentType === PaymentType.SUBSCRIPTION
+            ? QuotaPoolType.SUBSCRIPTION
+            : QuotaPoolType.PAYGO),
+        measurementType:
+          order.quotaMeasurementType || QuotaMeasurementType.UNIT,
         orderNo: order.orderNo,
         subscriptionNo: newSubscription?.subscriptionNo,
         transactionNo: getSnowId(),
-        transactionType: CreditTransactionType.GRANT,
+        transactionType: QuotaTransactionType.GRANT,
         transactionScene:
           order.paymentType === PaymentType.SUBSCRIPTION
-            ? CreditTransactionScene.SUBSCRIPTION
-            : CreditTransactionScene.PAYMENT,
-        credits: credits,
-        remainingCredits: credits,
-        description: `Grant credit`,
+            ? QuotaTransactionScene.SUBSCRIPTION
+            : QuotaTransactionScene.PAYMENT,
+        amount: String(quotaAmount),
+        remainingAmount: String(quotaAmount),
+        description: `Grant quota`,
         expiresAt: expiresAt,
-        status: CreditStatus.ACTIVE,
+        status: QuotaStatus.ACTIVE,
       };
     }
 
@@ -387,7 +400,7 @@ export async function handlePaymentSuccess({
       orderNo,
       updateOrder,
       newSubscription,
-      newCredit,
+      newQuota,
     });
   } else {
     throw new Error('unknown payment status');
@@ -451,8 +464,10 @@ export async function handleSubscriptionRenewal({
       productName: subscription.productName,
       description: 'Subscription Renewal',
       callbackUrl: '',
-      creditsAmount: subscription.creditsAmount,
-      creditsValidDays: subscription.creditsValidDays,
+      quotaPoolType: subscription.quotaPoolType,
+      quotaMeasurementType: subscription.quotaMeasurementType,
+      quotaAmount: subscription.quotaAmount,
+      quotaValidDays: subscription.quotaValidDays,
       planName: subscription.planName || '',
       paymentProductId: subscription.paymentProductId,
       paymentResult: JSON.stringify(session.paymentResult),
@@ -473,35 +488,33 @@ export async function handleSubscriptionRenewal({
       subscriptionResult: JSON.stringify(session.subscriptionResult),
     };
 
-    // grant credit for renewal order
-    let newCredit: NewCredit | undefined = undefined;
-    if (order.creditsAmount && order.creditsAmount > 0) {
-      const credits = order.creditsAmount;
-      const expiresAt =
-        credits > 0
-          ? calculateCreditExpirationTime({
-              creditsValidDays: order.creditsValidDays || 0,
-              currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
-            })
-          : null;
+    // grant quota for renewal order
+    let newQuota: NewQuota | undefined = undefined;
+    const quotaAmount = parseFloat(order.quotaAmount || '0');
+    if (quotaAmount > 0) {
+      const expiresAt = calculateQuotaExpirationTime({
+        validDays: order.quotaValidDays || 0,
+        currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
+      });
 
-      newCredit = {
+      newQuota = {
         id: getUuid(),
         userId: order.userId,
         userEmail: order.userEmail,
+        poolType:
+          order.quotaPoolType || QuotaPoolType.SUBSCRIPTION,
+        measurementType:
+          order.quotaMeasurementType || QuotaMeasurementType.UNIT,
         orderNo: order.orderNo,
         subscriptionNo: subscription.subscriptionNo,
         transactionNo: getSnowId(),
-        transactionType: CreditTransactionType.GRANT,
-        transactionScene:
-          order.paymentType === PaymentType.SUBSCRIPTION
-            ? CreditTransactionScene.SUBSCRIPTION
-            : CreditTransactionScene.PAYMENT,
-        credits: credits,
-        remainingCredits: credits,
-        description: `Grant credit`,
+        transactionType: QuotaTransactionType.GRANT,
+        transactionScene: QuotaTransactionScene.RENEWAL,
+        amount: String(quotaAmount),
+        remainingAmount: String(quotaAmount),
+        description: `Grant quota`,
         expiresAt: expiresAt,
-        status: CreditStatus.ACTIVE,
+        status: QuotaStatus.ACTIVE,
       };
     }
 
@@ -509,7 +522,7 @@ export async function handleSubscriptionRenewal({
       subscriptionNo,
       updateSubscription,
       newOrder: order,
-      newCredit,
+      newQuota,
     });
   } else {
     throw new Error('unknown payment status');

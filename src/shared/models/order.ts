@@ -1,10 +1,10 @@
 import { and, count, desc, eq, or } from 'drizzle-orm';
 
 import { db } from '@/core/db';
-import { credit, order, subscription } from '@/config/db/schema';
+import { quota, order, subscription } from '@/config/db/schema';
 import { PaymentType } from '@/extensions/payment/types';
 
-import { NewCredit } from './credit';
+import { NewQuota } from './quota';
 import {
   NewSubscription,
   UpdateSubscription,
@@ -207,19 +207,19 @@ export async function updateOrderInTransaction({
   orderNo,
   updateOrder,
   newSubscription,
-  newCredit,
+  newQuota,
 }: {
   orderNo: string;
   updateOrder: UpdateOrder;
   newSubscription?: NewSubscription;
-  newCredit?: NewCredit;
+  newQuota?: NewQuota;
 }) {
   if (!orderNo || !updateOrder) {
     throw new Error('orderNo and updateOrder are required');
   }
 
   // only update order, no need transaction
-  if (!newSubscription && !newCredit) {
+  if (!newSubscription && !newQuota) {
     return updateOrderByOrderNo(orderNo, updateOrder);
   }
 
@@ -228,7 +228,7 @@ export async function updateOrderInTransaction({
     let result: any = {
       order: null,
       subscription: null,
-      credit: null,
+      quota: null,
     };
 
     // deal with subscription
@@ -262,25 +262,25 @@ export async function updateOrderInTransaction({
       result.subscription = existingSubscription;
     }
 
-    // deal with credit
-    if (newCredit) {
-      // not create credit with same order no
-      let [existingCredit] = await tx
+    // deal with quota
+    if (newQuota) {
+      // not create quota with same order no (idempotency)
+      let [existingQuota] = await tx
         .select()
-        .from(credit)
-        .where(eq(credit.orderNo, orderNo));
+        .from(quota)
+        .where(eq(quota.orderNo, orderNo));
 
-      if (!existingCredit) {
-        // create credit
-        const [creditResult] = await tx
-          .insert(credit)
-          .values(newCredit)
+      if (!existingQuota) {
+        // create quota
+        const [quotaResult] = await tx
+          .insert(quota)
+          .values(newQuota)
           .returning();
 
-        existingCredit = creditResult;
+        existingQuota = quotaResult;
       }
 
-      result.credit = existingCredit;
+      result.quota = existingQuota;
     }
 
     // update order with optimistic lock
@@ -320,19 +320,19 @@ export async function updateSubscriptionInTransaction({
   subscriptionNo,
   updateSubscription,
   newOrder,
-  newCredit,
+  newQuota,
 }: {
   subscriptionNo: string; // subscription unique id in table
   updateSubscription: UpdateSubscription;
   newOrder?: NewOrder;
-  newCredit?: NewCredit;
+  newQuota?: NewQuota;
 }) {
   if (!subscriptionNo || !updateSubscription) {
     throw new Error('subscriptionNo and updateSubscription are required');
   }
 
-  // only update order, no need transaction
-  if (!newOrder && !newCredit) {
+  // only update subscription, no need transaction
+  if (!newOrder && !newQuota) {
     return updateSubscriptionBySubscriptionNo(
       subscriptionNo,
       updateSubscription
@@ -344,7 +344,7 @@ export async function updateSubscriptionInTransaction({
     let result: any = {
       order: null,
       subscription: null,
-      credit: null,
+      quota: null,
     };
 
     // deal with order
@@ -378,30 +378,30 @@ export async function updateSubscriptionInTransaction({
       result.order = existingOrder;
     }
 
-    // deal with credit
-    if (newCredit) {
-      let existingCredit: any = null;
+    // deal with quota
+    if (newQuota) {
+      let existingQuota: any = null;
       if (result.order && result.order.orderNo) {
-        // not create credit with same order no
-        const [existingCreditResult] = await tx
+        // not create quota with same order no (idempotency)
+        const [existingQuotaResult] = await tx
           .select()
-          .from(credit)
-          .where(eq(credit.orderNo, result.order.orderNo));
+          .from(quota)
+          .where(eq(quota.orderNo, result.order.orderNo));
 
-        existingCredit = existingCreditResult;
+        existingQuota = existingQuotaResult;
       }
 
-      if (!existingCredit) {
-        // create credit
-        const [creditResult] = await tx
-          .insert(credit)
-          .values(newCredit)
+      if (!existingQuota) {
+        // create quota
+        const [quotaResult] = await tx
+          .insert(quota)
+          .values(newQuota)
           .returning();
 
-        existingCredit = creditResult;
+        existingQuota = quotaResult;
       }
 
-      result.credit = existingCredit;
+      result.quota = existingQuota;
     }
 
     // update subscription

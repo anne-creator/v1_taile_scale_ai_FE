@@ -65,7 +65,7 @@ export function Hero({
   const [userMode, setUserMode] = useState<UserMode>('developers');
   const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>('typescript');
   const [apiKey, setApiKey] = useState('');
-  const [codePrompt, setCodePrompt] = useState('A brave knight in an enchanted forest');
+  const [codePrompt, setCodePrompt] = useState('A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest');
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
   const [copied, setCopied] = useState(false);
@@ -77,8 +77,8 @@ export function Hero({
   const [showQuotaModal, setShowQuotaModal] = useState(false);
   const [isImageHovered, setIsImageHovered] = useState(false);
 
-  // Default placeholder image
-  const placeholderImage = 'https://images.unsplash.com/photo-1610308700652-d931026f7eec?w=800';
+  // Default placeholder image - real TaleCraft generated illustration
+  const placeholderImage = 'https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg';
 
   const codeExamples: Record<CodeLanguage, string> = {
     typescript: `const response = await fetch('https://talescaleai.com/api/v1/generate', {
@@ -474,7 +474,7 @@ print(result["data"]["image_url"])`,
                       {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </button>
                   </div>
-                  <pre className="text-sm text-gray-300 overflow-x-auto max-h-[280px]">
+                  <pre className="text-sm text-gray-300 overflow-y-auto max-h-[280px] whitespace-pre-wrap break-all scrollbar-thin">
                     <code>{codeExamples[codeLanguage]}</code>
                   </pre>
                 </div>
@@ -484,7 +484,7 @@ print(result["data"]["image_url"])`,
                   <label className="block text-sm mb-2">Edit Prompt</label>
                   <Input
                     type="text"
-                    placeholder="A brave knight in an enchanted forest"
+                    placeholder="A wise old owl in a velvet waistcoat reading to woodland creatures..."
                     value={codePrompt}
                     onChange={(e) => setCodePrompt(e.target.value)}
                   />
@@ -571,7 +571,7 @@ print(result["data"]["image_url"])`,
                 <div>
                   <label className="block text-sm mb-2">Describe Your Story Scene</label>
                   <Textarea
-                    placeholder="A brave knight in an enchanted forest..."
+                    placeholder="A wise old owl in a velvet waistcoat reading to woodland creatures in an ancient oak forest..."
                     className="min-h-[120px] resize-none"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}

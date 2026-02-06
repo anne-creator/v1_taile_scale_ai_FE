@@ -302,10 +302,8 @@ export function MusicGeneratorProvider({ children }: MusicGeneratorProviderProps
       return;
     }
 
-    if (!user.credits || user.credits.remainingCredits < costCredits) {
-      toast.error('Insufficient credits');
-      return;
-    }
+    // Quota check is done server-side in the API route.
+    // Client-side check removed to avoid stale data issues.
 
     if (!provider || !model) {
       toast.error('Invalid provider or model');

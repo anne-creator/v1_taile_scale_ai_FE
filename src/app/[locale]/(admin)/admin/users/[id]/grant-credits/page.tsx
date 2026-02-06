@@ -4,12 +4,16 @@ import { PERMISSIONS, requirePermission } from '@/core/rbac';
 import { Empty } from '@/components/custom';
 import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
 import { FormCard } from '@/components/blocks/form';
-import { grantCreditsForUser } from '@/shared/models/credit';
+import {
+  grantQuotaForUser,
+  QuotaMeasurementType,
+  QuotaPoolType,
+} from '@/shared/models/quota';
 import { findUserById } from '@/shared/models/user';
 import { Crumb } from '@/shared/types/blocks/common';
 import { Form } from '@/shared/types/blocks/form';
 
-export default async function UserGrantCreditsPage({
+export default async function UserGrantQuotaPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
@@ -17,7 +21,7 @@ export default async function UserGrantCreditsPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  // Check if user has permission to edit posts
+  // Check if user has permission to write users
   await requirePermission({
     code: PERMISSIONS.USERS_WRITE,
     redirectUrl: '/admin/no-permission',
@@ -54,7 +58,29 @@ export default async function UserGrantCreditsPage({
         attributes: { disabled: true },
       },
       {
-        name: 'credits',
+        name: 'pool_type',
+        type: 'select',
+        title: 'Pool Type',
+        placeholder: 'Select pool type',
+        options: [
+          { label: 'Pay-as-you-go', value: 'paygo' },
+          { label: 'Subscription', value: 'subscription' },
+        ],
+        validation: { required: true },
+      },
+      {
+        name: 'measurement_type',
+        type: 'select',
+        title: 'Measurement Type',
+        placeholder: 'Select measurement type',
+        options: [
+          { label: 'Unit', value: 'unit' },
+          { label: 'Dollar', value: 'dollar' },
+        ],
+        validation: { required: true },
+      },
+      {
+        name: 'amount',
         type: 'number',
         title: t('grant_credits.fields.credits'),
         placeholder: '0',
@@ -91,24 +117,31 @@ export default async function UserGrantCreditsPage({
           throw new Error('no auth');
         }
 
-        const credits = parseInt(data.get('credits') as string) || 0;
+        const poolType =
+          (data.get('pool_type') as string) || QuotaPoolType.PAYGO;
+        const measurementType =
+          (data.get('measurement_type') as string) ||
+          QuotaMeasurementType.UNIT;
+        const amount = parseFloat(data.get('amount') as string) || 0;
         const validDays = parseInt(data.get('valid_days') as string) || 0;
         const description = data.get('description') as string;
 
-        if (credits <= 0) {
-          throw new Error('credits amount must be greater than 0');
+        if (amount <= 0) {
+          throw new Error('amount must be greater than 0');
         }
 
-        await grantCreditsForUser({
+        await grantQuotaForUser({
           user: user,
-          credits: credits,
+          poolType: poolType as QuotaPoolType,
+          measurementType: measurementType as QuotaMeasurementType,
+          amount: amount,
           validDays: validDays > 0 ? validDays : 0,
           description: description,
         });
 
         return {
           status: 'success',
-          message: 'credits granted successfully',
+          message: 'quota granted successfully',
           redirect_url: `/admin/users?email=${user.email}`,
         };
       },

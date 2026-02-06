@@ -169,13 +169,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const fetchUserCredits = useCallback(async () => {
+  const fetchUserQuota = useCallback(async () => {
     try {
       if (!userRef.current) {
         return;
       }
 
-      const resp = await fetch('/api/user/get-user-credits', {
+      const resp = await fetch('/api/user/get-user-info', {
         method: 'POST',
       });
       if (!resp.ok) {
@@ -186,10 +186,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(message);
       }
 
-      setUser((prev) => (prev ? { ...prev, credits: data } : prev));
+      if (data?.quota) {
+        setUser((prev) => (prev ? { ...prev, quota: data.quota } : prev));
+      }
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
-        console.log('fetch user credits failed:', e);
+        console.log('fetch user quota failed:', e);
       }
     }
   }, []);
@@ -247,9 +249,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Fetch extended user info and credits in parallel (per code_principle.md)
-    await Promise.all([fetchUserInfo(), fetchUserCredits()]);
-  }, [fetchUserInfo, fetchUserCredits]);
+    // Fetch extended user info (includes quota overview)
+    await fetchUserInfo();
+  }, [fetchUserInfo]);
 
   const showOneTap = useCallback(
     async (configs: Record<string, string>) => {

@@ -2,6 +2,7 @@ import {
   boolean,
   index,
   integer,
+  numeric,
   pgSchema,
   pgTable,
   text,
@@ -222,8 +223,10 @@ export const order = table(
     subscriptionResult: text('subscription_result'), // provider subscription result
     checkoutUrl: text('checkout_url'), // checkout url
     callbackUrl: text('callback_url'), // callback url, after handle callback
-    creditsAmount: integer('credits_amount'), // credits amount
-    creditsValidDays: integer('credits_valid_days'), // credits validity days
+    quotaPoolType: text('quota_pool_type'), // 'subscription' | 'paygo'
+    quotaMeasurementType: text('quota_measurement_type'), // 'dollar' | 'unit'
+    quotaAmount: numeric('quota_amount', { precision: 12, scale: 4 }), // quota amount to grant
+    quotaValidDays: integer('quota_valid_days'), // quota validity days
     planName: text('plan_name'), // subscription plan name
     paymentProductId: text('payment_product_id'), // payment product id
     invoiceId: text('invoice_id'),
@@ -282,8 +285,10 @@ export const subscription = table(
     planName: text('plan_name'),
     billingUrl: text('billing_url'),
     productName: text('product_name'), // subscription product name
-    creditsAmount: integer('credits_amount'), // subscription credits amount
-    creditsValidDays: integer('credits_valid_days'), // subscription credits valid days
+    quotaPoolType: text('quota_pool_type'), // 'subscription' | 'paygo'
+    quotaMeasurementType: text('quota_measurement_type'), // 'dollar' | 'unit'
+    quotaAmount: numeric('quota_amount', { precision: 12, scale: 4 }), // quota amount per period
+    quotaValidDays: integer('quota_valid_days'), // quota validity days
     paymentProductId: text('payment_product_id'), // subscription payment product id
     paymentUserId: text('payment_user_id'), // subscription payment user id
     canceledAt: timestamp('canceled_at'), // subscription canceled apply at
@@ -310,48 +315,76 @@ export const subscription = table(
   ]
 );
 
-export const credit = table(
-  'credit',
+export const quota = table(
+  'quota',
   {
     id: text('id').primaryKey(),
     userId: text('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }), // user id
-    userEmail: text('user_email'), // user email
+      .references(() => user.id, { onDelete: 'cascade' }),
+    userEmail: text('user_email'),
+    poolType: text('pool_type').notNull(), // 'subscription' | 'paygo'
+    measurementType: text('measurement_type').notNull(), // 'dollar' | 'unit'
     orderNo: text('order_no'), // payment order no
     subscriptionNo: text('subscription_no'), // subscription no
-    transactionNo: text('transaction_no').unique().notNull(), // transaction no
-    transactionType: text('transaction_type').notNull(), // transaction type, grant / consume
-    transactionScene: text('transaction_scene'), // transaction scene, payment / subscription / gift / award
-    credits: integer('credits').notNull(), // credits amount, n or -n
-    remainingCredits: integer('remaining_credits').notNull().default(0), // remaining credits amount
-    description: text('description'), // transaction description
-    expiresAt: timestamp('expires_at'), // transaction expires at
-    status: text('status').notNull(), // transaction status
+    transactionNo: text('transaction_no').unique().notNull(),
+    transactionType: text('transaction_type').notNull(), // 'grant' | 'consume'
+    transactionScene: text('transaction_scene'), // 'subscription' | 'payment' | 'renewal' | 'gift' | 'reward'
+    amount: numeric('amount', { precision: 12, scale: 4 }).notNull(), // positive=grant, negative=consume
+    remainingAmount: numeric('remaining_amount', { precision: 12, scale: 4 })
+      .notNull()
+      .default('0'), // grant records only: remaining balance
+    description: text('description'),
+    expiresAt: timestamp('expires_at'),
+    status: text('status').notNull(), // 'active' | 'expired' | 'deleted'
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     deletedAt: timestamp('deleted_at'),
-    consumedDetail: text('consumed_detail'), // consumed detail
-    metadata: text('metadata'), // transaction metadata
+    consumedDetail: text('consumed_detail'), // JSON: consumed pool details
+    metadata: text('metadata'),
   },
   (table) => [
-    // Critical composite index for credit consumption (FIFO queue)
-    // Query: WHERE userId = ? AND transactionType = 'grant' AND status = 'active'
-    //        AND remainingCredits > 0 ORDER BY expiresAt
-    // Can also be used for: WHERE userId = ? (left-prefix)
-    index('idx_credit_consume_fifo').on(
+    // Critical composite index for quota consumption (FIFO by pool type then expiry)
+    // Query: WHERE userId = ? AND poolType = ? AND status = 'active' AND transactionType = 'grant'
+    //        AND remainingAmount > 0 ORDER BY expiresAt
+    index('idx_quota_consume_fifo').on(
       table.userId,
+      table.poolType,
       table.status,
       table.transactionType,
-      table.remainingCredits,
+      table.remainingAmount,
       table.expiresAt
     ),
-    // Query credits by order number
-    index('idx_credit_order_no').on(table.orderNo),
-    // Query credits by subscription number
-    index('idx_credit_subscription_no').on(table.subscriptionNo),
+    // Query quota by order number (idempotency check)
+    index('idx_quota_order_no').on(table.orderNo),
+    // Query quota by subscription number
+    index('idx_quota_subscription_no').on(table.subscriptionNo),
+  ]
+);
+
+export const serviceCost = table(
+  'service_cost',
+  {
+    id: text('id').primaryKey(),
+    serviceType: text('service_type').notNull(), // 'ai-image' | 'ai-video' | 'ai-music' | 'ai-chat'
+    scene: text('scene').notNull().default(''), // 'text-to-image' | 'image-to-image' | ''
+    dollarCost: numeric('dollar_cost', { precision: 8, scale: 4 })
+      .notNull()
+      .default('0'), // cost in dollars, e.g. 0.05
+    unitCost: integer('unit_cost').notNull().default(1), // cost in units, e.g. 1
+    displayName: text('display_name'),
+    description: text('description'),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    // Query by service type and scene (also used for uniqueness check in app layer)
+    index('idx_service_cost_type_scene').on(table.serviceType, table.scene),
   ]
 );
 
@@ -493,9 +526,14 @@ export const aiTask = table(
     taskId: text('task_id'), // provider task id
     taskInfo: text('task_info'), // provider task info
     taskResult: text('task_result'), // provider task result
-    costCredits: integer('cost_credits').notNull().default(0),
+    costAmount: numeric('cost_amount', { precision: 12, scale: 4 })
+      .notNull()
+      .default('0'), // cost amount consumed
+    costMeasurementType: text('cost_measurement_type')
+      .notNull()
+      .default('unit'), // 'dollar' | 'unit'
     scene: text('scene').notNull().default(''),
-    creditId: text('credit_id'), // credit consumption record id
+    quotaId: text('quota_id'), // quota consumption record id
   },
   (table) => [
     // Composite: Query user's AI tasks by status

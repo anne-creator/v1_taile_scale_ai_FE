@@ -4,15 +4,15 @@ import { PERMISSIONS, requirePermission } from '@/core/rbac';
 import { Header, Main, MainHeader } from '@/components/blocks/dashboard';
 import { TableCard } from '@/components/blocks/table';
 import {
-  CreditStatus,
-  CreditTransactionType,
-  getCredits,
-  getCreditsCount,
-} from '@/shared/models/credit';
+  getQuotas,
+  getQuotasCount,
+  QuotaStatus,
+  QuotaTransactionType,
+} from '@/shared/models/quota';
 import { Crumb, Tab } from '@/shared/types/blocks/common';
 import { type Table } from '@/shared/types/blocks/table';
 
-export default async function CreditsPage({
+export default async function QuotasPage({
   params,
   searchParams,
 }: {
@@ -22,7 +22,7 @@ export default async function CreditsPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  // Check if user has permission to read credits
+  // Check if user has permission to read credits/quotas
   await requirePermission({
     code: PERMISSIONS.CREDITS_READ,
     redirectUrl: '/admin/no-permission',
@@ -61,14 +61,14 @@ export default async function CreditsPage({
     },
   ];
 
-  const total = await getCreditsCount({
-    transactionType: type as CreditTransactionType,
-    status: CreditStatus.ACTIVE,
+  const total = await getQuotasCount({
+    transactionType: type as QuotaTransactionType,
+    status: QuotaStatus.ACTIVE,
   });
 
-  const credits = await getCredits({
-    transactionType: type as CreditTransactionType,
-    status: CreditStatus.ACTIVE,
+  const quotas = await getQuotas({
+    transactionType: type as QuotaTransactionType,
+    status: QuotaStatus.ACTIVE,
     getUser: true,
     page,
     limit,
@@ -83,21 +83,37 @@ export default async function CreditsPage({
       },
       { name: 'user', title: t('fields.user'), type: 'user' },
       {
-        name: 'credits',
+        name: 'poolType',
+        title: 'Pool',
+        type: 'label',
+      },
+      {
+        name: 'measurementType',
+        title: 'Unit',
+        type: 'label',
+      },
+      {
+        name: 'amount',
         title: t('fields.amount'),
         callback: (item) => {
-          if (item.credits > 0) {
-            return <div className="text-green-500">+{item.credits}</div>;
+          const amount = parseFloat(item.amount);
+          const prefix = item.measurementType === 'dollar' ? '$' : '';
+          if (amount > 0) {
+            return <div className="text-green-500">+{prefix}{amount}</div>;
           } else {
-            return <div className="text-red-500">{item.credits}</div>;
+            return <div className="text-red-500">{prefix}{amount}</div>;
           }
         },
       },
       {
-        name: 'remainingCredits',
+        name: 'remainingAmount',
         title: t('fields.remaining'),
-        type: 'label',
-        placeholder: '-',
+        callback: (item) => {
+          const remaining = parseFloat(item.remainingAmount || '0');
+          if (remaining <= 0) return <span className="text-muted-foreground">-</span>;
+          const prefix = item.measurementType === 'dollar' ? '$' : '';
+          return <span>{prefix}{remaining}</span>;
+        },
       },
       { name: 'transactionType', title: t('fields.type') },
       { name: 'transactionScene', title: t('fields.scene'), placeholder: '-' },
@@ -117,7 +133,7 @@ export default async function CreditsPage({
         placeholder: '-',
       },
     ],
-    data: credits,
+    data: quotas,
     pagination: {
       total,
       page,

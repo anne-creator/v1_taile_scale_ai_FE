@@ -3,19 +3,103 @@ import { getTranslations } from 'next-intl/server';
 import { Empty } from '@/components/custom';
 import { PanelCard } from '@/components/blocks/panel';
 import { TableCard } from '@/components/blocks/table';
+import { Progress } from '@/components/ui/progress';
 import {
-  Credit,
-  CreditStatus,
-  CreditTransactionType,
-  getCredits,
-  getCreditsCount,
-  getRemainingCredits,
-} from '@/shared/models/credit';
+  getQuotas,
+  getQuotasCount,
+  getQuotaOverview,
+  QuotaStatus,
+  QuotaTransactionType,
+  QuotaPoolOverview,
+} from '@/shared/models/quota';
 import { getUserInfo } from '@/shared/models/user';
 import { Tab } from '@/shared/types/blocks/common';
 import { type Table } from '@/shared/types/blocks/table';
 
-export default async function CreditsPage({
+function QuotaPoolCard({
+  title,
+  pool,
+  purchaseUrl,
+  purchaseLabel,
+}: {
+  title: string;
+  pool: QuotaPoolOverview | null;
+  purchaseUrl?: string;
+  purchaseLabel?: string;
+}) {
+  if (!pool) {
+    return (
+      <PanelCard
+        title={title}
+        buttons={
+          purchaseUrl
+            ? [
+                {
+                  title: purchaseLabel || 'Purchase',
+                  url: purchaseUrl,
+                  target: '_blank',
+                  icon: 'Coins',
+                },
+              ]
+            : undefined
+        }
+        className="max-w-md"
+      >
+        <div className="text-muted-foreground text-sm">No active quota</div>
+      </PanelCard>
+    );
+  }
+
+  const prefix = pool.measurementType === 'dollar' ? '$' : '';
+  const suffix = pool.measurementType === 'unit' ? ' units' : '';
+  const percentage =
+    pool.totalGranted > 0
+      ? Math.round((pool.remaining / pool.totalGranted) * 100)
+      : 0;
+
+  return (
+    <PanelCard
+      title={title}
+      buttons={
+        purchaseUrl
+          ? [
+              {
+                title: purchaseLabel || 'Purchase',
+                url: purchaseUrl,
+                target: '_blank',
+                icon: 'Coins',
+              },
+            ]
+          : undefined
+      }
+      className="max-w-md"
+    >
+      <div className="space-y-3">
+        <div className="text-primary text-3xl font-bold">
+          {prefix}
+          {pool.remaining}
+          {suffix}
+        </div>
+        <Progress value={percentage} className="h-2" />
+        <div className="text-muted-foreground text-sm">
+          {prefix}
+          {pool.totalConsumed}
+          {suffix} used of {prefix}
+          {pool.totalGranted}
+          {suffix}
+          {pool.earliestExpiry && (
+            <span className="ml-2">
+              · Expires{' '}
+              {new Date(pool.earliestExpiry).toLocaleDateString()}
+            </span>
+          )}
+        </div>
+      </div>
+    </PanelCard>
+  );
+}
+
+export default async function UsagePage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: number; pageSize?: number; type?: string }>;
@@ -31,16 +115,16 @@ export default async function CreditsPage({
 
   const t = await getTranslations('settings.credits');
 
-  const total = await getCreditsCount({
-    transactionType: type as CreditTransactionType,
+  const total = await getQuotasCount({
+    transactionType: type as QuotaTransactionType,
     userId: user.id,
-    status: CreditStatus.ACTIVE,
+    status: QuotaStatus.ACTIVE,
   });
 
-  const credits = await getCredits({
+  const quotas = await getQuotas({
     userId: user.id,
-    status: CreditStatus.ACTIVE,
-    transactionType: type as CreditTransactionType,
+    status: QuotaStatus.ACTIVE,
+    transactionType: type as QuotaTransactionType,
     page,
     limit,
   });
@@ -61,17 +145,32 @@ export default async function CreditsPage({
         metadata: { variant: 'outline' },
       },
       {
-        name: 'transactionScene',
-        title: t('fields.scene'),
+        name: 'poolType',
+        title: 'Pool',
         type: 'label',
-        placeholder: '-',
         metadata: { variant: 'outline' },
       },
       {
-        name: 'credits',
+        name: 'amount',
         title: t('fields.credits'),
-        type: 'label',
-        metadata: { variant: 'outline' },
+        callback: (item) => {
+          const amount = parseFloat(item.amount);
+          const prefix = item.measurementType === 'dollar' ? '$' : '';
+          if (amount > 0) {
+            return (
+              <span className="text-green-500">
+                +{prefix}
+                {amount}
+              </span>
+            );
+          }
+          return (
+            <span className="text-red-500">
+              {prefix}
+              {amount}
+            </span>
+          );
+        },
       },
       {
         name: 'expiresAt',
@@ -86,7 +185,7 @@ export default async function CreditsPage({
         type: 'time',
       },
     ],
-    data: credits,
+    data: quotas,
     pagination: {
       total,
       page,
@@ -94,7 +193,7 @@ export default async function CreditsPage({
     },
   };
 
-  const remainingCredits = await getRemainingCredits(user.id);
+  const overview = await getQuotaOverview(user.id);
 
   const tabs: Tab[] = [
     {
@@ -119,22 +218,18 @@ export default async function CreditsPage({
 
   return (
     <div className="space-y-8">
-      <PanelCard
-        title={t('view.title')}
-        buttons={[
-          {
-            title: t('view.buttons.purchase'),
-            url: '/pricing',
-            target: '_blank',
-            icon: 'Coins',
-          },
-        ]}
-        className="max-w-md"
-      >
-        <div className="text-primary text-3xl font-bold">
-          {remainingCredits}
-        </div>
-      </PanelCard>
+      <div className="flex flex-col gap-4 md:flex-row">
+        <QuotaPoolCard
+          title="Monthly Subscription"
+          pool={overview.subscription}
+        />
+        <QuotaPoolCard
+          title="Pay-as-you-go"
+          pool={overview.paygo}
+          purchaseUrl="/pricing"
+          purchaseLabel={t('view.buttons.purchase')}
+        />
+      </div>
       <TableCard title={t('list.title')} tabs={tabs} table={table} />
     </div>
   );

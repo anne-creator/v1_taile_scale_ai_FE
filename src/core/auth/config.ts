@@ -14,7 +14,7 @@ import {
 } from '@/shared/lib/cookie';
 import { getUuid } from '@/shared/lib/hash';
 import { getClientIp } from '@/shared/lib/ip';
-import { grantCreditsForNewUser } from '@/shared/models/credit';
+import { grantQuotaForNewUser } from '@/shared/models/quota';
 import { getEmailService } from '@/shared/services/email';
 import { grantRoleForNewUser } from '@/shared/services/rbac';
 
@@ -153,8 +153,8 @@ export async function getAuthOptions(configs: Record<string, string>) {
                 throw new Error('user id is required');
               }
 
-              // grant credits for new user
-              await grantCreditsForNewUser(user);
+              // grant quota for new user
+              await grantQuotaForNewUser(user);
 
               // grant role for new user
               await grantRoleForNewUser(user);

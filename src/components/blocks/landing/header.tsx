@@ -312,8 +312,8 @@ export function Header({ header }: { header: HeaderType }) {
                       </Link>
                     ))}
 
-                  {header.show_theme ? <ThemeToggler /> : null}
-                  {header.show_locale ? <LocaleSelector /> : null}
+                  {/* Disabled: {header.show_theme ? <ThemeToggler /> : null} */}
+                  {/* Disabled: {header.show_locale ? <LocaleSelector /> : null} */}
                   <div className="flex-1 md:hidden"></div>
                   {header.show_sign ? (
                     <SignUser userNav={header.user_nav} />

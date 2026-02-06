@@ -4,7 +4,7 @@ import { respData, respErr } from '@/shared/lib/resp';
 import { createAITask, NewAITask } from '@/shared/models/ai_task';
 import { findApikeyByKey } from '@/shared/models/apikey';
 import { getAllConfigs } from '@/shared/models/config';
-import { getRemainingCredits } from '@/shared/models/credit';
+import { canConsumeService } from '@/shared/models/quota';
 import { findUserById } from '@/shared/models/user';
 import {
   generateIllustration,
@@ -84,13 +84,10 @@ export async function POST(request: Request) {
     const mediaType = AIMediaType.IMAGE;
     const scene = 'text-to-image';
 
-    // Cost credits for illustration generation
-    const costCredits = 2;
-
-    // Check credits
-    const remainingCredits = await getRemainingCredits(user.id);
-    if (remainingCredits < costCredits) {
-      return respErr('insufficient credits');
+    // Check quota (cost is looked up from service_cost table)
+    const hasQuota = await canConsumeService(user.id, `ai-${mediaType}`, scene);
+    if (!hasQuota) {
+      return respErr('insufficient quota');
     }
 
     // Generate illustration using core-services
@@ -114,7 +111,6 @@ export async function POST(request: Request) {
       scene,
       options: JSON.stringify({ style: illustrationStyle, aspect_ratio: aspect_ratio || '1:1' }),
       status: AITaskStatus.SUCCESS,
-      costCredits,
       taskId: result.taskId,
       taskInfo: JSON.stringify({
         images: [{ imageUrl: result.imageUrl, imageType: result.mimeType }],
