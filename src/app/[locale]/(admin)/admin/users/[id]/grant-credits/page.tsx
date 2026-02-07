@@ -63,8 +63,8 @@ export default async function UserGrantQuotaPage({
         title: 'Pool Type',
         placeholder: 'Select pool type',
         options: [
-          { label: 'Pay-as-you-go', value: 'paygo' },
-          { label: 'Subscription', value: 'subscription' },
+          { title: 'Pay-as-you-go', value: 'paygo' },
+          { title: 'Subscription', value: 'subscription' },
         ],
         validation: { required: true },
       },
@@ -74,8 +74,8 @@ export default async function UserGrantQuotaPage({
         title: 'Measurement Type',
         placeholder: 'Select measurement type',
         options: [
-          { label: 'Unit', value: 'unit' },
-          { label: 'Dollar', value: 'dollar' },
+          { title: 'Unit', value: 'unit' },
+          { title: 'Dollar', value: 'dollar' },
         ],
         validation: { required: true },
       },

@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, ArrowRight, Download } from 'lucide-react';
-
-import { Link } from '@/core/i18n/navigation';
+import { Copy, Check, Download } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 
@@ -161,16 +159,6 @@ export function Showcases({
           {galleryImages.map((image: GalleryImage, index: number) => (
             <GalleryCard key={index} image={image} />
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <Link
-            href="/showcases"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border bg-background hover:bg-muted transition-colors font-medium"
-          >
-            View Full Gallery
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
       </div>
     </section>
