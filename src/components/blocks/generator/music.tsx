@@ -229,15 +229,15 @@ export function MusicGenerator({ className, srOnlyTitle }: MusicGeneratorProps) 
                     </span>
                   </div>
                 ) : user &&
-                  user.credits &&
-                  user.credits.remainingCredits > 0 ? (
+                  user.quota &&
+                  ((user.quota.subscription?.remaining ?? 0) + (user.quota.paygo?.remaining ?? 0)) > 0 ? (
                   <div className="mb-6 flex items-center justify-between text-sm">
                     <span className="text-primary">
                       {t('generator.credits_cost', { credits: state.costCredits })}
                     </span>
                     <span className="text-foreground font-medium">
                       {t('generator.credits_remaining', {
-                        credits: user.credits.remainingCredits,
+                        credits: (user.quota.subscription?.remaining ?? 0) + (user.quota.paygo?.remaining ?? 0),
                       })}
                     </span>
                   </div>
@@ -246,7 +246,7 @@ export function MusicGenerator({ className, srOnlyTitle }: MusicGeneratorProps) 
                     <span className="text-primary">
                       {t('generator.credits_cost', { credits: state.costCredits })},{' '}
                       {t('generator.credits_remaining', {
-                        credits: user?.credits?.remainingCredits || 0,
+                        credits: (user?.quota?.subscription?.remaining ?? 0) + (user?.quota?.paygo?.remaining ?? 0),
                       })}
                     </span>
                     <Link href="/pricing">

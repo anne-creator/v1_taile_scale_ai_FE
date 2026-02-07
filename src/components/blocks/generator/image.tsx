@@ -66,7 +66,7 @@ export function ImageGenerator({
   const { state, actions } = useImageGenerator();
   const { user, isCheckSign } = useAuth();
 
-  const remainingCredits = user?.credits?.remainingCredits ?? 0;
+  const remainingCredits = (user?.quota?.subscription?.remaining ?? 0) + (user?.quota?.paygo?.remaining ?? 0);
 
   return (
     <section className={cn('py-section-md', className)}>

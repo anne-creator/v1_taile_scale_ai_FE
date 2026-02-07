@@ -58,7 +58,7 @@ export function VideoGenerator({ srOnlyTitle }: VideoGeneratorProps) {
   const { state, actions } = useVideoGenerator();
   const { user, isCheckSign } = useAuth();
 
-  const remainingCredits = user?.credits?.remainingCredits ?? 0;
+  const remainingCredits = (user?.quota?.subscription?.remaining ?? 0) + (user?.quota?.paygo?.remaining ?? 0);
 
   return (
     <section className="py-section-md">
