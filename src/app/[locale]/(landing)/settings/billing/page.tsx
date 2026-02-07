@@ -4,6 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import { Empty } from '@/components/custom';
 import { PanelCard } from '@/components/blocks/panel';
 import { TableCard } from '@/components/blocks/table';
+import { UsagePanel } from '@/components/blocks/billing/usage-panel';
+import { AddonTopup } from '@/components/blocks/billing/addon-topup';
 import { Button } from '@/components/ui/button';
 import {
   getCurrentSubscription,
@@ -12,6 +14,7 @@ import {
   Subscription,
   SubscriptionStatus,
 } from '@/shared/models/subscription';
+import { getQuotaOverview } from '@/shared/models/quota';
 import { getUserInfo } from '@/shared/models/user';
 import { Button as ButtonType, Tab } from '@/shared/types/blocks/common';
 import { type Table } from '@/shared/types/blocks/table';
@@ -32,7 +35,20 @@ export default async function BillingPage({
 
   const t = await getTranslations('settings.billing');
 
-  const currentSubscription = await getCurrentSubscription(user.id);
+  const [currentSubscription, quotaOverview] = await Promise.all([
+    getCurrentSubscription(user.id),
+    getQuotaOverview(user.id),
+  ]);
+
+  const hasActiveSubscription =
+    currentSubscription?.status === SubscriptionStatus.ACTIVE ||
+    currentSubscription?.status === SubscriptionStatus.TRIALING ||
+    currentSubscription?.status === SubscriptionStatus.PENDING_CANCEL;
+
+  const isQuotaDepleted =
+    hasActiveSubscription &&
+    quotaOverview.subscription !== null &&
+    quotaOverview.subscription.remaining <= 0;
 
   const total = await getSubscriptionsCount({
     userId: user.id,
@@ -229,27 +245,40 @@ export default async function BillingPage({
 
   return (
     <div className="space-y-8">
-      <PanelCard
-        label={currentSubscription?.status}
-        title={t('view.title')}
-        buttons={buttons}
-        className="max-w-md"
-      >
-        <div className="text-primary text-3xl font-bold">
-          {currentSubscription?.planName || t('view.no_subscription')}
-        </div>
-        {currentSubscription?.status ===
-        SubscriptionStatus.PENDING_CANCEL ? (
-          <div className="text-muted-foreground mt-4 text-sm font-normal">
-            {t('view.canceled_tip', {
-              date: moment(
-                currentSubscription?.canceledEndAt ||
-                  currentSubscription?.currentPeriodEnd
-              ).format('YYYY-MM-DD'),
-            })}
+      <div className="flex flex-col gap-4 md:flex-row">
+        <PanelCard
+          label={currentSubscription?.status}
+          title={t('view.title')}
+          buttons={buttons}
+          className="max-w-md flex-1"
+        >
+          <div className="text-primary text-3xl font-bold">
+            {currentSubscription?.planName || t('view.no_subscription')}
           </div>
-        ) : null}
-      </PanelCard>
+          {currentSubscription?.status ===
+          SubscriptionStatus.PENDING_CANCEL ? (
+            <div className="text-muted-foreground mt-4 text-sm font-normal">
+              {t('view.canceled_tip', {
+                date: moment(
+                  currentSubscription?.canceledEndAt ||
+                    currentSubscription?.currentPeriodEnd
+                ).format('YYYY-MM-DD'),
+              })}
+            </div>
+          ) : null}
+        </PanelCard>
+
+        {hasActiveSubscription && (
+          <UsagePanel
+            pool={quotaOverview.subscription}
+            className="max-w-md flex-1"
+          />
+        )}
+
+        {isQuotaDepleted && (
+          <AddonTopup className="max-w-md flex-1" />
+        )}
+      </div>
       <TableCard title={t('list.title')} tabs={tabs} table={table} />
     </div>
   );

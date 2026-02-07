@@ -138,12 +138,12 @@ export async function generateIllustration({
 
   // Build request payload
   const generationConfig: Record<string, unknown> = {
-    response_modalities: ['TEXT', 'IMAGE'],
+    responseModalities: ['TEXT', 'IMAGE'],
   };
 
-  // Add aspect ratio if specified
+  // Add aspect ratio via imageConfig (per Gemini API spec)
   if (aspectRatio) {
-    generationConfig.aspectRatio = aspectRatio;
+    generationConfig.imageConfig = { aspectRatio };
   }
 
   const payload = {
@@ -151,7 +151,7 @@ export async function generateIllustration({
       role: 'user',
       parts,
     },
-    generation_config: generationConfig,
+    generationConfig,
   };
 
   // Call Gemini API

@@ -22,7 +22,7 @@ import { PricingCurrency } from '@/shared/types/blocks/pricing';
 
 export async function POST(req: Request) {
   try {
-    const { product_id, currency, locale, payment_provider, metadata } =
+    const { product_id, currency, locale, payment_provider, metadata, custom_amount } =
       await req.json();
     if (!product_id) {
       return respErr('product_id is required');
@@ -99,6 +99,25 @@ export async function POST(req: Request) {
     const paymentProvider = paymentService.getProvider(paymentProviderName);
     if (!paymentProvider || !paymentProvider.name) {
       return respErr('no payment provider configured');
+    }
+
+    // --- Addon top-up: validate and override amount ---
+    let addonQuotaAmount: number | undefined;
+    if (product_id === 'addon-topup') {
+      if (!custom_amount || typeof custom_amount !== 'number') {
+        return respErr('custom_amount is required for addon top-up');
+      }
+      // custom_amount is in cents; must be >= 300 ($3) and a whole-dollar amount
+      if (custom_amount < 300) {
+        return respErr('minimum top-up amount is $3');
+      }
+      if (custom_amount % 100 !== 0) {
+        return respErr('top-up amount must be a whole dollar value');
+      }
+      // Override pricing item amount with custom amount
+      pricingItem.amount = custom_amount;
+      // Quota amount = dollar value (e.g. 300 cents → $3.00)
+      addonQuotaAmount = custom_amount / 100;
     }
 
     // checkout currency and amount - calculate from server-side data only (never trust client input)
@@ -280,7 +299,7 @@ export async function POST(req: Request) {
       callbackUrl: callbackUrl,
       quotaPoolType: pricingItem.quota?.pool_type || (paymentType === PaymentType.SUBSCRIPTION ? 'subscription' : 'paygo'),
       quotaMeasurementType: pricingItem.quota?.measurement_type || 'unit',
-      quotaAmount: String(pricingItem.quota?.amount ?? pricingItem.credits ?? 0),
+      quotaAmount: String(addonQuotaAmount ?? pricingItem.quota?.amount ?? pricingItem.credits ?? 0),
       quotaValidDays: pricingItem.valid_days,
       planName: pricingItem.plan_name || '',
       paymentProductId: paymentProductId,

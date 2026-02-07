@@ -180,7 +180,11 @@
             },
             "product_id": "pro-monthly",
             "product_name": "TaleCraft AI 专业版包月",
-            "credits": 400,
+            "quota": {
+              "pool_type": "subscription",
+              "measurement_type": "unit",
+              "amount": 400
+            },
             "valid_days": 30,
             "group": "monthly",
             "plan_name": "专业版"
@@ -285,6 +289,30 @@
             "valid_days": 365,
             "group": "yearly",
             "plan_name": "高级版"
+          },
+          {
+            "title": "额外加购",
+            "description": "月度配额用完时按需充值。",
+            "interval": "one-time",
+            "amount": 300,
+            "currency": "USD",
+            "price": "$3",
+            "unit": "",
+            "is_featured": false,
+            "button": {
+              "title": "充值",
+              "url": "/#pricing",
+              "icon": "RiFlashlightFill"
+            },
+            "product_id": "addon-topup",
+            "product_name": "TaleCraft AI 额外加购",
+            "quota": {
+              "pool_type": "paygo",
+              "measurement_type": "dollar",
+              "amount": 0
+            },
+            "valid_days": 365,
+            "group": "addon"
           }
         ]
       }

@@ -22,6 +22,7 @@ export interface CheckoutResult {
 
 export interface CheckoutActions {
   checkout: (productId: string) => Promise<CheckoutResult>;
+  checkoutAddon: (amountDollars: number) => Promise<CheckoutResult>;
   clearError: () => void;
 }
 
@@ -89,6 +90,54 @@ export function useCheckout(): UseCheckoutReturn {
     }
   }, []);
 
+  const checkoutAddon = useCallback(async (amountDollars: number): Promise<CheckoutResult> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (!Number.isInteger(amountDollars) || amountDollars < 3) {
+        throw new Error('Minimum top-up amount is $3');
+      }
+
+      const resp = await fetch('/api/payment/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: 'addon-topup',
+          custom_amount: amountDollars * 100,
+        }),
+      });
+
+      if (!resp.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { code, data, message } = await resp.json();
+
+      if (code !== 0) {
+        throw new Error(message || 'Failed to create checkout');
+      }
+
+      if (!data?.checkoutUrl) {
+        throw new Error('No checkout URL returned');
+      }
+
+      return {
+        checkoutUrl: data.checkoutUrl,
+        shouldRedirectToBilling: false,
+      };
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to start top-up. Please try again.';
+      setError(errorMessage);
+      return {
+        checkoutUrl: null,
+        shouldRedirectToBilling: false,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -96,9 +145,10 @@ export function useCheckout(): UseCheckoutReturn {
   const actions: CheckoutActions = useMemo(
     () => ({
       checkout,
+      checkoutAddon,
       clearError,
     }),
-    [checkout, clearError]
+    [checkout, checkoutAddon, clearError]
   );
 
   return {

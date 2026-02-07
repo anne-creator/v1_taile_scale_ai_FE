@@ -676,6 +676,8 @@ print(result["data"]["image_url"])`,
               aspectRatio === '1:1' && "aspect-square",
               aspectRatio === '4:3' && "aspect-[4/3]"
             )}
+            onMouseEnter={() => setIsImageHovered(true)}
+            onMouseLeave={() => setIsImageHovered(false)}
           >
             {isGenerating ? (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -692,8 +694,6 @@ print(result["data"]["image_url"])`,
                 src={generatedImage || placeholderImage}
                 alt={generatedImage ? "Generated illustration" : "Example illustration"}
                 className="w-full h-full object-cover"
-                onMouseEnter={() => setIsImageHovered(true)}
-                onMouseLeave={() => setIsImageHovered(false)}
               />
             )}
 
@@ -706,17 +706,18 @@ print(result["data"]["image_url"])`,
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
 
-            {/* Download button when image is generated */}
+            {/* Download button when image is generated - centered with semi-transparent style */}
             {generatedImage && (
               <button
                 onClick={handleDownload}
                 className={cn(
-                  "absolute bottom-4 right-4 p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all duration-200",
+                  "absolute inset-0 m-auto w-fit h-fit px-5 py-3 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all duration-200 flex items-center gap-2",
                   isImageHovered ? "opacity-100" : "opacity-0"
                 )}
                 title="Download image"
               >
                 <Download className="w-5 h-5 text-white" />
+                <span className="text-white text-sm font-medium">Download</span>
               </button>
             )}
           </div>

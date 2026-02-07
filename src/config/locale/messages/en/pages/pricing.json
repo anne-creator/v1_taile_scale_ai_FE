@@ -135,10 +135,10 @@
             "label": "70% off 1st month",
             "features_title": "Includes",
             "features": [
-              "$50 monthly generation budget",
+              "400 image generations/month",
               "All style models & parameters",
               "99.9% uptime SLA",
-              "Pay-as-you-go overage available",
+              "$0.09 per additional image",
               "Priority API access",
               "Dedicated support channel"
             ],
@@ -159,8 +159,8 @@
             "product_name": "TaleCraft AI Pro Monthly",
             "quota": {
               "pool_type": "subscription",
-              "measurement_type": "dollar",
-              "amount": 50.00
+              "measurement_type": "unit",
+              "amount": 400
             },
             "valid_days": 30,
             "group": "monthly",
@@ -171,10 +171,10 @@
             "description": "Professional plan, billed annually.",
             "features_title": "Includes",
             "features": [
-              "$50 monthly generation budget",
+              "400 image generations/month",
               "All style models & parameters",
               "99.9% uptime SLA",
-              "Pay-as-you-go overage available",
+              "$0.09 per additional image",
               "Priority API access",
               "Dedicated support channel"
             ],
@@ -195,12 +195,36 @@
             "product_name": "TaleCraft AI Pro Annual",
             "quota": {
               "pool_type": "subscription",
-              "measurement_type": "dollar",
-              "amount": 50.00
+              "measurement_type": "unit",
+              "amount": 400
             },
             "valid_days": 365,
             "group": "yearly",
             "plan_name": "Pro"
+          },
+          {
+            "title": "Add-on Credits",
+            "description": "Top up when your monthly quota runs out.",
+            "interval": "one-time",
+            "amount": 300,
+            "currency": "USD",
+            "price": "$3",
+            "unit": "",
+            "is_featured": false,
+            "button": {
+              "title": "Top Up",
+              "url": "/#pricing",
+              "icon": "RiFlashlightFill"
+            },
+            "product_id": "addon-topup",
+            "product_name": "TaleCraft AI Add-on Credits",
+            "quota": {
+              "pool_type": "paygo",
+              "measurement_type": "dollar",
+              "amount": 0
+            },
+            "valid_days": 365,
+            "group": "addon"
           }
         ]
       }
