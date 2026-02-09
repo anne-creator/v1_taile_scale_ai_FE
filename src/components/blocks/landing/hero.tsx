@@ -1,22 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Copy,
-  Check,
-  Loader2,
-  AlertCircle,
-  Wand2,
-  Download,
-  Sparkles,
-} from 'lucide-react';
-
-import { Link } from '@/core/i18n/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { useCallback, useEffect, useState } from 'react';
+import { TextShimmer } from '@/components/animations/text-shimmer';
 import {
   Select,
   SelectContent,
@@ -24,11 +9,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/compound/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/providers/auth-provider';
 import { useUI } from '@/providers/ui-provider';
+import {
+  AlertCircle,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Copy,
+  Download,
+  Loader2,
+  Sparkles,
+  Wand2,
+} from 'lucide-react';
+
+import { Link } from '@/core/i18n/navigation';
+import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
-import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
 
 type UserMode = 'developers' | 'creators';
 type CodeLanguage = 'typescript' | 'python' | 'curl';
@@ -65,7 +67,9 @@ export function Hero({
   const [userMode, setUserMode] = useState<UserMode>('developers');
   const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>('typescript');
   const [apiKey, setApiKey] = useState('');
-  const [codePrompt, setCodePrompt] = useState('A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest');
+  const [codePrompt, setCodePrompt] = useState(
+    'A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest'
+  );
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
   const [copied, setCopied] = useState(false);
@@ -78,7 +82,8 @@ export function Hero({
   const [isImageHovered, setIsImageHovered] = useState(false);
 
   // Default placeholder image - real TaleCraft generated illustration
-  const placeholderImage = 'https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg';
+  const placeholderImage =
+    'https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg';
 
   const codeExamples: Record<CodeLanguage, string> = {
     typescript: `const response = await fetch('https://talescaleai.com/api/v1/generate', {
@@ -119,7 +124,7 @@ print(result["data"]["image_url"])`,
     "prompt": "${codePrompt}",
     "style": "children_book",
     "aspect_ratio": "${aspectRatio}"
-  }'`
+  }'`,
   };
 
   const handleCopy = () => {
@@ -186,7 +191,10 @@ print(result["data"]["image_url"])`,
           imageUrl = output;
         } else if (Array.isArray(output) && output.length > 0) {
           const first = output[0];
-          imageUrl = typeof first === 'string' ? first : first?.url ?? first?.uri ?? first?.imageUrl;
+          imageUrl =
+            typeof first === 'string'
+              ? first
+              : (first?.url ?? first?.uri ?? first?.imageUrl);
         }
 
         if (imageUrl) {
@@ -234,7 +242,7 @@ print(result["data"]["image_url"])`,
       // Use public API with API key authentication
       const resp = await fetch('/api/v1/generate', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-API-Key': apiKey,
         },
@@ -294,7 +302,9 @@ print(result["data"]["image_url"])`,
   const handleDownload = async () => {
     if (!generatedImage) return;
     try {
-      const resp = await fetch(`/api/proxy/file?url=${encodeURIComponent(generatedImage)}`);
+      const resp = await fetch(
+        `/api/proxy/file?url=${encodeURIComponent(generatedImage)}`
+      );
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -313,17 +323,16 @@ print(result["data"]["image_url"])`,
 
     if (user) {
       return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-background rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-background w-full max-w-md space-y-4 rounded-xl p-6 shadow-xl">
             <div className="text-center">
-              <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20">
+                <Sparkles className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                Credits Depleted
-              </h3>
+              <h3 className="mb-2 text-xl font-semibold">Credits Depleted</h3>
               <p className="text-muted-foreground">
-                You've used all your credits. Purchase more credits to continue generating images!
+                You've used all your credits. Purchase more credits to continue
+                generating images!
               </p>
             </div>
 
@@ -335,7 +344,7 @@ print(result["data"]["image_url"])`,
                   window.location.href = '/pricing';
                 }}
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="mr-2 h-4 w-4" />
                 Get More Credits
               </Button>
               <Button
@@ -352,15 +361,13 @@ print(result["data"]["image_url"])`,
     }
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-background rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="bg-background w-full max-w-md space-y-4 rounded-xl p-6 shadow-xl">
           <div className="text-center">
-            <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20">
+              <AlertCircle className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">
-              Sign In Required
-            </h3>
+            <h3 className="mb-2 text-xl font-semibold">Sign In Required</h3>
             <p className="text-muted-foreground">
               Sign in to generate images and unlock all features!
             </p>
@@ -375,7 +382,7 @@ print(result["data"]["image_url"])`,
               }}
             >
               Sign In / Sign Up
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -399,14 +406,14 @@ print(result["data"]["image_url"])`,
 
       <div className="container">
         {/* Mode Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-lg border p-1 bg-muted/50">
+        <div className="mb-8 flex justify-center">
+          <div className="bg-muted/50 inline-flex rounded-lg border p-1">
             <button
               onClick={() => setUserMode('developers')}
               className={cn(
-                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                'rounded-md px-4 py-2 text-sm font-medium transition-colors',
                 userMode === 'developers'
-                  ? 'bg-background shadow-sm border-b-2 border-primary'
+                  ? 'bg-background border-primary border-b-2 shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -415,9 +422,9 @@ print(result["data"]["image_url"])`,
             <button
               onClick={() => setUserMode('creators')}
               className={cn(
-                'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                'rounded-md px-4 py-2 text-sm font-medium transition-colors',
                 userMode === 'creators'
-                  ? 'bg-background shadow-sm border-b-2 border-primary'
+                  ? 'bg-background border-primary border-b-2 shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -427,75 +434,83 @@ print(result["data"]["image_url"])`,
         </div>
 
         {/* Title */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-5xl mb-4">
+        <div className="mb-12 text-center">
+          <h1 className="mb-4 text-3xl font-bold tracking-tight sm:text-5xl">
             {userMode === 'developers'
               ? 'Reliable Image Generation API'
-              : 'No-Code Story Illustrator'
-            }
+              : 'No-Code Story Illustrator'}
           </h1>
           <p className="text-muted-foreground text-lg">
             {userMode === 'developers'
               ? 'Generate consistent style illustrations in seconds.'
-              : 'Create consistent characters and scenes instantly.'
-            }
+              : 'Create consistent characters and scenes instantly.'}
           </p>
         </div>
 
         {/* Content Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto items-start">
+        <div className="mx-auto grid max-w-6xl items-start gap-8 lg:grid-cols-2">
           {/* Left Panel */}
           <div className="space-y-4">
             {userMode === 'developers' ? (
               <>
                 {/* Code Snippet */}
-                <div className="bg-brand-dark-soft rounded-lg p-4 relative">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="bg-brand-dark-soft relative rounded-lg p-4">
+                  <div className="mb-4 flex items-center justify-between">
                     <div className="flex gap-1">
-                      {(['typescript', 'python', 'curl'] as CodeLanguage[]).map((lang) => (
-                        <button
-                          key={lang}
-                          onClick={() => setCodeLanguage(lang)}
-                          className={cn(
-                            'text-xs px-3 py-1.5 rounded transition-colors',
-                            codeLanguage === lang
-                              ? 'bg-primary text-primary-foreground'
-                              : 'text-gray-400 hover:text-gray-200'
-                          )}
-                        >
-                          {lang === 'typescript' ? 'TypeScript' : lang === 'python' ? 'Python' : 'cURL'}
-                        </button>
-                      ))}
+                      {(['typescript', 'python', 'curl'] as CodeLanguage[]).map(
+                        (lang) => (
+                          <button
+                            key={lang}
+                            onClick={() => setCodeLanguage(lang)}
+                            className={cn(
+                              'rounded px-3 py-1.5 text-xs transition-colors',
+                              codeLanguage === lang
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-gray-400 hover:text-gray-200'
+                            )}
+                          >
+                            {lang === 'typescript'
+                              ? 'TypeScript'
+                              : lang === 'python'
+                                ? 'Python'
+                                : 'cURL'}
+                          </button>
+                        )
+                      )}
                     </div>
                     <button
                       onClick={handleCopy}
-                      className="text-gray-400 hover:text-white transition-colors"
+                      className="text-gray-400 transition-colors hover:text-white"
                     >
-                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  <pre className="text-sm text-gray-300 overflow-y-auto max-h-[280px] whitespace-pre-wrap break-all scrollbar-thin">
+                  <pre className="scrollbar-thin max-h-[280px] overflow-y-auto text-sm break-all whitespace-pre-wrap text-gray-300">
                     <code>{codeExamples[codeLanguage]}</code>
                   </pre>
                 </div>
 
                 {/* Edit Prompt */}
                 <div>
-                  <label className="block text-sm mb-2">Edit Prompt</label>
+                  <label className="mb-2 block text-sm">Edit Prompt</label>
                   <Input
                     type="text"
                     placeholder="A wise old owl in a velvet waistcoat reading to woodland creatures..."
                     value={codePrompt}
                     onChange={(e) => setCodePrompt(e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-muted-foreground mt-1 text-xs">
                     Changes will be reflected in the code snippet above
                   </p>
                 </div>
 
                 {/* Aspect Ratio */}
                 <div>
-                  <label className="block text-sm mb-2">Aspect Ratio</label>
+                  <label className="mb-2 block text-sm">Aspect Ratio</label>
                   <div className="flex gap-2">
                     {(['16:9', '1:1', '4:3'] as AspectRatio[]).map((ratio) => (
                       <button
@@ -503,7 +518,7 @@ print(result["data"]["image_url"])`,
                         onClick={() => setAspectRatio(ratio)}
                         disabled={isGenerating}
                         className={cn(
-                          'px-4 py-2 border rounded-lg transition-colors text-sm',
+                          'rounded-lg border px-4 py-2 text-sm transition-colors',
                           aspectRatio === ratio
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-border hover:border-primary/50'
@@ -517,7 +532,7 @@ print(result["data"]["image_url"])`,
 
                 {/* API Key Input */}
                 <div>
-                  <label className="block text-sm mb-2">Your API Key</label>
+                  <label className="mb-2 block text-sm">Your API Key</label>
                   <div className="flex gap-2">
                     <Input
                       type="password"
@@ -532,16 +547,18 @@ print(result["data"]["image_url"])`,
                       disabled={isGeneratingKey}
                     >
                       {isGeneratingKey ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          <Wand2 className="w-4 h-4 mr-1" />
+                          <Wand2 className="mr-1 h-4 w-4" />
                           Generate Key
                         </>
                       )}
                     </Button>
                   </div>
-                  {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+                  {error && (
+                    <p className="text-destructive mt-1 text-xs">{error}</p>
+                  )}
                 </div>
 
                 {/* Generate Illustration Button */}
@@ -554,13 +571,13 @@ print(result["data"]["image_url"])`,
                 >
                   {isGenerating ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Generating...
                     </>
                   ) : (
                     <>
                       Generate Illustration
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -569,7 +586,9 @@ print(result["data"]["image_url"])`,
               <>
                 {/* Prompt Input */}
                 <div>
-                  <label className="block text-sm mb-2">Describe Your Story Scene</label>
+                  <label className="mb-2 block text-sm">
+                    Describe Your Story Scene
+                  </label>
                   <Textarea
                     placeholder="A wise old owl in a velvet waistcoat reading to woodland creatures in an ancient oak forest..."
                     className="min-h-[120px] resize-none"
@@ -581,21 +600,25 @@ print(result["data"]["image_url"])`,
 
                 {/* Style Selection */}
                 <div>
-                  <label className="block text-sm mb-2">Art Style</label>
+                  <label className="mb-2 block text-sm">Art Style</label>
                   <Select defaultValue="vintage">
                     <SelectTrigger>
                       <SelectValue placeholder="Select style" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="vintage">Vintage Children's Book</SelectItem>
-                      <SelectItem value="watercolor" disabled>Coming Soon...</SelectItem>
+                      <SelectItem value="vintage">
+                        Vintage Children's Book
+                      </SelectItem>
+                      <SelectItem value="watercolor" disabled>
+                        Coming Soon...
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Aspect Ratio */}
                 <div>
-                  <label className="block text-sm mb-2">Format</label>
+                  <label className="mb-2 block text-sm">Format</label>
                   <div className="flex gap-2">
                     {(['16:9', '1:1', '4:3'] as AspectRatio[]).map((ratio) => (
                       <button
@@ -603,7 +626,7 @@ print(result["data"]["image_url"])`,
                         onClick={() => setAspectRatio(ratio)}
                         disabled={isGenerating}
                         className={cn(
-                          'px-4 py-2 border rounded-lg transition-colors text-sm',
+                          'rounded-lg border px-4 py-2 text-sm transition-colors',
                           aspectRatio === ratio
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-border hover:border-primary/50'
@@ -617,7 +640,7 @@ print(result["data"]["image_url"])`,
 
                 {/* API Key Input */}
                 <div>
-                  <label className="block text-sm mb-2">Your API Key</label>
+                  <label className="mb-2 block text-sm">Your API Key</label>
                   <div className="flex gap-2">
                     <Input
                       type="password"
@@ -632,16 +655,18 @@ print(result["data"]["image_url"])`,
                       disabled={isGeneratingKey}
                     >
                       {isGeneratingKey ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          <Wand2 className="w-4 h-4 mr-1" />
+                          <Wand2 className="mr-1 h-4 w-4" />
                           Generate Key
                         </>
                       )}
                     </Button>
                   </div>
-                  {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+                  {error && (
+                    <p className="text-destructive mt-1 text-xs">{error}</p>
+                  )}
                 </div>
 
                 {/* Generate Button */}
@@ -654,13 +679,13 @@ print(result["data"]["image_url"])`,
                 >
                   {isGenerating ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Generating...
                     </>
                   ) : (
                     <>
                       Generate Illustration
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -669,55 +694,79 @@ print(result["data"]["image_url"])`,
           </div>
 
           {/* Right Panel - Generated Image */}
-          <div 
+          <div
             className={cn(
-              "relative rounded-xl overflow-hidden border bg-muted",
-              aspectRatio === '16:9' && "aspect-[16/9]",
-              aspectRatio === '1:1' && "aspect-square",
-              aspectRatio === '4:3' && "aspect-[4/3]"
+              'bg-muted relative overflow-hidden rounded-xl border',
+              aspectRatio === '16:9' && 'aspect-[16/9]',
+              aspectRatio === '1:1' && 'aspect-square',
+              aspectRatio === '4:3' && 'aspect-[4/3]'
             )}
             onMouseEnter={() => setIsImageHovered(true)}
             onMouseLeave={() => setIsImageHovered(false)}
           >
             {isGenerating ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-                <div className="text-center">
-                  <Loader2 
-                    className="w-8 h-8 mx-auto mb-2 text-gray-400" 
-                    style={{ animation: 'spin 1s linear infinite' }}
+              <div className="bg-muted absolute inset-0 flex flex-col items-center justify-center">
+                {/* Skeleton shimmer background to simulate image forming */}
+                <div className="absolute inset-4 flex flex-col gap-3 opacity-40">
+                  <Skeleton className="h-1/3 w-full rounded-lg" />
+                  <div className="flex h-1/4 gap-3">
+                    <Skeleton className="w-1/2 rounded-lg" />
+                    <Skeleton className="w-1/2 rounded-lg" />
+                  </div>
+                  <Skeleton className="h-1/4 w-3/4 rounded-lg" />
+                </div>
+
+                {/* Center loading indicator */}
+                <div className="relative z-10 flex flex-col items-center gap-3">
+                  <Sparkles
+                    className="text-primary h-10 w-10 animate-pulse"
+                    aria-hidden="true"
                   />
-                  <p className="text-sm text-muted-foreground">Creating your illustration...</p>
+                  <TextShimmer className="text-sm" shimmerWidth={120}>
+                    Creating your illustration...
+                  </TextShimmer>
+                </div>
+
+                {/* Animated progress bar at bottom */}
+                <div className="bg-muted-foreground/10 absolute right-0 bottom-0 left-0 h-1 overflow-hidden">
+                  <div className="bg-primary/60 animate-progress h-full w-1/3 rounded-full" />
                 </div>
               </div>
             ) : (
               <img
                 src={generatedImage || placeholderImage}
-                alt={generatedImage ? "Generated illustration" : "Example illustration"}
-                className="w-full h-full object-cover"
+                alt={
+                  generatedImage
+                    ? 'Generated illustration'
+                    : 'Example illustration'
+                }
+                className="h-full w-full object-cover"
               />
             )}
 
-            {/* Gallery link overlay */}
-            <Link
-              href="/showcases"
-              className="absolute top-4 right-4 flex items-center gap-1.5 text-sm font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full text-primary hover:bg-black/60 transition-colors"
-            >
-              Check guide gallery for inspiration
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
+            {/* Gallery link overlay - hidden during generation */}
+            {!isGenerating && (
+              <Link
+                href="/showcases"
+                className="text-primary absolute top-4 right-4 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-black/60"
+              >
+                Check guide gallery for inspiration
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
 
             {/* Download button when image is generated - centered with semi-transparent style */}
             {generatedImage && (
               <button
                 onClick={handleDownload}
                 className={cn(
-                  "absolute inset-0 m-auto w-fit h-fit px-5 py-3 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all duration-200 flex items-center gap-2",
-                  isImageHovered ? "opacity-100" : "opacity-0"
+                  'absolute inset-0 m-auto flex h-fit w-fit items-center gap-2 rounded-full bg-black/40 px-5 py-3 backdrop-blur-sm transition-all duration-200 hover:bg-black/60',
+                  isImageHovered ? 'opacity-100' : 'opacity-0'
                 )}
                 title="Download image"
               >
-                <Download className="w-5 h-5 text-white" />
-                <span className="text-white text-sm font-medium">Download</span>
+                <Download className="h-5 w-5 text-white" />
+                <span className="text-sm font-medium text-white">Download</span>
               </button>
             )}
           </div>

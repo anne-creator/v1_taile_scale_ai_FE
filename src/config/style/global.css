@@ -137,6 +137,18 @@ pre {
       transform: translateY(calc(-100% - var(--gap)));
     }
   }
+  --animate-progress: progress 2s ease-in-out infinite;
+  @keyframes progress {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(200%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
 }
 
 ::view-transition-old(root),
@@ -176,7 +188,7 @@ pre {
     line-height: var(--line-height-normal);
     font-weight: var(--font-weight-medium);
   }
-  
+
   /* Animation Duration Utilities */
   .duration-token-fast {
     transition-duration: var(--duration-fast);
@@ -190,7 +202,7 @@ pre {
   .duration-token-slower {
     transition-duration: var(--duration-slower);
   }
-  
+
   /* Animation Easing Utilities */
   .ease-token-in {
     transition-timing-function: var(--ease-in);
