@@ -249,9 +249,10 @@ export async function grantQuotaForNewUser(user: User) {
     parseInt(configs.initial_credits_valid_days as string) || 0;
   const description = configs.initial_credits_description || 'Initial quota';
 
-  // Default: grant as paygo unit-based (backward compatible)
+  // Default: grant as subscription unit-based (consumed first before paid quota)
   const poolType =
-    (configs.initial_quota_pool_type as QuotaPoolType) || QuotaPoolType.PAYGO;
+    (configs.initial_quota_pool_type as QuotaPoolType) ||
+    QuotaPoolType.SUBSCRIPTION;
   const measurementType =
     (configs.initial_quota_measurement_type as QuotaMeasurementType) ||
     QuotaMeasurementType.UNIT;

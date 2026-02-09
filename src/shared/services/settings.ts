@@ -369,6 +369,32 @@ export async function getSettings() {
       tip: 'description for initial credits',
     },
     {
+      name: 'initial_quota_pool_type',
+      title: 'Initial Quota Pool Type',
+      type: 'select',
+      value: 'subscription',
+      options: [
+        { title: 'Subscription', value: 'subscription' },
+        { title: 'Pay-as-you-go', value: 'paygo' },
+      ],
+      group: 'credit',
+      tab: 'general',
+      tip: 'which pool to grant initial quota to (subscription = consumed first, paygo = consumed second)',
+    },
+    {
+      name: 'initial_quota_measurement_type',
+      title: 'Initial Quota Measurement Type',
+      type: 'select',
+      value: 'unit',
+      options: [
+        { title: 'Unit', value: 'unit' },
+        { title: 'Dollar', value: 'dollar' },
+      ],
+      group: 'credit',
+      tab: 'general',
+      tip: 'measurement type for initial quota (unit = 1 per generation, dollar = cost per generation)',
+    },
+    {
       name: 'email_auth_enabled',
       title: 'Enabled',
       type: 'switch',

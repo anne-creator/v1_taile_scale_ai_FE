@@ -750,7 +750,7 @@ print(result["data"]["image_url"])`,
                 href="/showcases"
                 className="text-primary absolute top-4 right-4 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-black/60"
               >
-                Check guide gallery for inspiration
+                Check gallery for inspiration
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             )}

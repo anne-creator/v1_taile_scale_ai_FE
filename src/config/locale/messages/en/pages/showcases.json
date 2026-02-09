@@ -1,15 +1,15 @@
 {
   "metadata": {
     "title": "Gallery - TaleCraft AI",
-    "description": "Explore stunning story illustrations created with TaleCraft AI"
+    "description": "Explore stunning story illustrations"
   },
   "page": {
-    "title": "Guide Gallery",
+    "title": "Gallery",
     "sections": {
       "showcases": {
         "id": "showcases",
         "block": "showcases",
-        "title": "Guide Gallery",
+        "title": "Gallery",
         "description": "Explore stunning illustrations created with TaleCraft. Every image tells a story.",
         "items": [
           {

@@ -1,10 +1,6 @@
 {
   "page": {
-    "show_sections": [
-      "hero",
-      "showcases",
-      "pricing"
-    ],
+    "show_sections": ["hero", "showcases", "pricing"],
     "sections": {
       "hero": {
         "id": "hero",
@@ -15,8 +11,9 @@
       "showcases": {
         "id": "showcases",
         "block": "showcases",
-        "title": "Guide Gallery",
-        "description": "Explore stunning illustrations created with TaleCraft. Every image tells a story.",
+        "title": "Gallery",
+        "description": "Every image tells a story.",
+        "showViewFullButton": true,
         "items": [
           {
             "image": {
