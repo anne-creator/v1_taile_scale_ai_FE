@@ -13,6 +13,7 @@ import {
 
 import { authClient, signIn, signOut, useSession } from '@/core/auth/client';
 import { useRouter } from '@/core/i18n/navigation';
+import { clearAnonymousSession } from '@/hooks/use-anonymous-session';
 import { User } from '@/shared/models/user';
 
 /**
@@ -146,6 +147,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Keep userRef in sync
   useEffect(() => {
     userRef.current = user;
+  }, [user]);
+
+  // Convert anonymous session when user authenticates (signup or login)
+  const prevUserRef = useRef<User | null>(null);
+  useEffect(() => {
+    const wasNull = prevUserRef.current === null;
+    prevUserRef.current = user;
+
+    if (!wasNull || !user?.id) return;
+
+    const ANON_KEY = 'talecraft_anonymous_session';
+    try {
+      const raw =
+        typeof window !== 'undefined' ? localStorage.getItem(ANON_KEY) : null;
+      if (!raw) return;
+      const { anonymousUserId } = JSON.parse(raw);
+      if (!anonymousUserId) return;
+
+      fetch('/api/anonymous/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ anonymousUserId }),
+      })
+        .catch(() => {})
+        .finally(() => {
+          clearAnonymousSession();
+        });
+    } catch {
+      // best-effort
+    }
   }, [user]);
 
   const fetchUserInfo = useCallback(async () => {

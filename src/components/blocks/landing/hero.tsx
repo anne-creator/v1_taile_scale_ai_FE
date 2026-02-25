@@ -29,6 +29,7 @@ import {
 
 import { Link } from '@/core/i18n/navigation';
 import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
+import { useAnonymousSession } from '@/hooks/use-anonymous-session';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 
@@ -63,6 +64,12 @@ export function Hero({
 }) {
   const { user } = useAuth();
   const { setIsShowSignModal } = useUI();
+  const {
+    session: anonSession,
+    createSession: createAnonSession,
+    updateRemainingGenerations,
+    isLoading: isAnonLoading,
+  } = useAnonymousSession();
 
   const [userMode, setUserMode] = useState<UserMode>('developers');
   const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>('typescript');
@@ -80,6 +87,13 @@ export function Hero({
   const [error, setError] = useState<string | null>(null);
   const [showQuotaModal, setShowQuotaModal] = useState(false);
   const [isImageHovered, setIsImageHovered] = useState(false);
+
+  // Auto-fill API key from anonymous session when available
+  useEffect(() => {
+    if (!user && anonSession?.apiKey && !apiKey) {
+      setApiKey(anonSession.apiKey);
+    }
+  }, [user, anonSession, apiKey]);
 
   // Default placeholder image - real TaleCraft generated illustration
   const placeholderImage =
@@ -135,7 +149,14 @@ print(result["data"]["image_url"])`,
 
   const handleGenerateApiKey = async () => {
     if (!user) {
-      setIsShowSignModal(true);
+      // For unauthenticated users, create an anonymous session
+      const session = await createAnonSession();
+      if (session) {
+        setApiKey(session.apiKey);
+        apiKeyStorage.setKey(session.apiKey);
+      } else {
+        setShowQuotaModal(true);
+      }
       return;
     }
     setIsGeneratingKey(true);
@@ -223,13 +244,19 @@ print(result["data"]["image_url"])`,
       return;
     }
 
-    if (!user) {
-      setIsShowSignModal(true);
-      return;
+    // For unauthenticated users, provision an anonymous session automatically
+    let activeKey = apiKey;
+    if (!user && !activeKey.trim()) {
+      const session = await createAnonSession();
+      if (!session) {
+        setShowQuotaModal(true);
+        return;
+      }
+      activeKey = session.apiKey;
+      setApiKey(activeKey);
     }
 
-    // Require API key in all modes
-    if (!apiKey.trim()) {
+    if (!activeKey.trim()) {
       setError('Please generate or enter an API key first');
       return;
     }
@@ -239,12 +266,11 @@ print(result["data"]["image_url"])`,
     setGeneratedImage(null);
 
     try {
-      // Use public API with API key authentication
       const resp = await fetch('/api/v1/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': apiKey,
+          'X-API-Key': activeKey,
         },
         body: JSON.stringify({
           prompt: currentPrompt,
@@ -260,11 +286,23 @@ print(result["data"]["image_url"])`,
 
       const { code, message, data } = await resp.json();
       if (code !== 0) {
-        if (message?.includes('insufficient credits')) {
+        if (
+          message?.includes('insufficient credits') ||
+          message?.includes('insufficient quota') ||
+          message?.includes('Insufficient quota')
+        ) {
+          if (anonSession) {
+            updateRemainingGenerations(0);
+          }
           setShowQuotaModal(true);
           return;
         }
         throw new Error(message || 'Generation failed');
+      }
+
+      // Decrement anonymous remaining count on success
+      if (anonSession && anonSession.remainingGenerations > 0) {
+        updateRemainingGenerations(anonSession.remainingGenerations - 1);
       }
 
       const newTaskId = data?.id;
@@ -331,8 +369,8 @@ print(result["data"]["image_url"])`,
               </div>
               <h3 className="mb-2 text-xl font-semibold">Credits Depleted</h3>
               <p className="text-muted-foreground">
-                You've used all your credits. Purchase more credits to continue
-                generating images!
+                You&apos;ve used all your credits. Purchase more credits to
+                continue generating images!
               </p>
             </div>
 
@@ -360,16 +398,23 @@ print(result["data"]["image_url"])`,
       );
     }
 
+    // Anonymous user or unauthenticated: prompt to sign up
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div className="bg-background w-full max-w-md space-y-4 rounded-xl p-6 shadow-xl">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/20">
-              <AlertCircle className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
+              <Sparkles className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <h3 className="mb-2 text-xl font-semibold">Sign In Required</h3>
+            <h3 className="mb-2 text-xl font-semibold">
+              {anonSession
+                ? 'Free Trial Complete'
+                : 'Sign In Required'}
+            </h3>
             <p className="text-muted-foreground">
-              Sign in to generate images and unlock all features!
+              {anonSession
+                ? 'You\'ve used all your free generations. Sign up to get more credits and unlock all features!'
+                : 'Sign in to generate images and unlock all features!'}
             </p>
           </div>
 
@@ -381,7 +426,7 @@ print(result["data"]["image_url"])`,
                 setIsShowSignModal(true);
               }}
             >
-              Sign In / Sign Up
+              Sign Up for Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
@@ -567,12 +612,12 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || !apiKey.trim()}
+                  disabled={isGenerating || isAnonLoading || (user && !apiKey.trim())}
                 >
-                  {isGenerating ? (
+                  {isGenerating || isAnonLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
+                      {isAnonLoading ? 'Setting up...' : 'Generating...'}
                     </>
                   ) : (
                     <>
@@ -581,6 +626,11 @@ print(result["data"]["image_url"])`,
                     </>
                   )}
                 </Button>
+                {!user && anonSession && (
+                  <p className="text-muted-foreground text-center text-xs">
+                    {anonSession.remainingGenerations} free generation{anonSession.remainingGenerations !== 1 ? 's' : ''} remaining
+                  </p>
+                )}
               </>
             ) : (
               <>
@@ -675,12 +725,12 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || !prompt.trim() || !apiKey.trim()}
+                  disabled={isGenerating || isAnonLoading || !prompt.trim() || (user && !apiKey.trim())}
                 >
-                  {isGenerating ? (
+                  {isGenerating || isAnonLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
+                      {isAnonLoading ? 'Setting up...' : 'Generating...'}
                     </>
                   ) : (
                     <>
@@ -689,6 +739,11 @@ print(result["data"]["image_url"])`,
                     </>
                   )}
                 </Button>
+                {!user && anonSession && (
+                  <p className="text-muted-foreground text-center text-xs">
+                    {anonSession.remainingGenerations} free generation{anonSession.remainingGenerations !== 1 ? 's' : ''} remaining
+                  </p>
+                )}
               </>
             )}
           </div>

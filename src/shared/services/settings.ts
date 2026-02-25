@@ -90,6 +90,12 @@ export async function getSettingTabs(tab: string) {
       url: '/admin/settings/customer_service',
       is_active: tab === 'customer_service',
     },
+    {
+      name: 'anonymous',
+      title: 'Anonymous Trial',
+      url: '/admin/settings/anonymous',
+      is_active: tab === 'anonymous',
+    },
   ];
 
   return tabs;
@@ -270,6 +276,12 @@ export async function getSettingGroups() {
       description:
         'custom your <a href="https://www.tawk.to" class="text-primary" target="_blank">Tawk</a> settings',
       tab: 'customer_service',
+    },
+    {
+      name: 'anonymous_trial',
+      title: 'Anonymous Trial',
+      description: 'Configure anonymous user trial settings for the landing page',
+      tab: 'anonymous',
     },
   ];
   return settingGroups;
@@ -956,6 +968,61 @@ export async function getSettings() {
       group: 'tawk',
       tab: 'customer_service',
     },
+    // --- Anonymous Trial ---
+    {
+      name: 'anonymous_trial_enabled',
+      title: 'Anonymous Trial Enabled',
+      type: 'switch',
+      value: 'true',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Allow anonymous users to generate images without signing up',
+    },
+    {
+      name: 'anonymous_trial_amount',
+      title: 'Free Generations',
+      type: 'number',
+      placeholder: '3',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Number of free image generations per anonymous session',
+    },
+    {
+      name: 'anonymous_session_ttl_days',
+      title: 'Session TTL (days)',
+      type: 'number',
+      placeholder: '7',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Days before anonymous session expires and is cleaned up',
+    },
+    {
+      name: 'anonymous_ip_max_accounts',
+      title: 'Max Accounts per IP',
+      type: 'number',
+      placeholder: '5',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Maximum anonymous accounts allowed per IP address (lifetime)',
+    },
+    {
+      name: 'anonymous_device_max_accounts',
+      title: 'Max Accounts per Device',
+      type: 'number',
+      placeholder: '3',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Maximum anonymous accounts allowed per device fingerprint (lifetime)',
+    },
+    {
+      name: 'anonymous_cooldown_hours',
+      title: 'Cooldown (hours)',
+      type: 'number',
+      placeholder: '48',
+      group: 'anonymous_trial',
+      tab: 'anonymous',
+      tip: 'Hours between new anonymous sessions from the same IP/device',
+    },
   ];
 
   return settings;
@@ -976,6 +1043,7 @@ export const publicSettingNames = [
   'promotekit_enabled',
   'crisp_enabled',
   'tawk_enabled',
+  'anonymous_trial_enabled',
 ];
 
 export async function getAllSettingNames() {

@@ -1,7 +1,9 @@
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
   integer,
+  jsonb,
   numeric,
   pgSchema,
   pgTable,
@@ -43,6 +45,8 @@ export const user = table(
     index('idx_user_name').on(table.name),
     // Order users by registration time for latest users list
     index('idx_user_created_at').on(table.createdAt),
+    // Partial index: exclude shadow users so admin queries stay fast
+    index('idx_real_users').on(table.createdAt).where(sql`email NOT LIKE '%@anonymous.local'`),
   ]
 );
 
@@ -403,6 +407,8 @@ export const apikey = table(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     deletedAt: timestamp('deleted_at'),
+    isTemporary: boolean('is_temporary').default(false).notNull(),
+    anonymousUserId: text('anonymous_user_id'),
   },
   (table) => [
     // Composite: Query user's API keys by status
@@ -411,6 +417,90 @@ export const apikey = table(
     // Composite: Validate active API key (most common for auth)
     // Can also be used for: WHERE key = ? (left-prefix)
     index('idx_apikey_key_status').on(table.key, table.status),
+    index('idx_apikey_anonymous').on(table.anonymousUserId).where(sql`is_temporary = true`),
+  ]
+);
+
+// --- Anonymous User Tables ---
+
+export const deviceFingerprint = table(
+  'device_fingerprint',
+  {
+    id: text('id').primaryKey(),
+    fingerprintHash: text('fingerprint_hash').notNull().unique(),
+    components: jsonb('components'),
+    anonymousAccountCount: integer('anonymous_account_count')
+      .notNull()
+      .default(1),
+    maxAnonymousAccounts: integer('max_anonymous_accounts')
+      .notNull()
+      .default(3),
+    lastAccountCreatedAt: timestamp('last_account_created_at')
+      .defaultNow()
+      .notNull(),
+    firstSeenAt: timestamp('first_seen_at').defaultNow().notNull(),
+    lastSeenAt: timestamp('last_seen_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_device_fp_last_created').on(table.lastAccountCreatedAt),
+  ]
+);
+
+export const ipTracking = table(
+  'ip_tracking',
+  {
+    id: text('id').primaryKey(),
+    ipAddress: text('ip_address').notNull().unique(),
+    anonymousAccountCount: integer('anonymous_account_count')
+      .notNull()
+      .default(1),
+    maxAnonymousAccounts: integer('max_anonymous_accounts')
+      .notNull()
+      .default(5),
+    lastAccountCreatedAt: timestamp('last_account_created_at')
+      .defaultNow()
+      .notNull(),
+    cooldownHours: integer('cooldown_hours').notNull().default(48),
+    firstSeenAt: timestamp('first_seen_at').defaultNow().notNull(),
+    lastSeenAt: timestamp('last_seen_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_ip_tracking_last_created').on(table.lastAccountCreatedAt),
+  ]
+);
+
+export const anonymousUser = table(
+  'anonymous_user',
+  {
+    id: text('id').primaryKey(),
+    fingerprintHash: text('fingerprint_hash'),
+    ipAddress: text('ip_address').notNull(),
+    shadowUserId: text('shadow_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    convertedToUserId: text('converted_to_user_id').references(() => user.id, {
+      onDelete: 'set null',
+    }),
+    isConverted: boolean('is_converted').default(false).notNull(),
+    tempApiKeyId: text('temp_api_key_id').references(() => apikey.id, {
+      onDelete: 'set null',
+    }),
+    trialQuotaId: text('trial_quota_id'),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    expiresAt: timestamp('expires_at')
+      .notNull()
+      .default(sql`now() + interval '7 days'`),
+  },
+  (table) => [
+    index('idx_anon_user_fingerprint').on(table.fingerprintHash),
+    index('idx_anon_user_ip').on(table.ipAddress),
+    index('idx_anon_user_converted').on(table.convertedToUserId).where(sql`is_converted = true`),
+    index('idx_anon_user_expires').on(table.expiresAt).where(sql`is_converted = false`),
+    index('idx_anon_user_shadow').on(table.shadowUserId),
   ]
 );
 

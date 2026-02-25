@@ -19,6 +19,7 @@ export type UpdateQuota = Partial<
 // --- Enums ---
 
 export enum QuotaPoolType {
+  TRIAL = 'trial',
   SUBSCRIPTION = 'subscription',
   PAYGO = 'paygo',
 }
@@ -45,6 +46,7 @@ export enum QuotaTransactionScene {
   RENEWAL = 'renewal',
   GIFT = 'gift',
   REWARD = 'reward',
+  TRIAL = 'trial',
 }
 
 // --- Types ---
@@ -82,6 +84,7 @@ export interface QuotaPoolOverview {
 }
 
 export interface QuotaOverview {
+  trial: QuotaPoolOverview | null;
   subscription: QuotaPoolOverview | null;
   paygo: QuotaPoolOverview | null;
 }
@@ -317,83 +320,50 @@ export async function canConsumeService(
     const cost = await getServiceCost(serviceType, scene);
     const currentTime = new Date();
 
-    // Check subscription pools first
-    const [subBalance] = await db()
-      .select({ total: sum(quota.remainingAmount) })
-      .from(quota)
-      .where(
-        and(
-          eq(quota.userId, userId),
-          eq(quota.poolType, QuotaPoolType.SUBSCRIPTION),
-          eq(quota.transactionType, QuotaTransactionType.GRANT),
-          eq(quota.status, QuotaStatus.ACTIVE),
-          gt(quota.remainingAmount, '0'),
-          or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
+    const poolOrder: QuotaPoolType[] = [
+      QuotaPoolType.TRIAL,
+      QuotaPoolType.SUBSCRIPTION,
+      QuotaPoolType.PAYGO,
+    ];
+
+    for (const poolType of poolOrder) {
+      const [balanceResult] = await db()
+        .select({ total: sum(quota.remainingAmount) })
+        .from(quota)
+        .where(
+          and(
+            eq(quota.userId, userId),
+            eq(quota.poolType, poolType),
+            eq(quota.transactionType, QuotaTransactionType.GRANT),
+            eq(quota.status, QuotaStatus.ACTIVE),
+            gt(quota.remainingAmount, '0'),
+            or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
+          )
+        );
+
+      const [pool] = await db()
+        .select()
+        .from(quota)
+        .where(
+          and(
+            eq(quota.userId, userId),
+            eq(quota.poolType, poolType),
+            eq(quota.transactionType, QuotaTransactionType.GRANT),
+            eq(quota.status, QuotaStatus.ACTIVE),
+            gt(quota.remainingAmount, '0'),
+            or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
+          )
         )
-      );
+        .limit(1);
 
-    // Get a representative subscription pool to determine measurement type
-    const [subPool] = await db()
-      .select()
-      .from(quota)
-      .where(
-        and(
-          eq(quota.userId, userId),
-          eq(quota.poolType, QuotaPoolType.SUBSCRIPTION),
-          eq(quota.transactionType, QuotaTransactionType.GRANT),
-          eq(quota.status, QuotaStatus.ACTIVE),
-          gt(quota.remainingAmount, '0'),
-          or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
-        )
-      )
-      .limit(1);
-
-    if (subPool && subBalance?.total) {
-      const balance = parseFloat(subBalance.total);
-      const requiredCost =
-        subPool.measurementType === QuotaMeasurementType.DOLLAR
-          ? parseFloat(cost.dollarCost)
-          : cost.unitCost;
-      if (balance >= requiredCost) return true;
-    }
-
-    // Check paygo pools
-    const [paygoBalance] = await db()
-      .select({ total: sum(quota.remainingAmount) })
-      .from(quota)
-      .where(
-        and(
-          eq(quota.userId, userId),
-          eq(quota.poolType, QuotaPoolType.PAYGO),
-          eq(quota.transactionType, QuotaTransactionType.GRANT),
-          eq(quota.status, QuotaStatus.ACTIVE),
-          gt(quota.remainingAmount, '0'),
-          or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
-        )
-      );
-
-    const [paygoPool] = await db()
-      .select()
-      .from(quota)
-      .where(
-        and(
-          eq(quota.userId, userId),
-          eq(quota.poolType, QuotaPoolType.PAYGO),
-          eq(quota.transactionType, QuotaTransactionType.GRANT),
-          eq(quota.status, QuotaStatus.ACTIVE),
-          gt(quota.remainingAmount, '0'),
-          or(isNull(quota.expiresAt), gt(quota.expiresAt, currentTime))
-        )
-      )
-      .limit(1);
-
-    if (paygoPool && paygoBalance?.total) {
-      const balance = parseFloat(paygoBalance.total);
-      const requiredCost =
-        paygoPool.measurementType === QuotaMeasurementType.DOLLAR
-          ? parseFloat(cost.dollarCost)
-          : cost.unitCost;
-      if (balance >= requiredCost) return true;
+      if (pool && balanceResult?.total) {
+        const balance = parseFloat(balanceResult.total);
+        const requiredCost =
+          pool.measurementType === QuotaMeasurementType.DOLLAR
+            ? parseFloat(cost.dollarCost)
+            : cost.unitCost;
+        if (balance >= requiredCost) return true;
+      }
     }
 
     return false;
@@ -427,8 +397,8 @@ export async function consumeQuota({
   const execute = async (tx: any) => {
     const currentTime = new Date();
 
-    // Try subscription pools first, then paygo
     const poolOrder: QuotaPoolType[] = [
+      QuotaPoolType.TRIAL,
       QuotaPoolType.SUBSCRIPTION,
       QuotaPoolType.PAYGO,
     ];
@@ -773,12 +743,15 @@ export async function getQuotaOverview(userId: string): Promise<QuotaOverview> {
     };
   };
 
-  const [subscriptionOverview, paygoOverview] = await Promise.all([
-    getPoolOverview(QuotaPoolType.SUBSCRIPTION),
-    getPoolOverview(QuotaPoolType.PAYGO),
-  ]);
+  const [trialOverview, subscriptionOverview, paygoOverview] =
+    await Promise.all([
+      getPoolOverview(QuotaPoolType.TRIAL),
+      getPoolOverview(QuotaPoolType.SUBSCRIPTION),
+      getPoolOverview(QuotaPoolType.PAYGO),
+    ]);
 
   return {
+    trial: trialOverview,
     subscription: subscriptionOverview,
     paygo: paygoOverview,
   };
