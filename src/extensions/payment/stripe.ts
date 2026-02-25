@@ -368,28 +368,41 @@ export class StripeProvider implements PaymentProvider {
    */
   async isNewCustomer(email: string): Promise<boolean> {
     try {
-      // Find existing customer by email
       const customers = await this.client.customers.list({
         email: email,
         limit: 1,
       });
 
       if (customers.data.length === 0) {
-        return true; // No customer record, is a new customer
+        return true;
       }
 
       const customerId = customers.data[0].id;
 
-      // Check if customer has any prior transactions (charges)
-      const charges = await this.client.charges.list({
+      // Check for subscriptions that actually started (not incomplete/abandoned)
+      const subscriptions = await this.client.subscriptions.list({
         customer: customerId,
-        limit: 1,
+        limit: 10,
       });
 
-      return charges.data.length === 0;
+      const hasRealSubscription = subscriptions.data.some(
+        (s) => !['incomplete', 'incomplete_expired'].includes(s.status)
+      );
+
+      if (hasRealSubscription) {
+        return false;
+      }
+
+      // Also check for successful one-time charges
+      const charges = await this.client.charges.list({
+        customer: customerId,
+        limit: 10,
+      });
+
+      return !charges.data.some((c) => c.status === 'succeeded');
     } catch (e) {
       console.log('check new customer failed:', e);
-      return true; // On failure, default to trying to apply promotion code
+      return true;
     }
   }
 
