@@ -39,6 +39,11 @@
           "title": "价格与账单",
           "url": "/settings/billing",
           "icon": "CreditCard"
+        },
+        {
+          "title": "API Key",
+          "url": "/settings/apikeys",
+          "icon": "KeyRound"
         }
       ]
     },

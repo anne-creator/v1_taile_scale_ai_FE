@@ -39,6 +39,11 @@
           "title": "Price & Billing",
           "url": "/settings/billing",
           "icon": "CreditCard"
+        },
+        {
+          "title": "API Key",
+          "url": "/settings/apikeys",
+          "icon": "KeyRound"
         }
       ]
     },

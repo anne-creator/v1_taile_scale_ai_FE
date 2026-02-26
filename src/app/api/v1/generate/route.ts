@@ -25,7 +25,10 @@ import {
  * Headers: { "X-API-Key": "your-api-key" }
  * Body: { "prompt": "A hedgehog reading a book in a cozy library", "style": "children_book", "aspect_ratio": "16:9" }
  */
+const FUNCTION_MAX_DURATION_MS = 115_000;
+
 export async function POST(request: Request) {
+  const deadlineMs = Date.now() + FUNCTION_MAX_DURATION_MS;
   try {
     // Get API key from header (user's API key for authentication)
     const userApiKey = request.headers.get('X-API-Key');
@@ -90,14 +93,13 @@ export async function POST(request: Request) {
       return respErr('insufficient quota');
     }
 
-    // Generate illustration using core-services
-    // This automatically includes system prompt + reference images
     const result = await generateIllustration({
       userPrompt: prompt,
       apiKey: geminiApiKey,
       model,
       style: illustrationStyle,
       aspectRatio: aspect_ratio,
+      deadlineMs,
     });
 
     // Create AI task record

@@ -38,6 +38,12 @@ export interface GenerateIllustrationParams {
    * Defaults to "1:1" if not specified.
    */
   aspectRatio?: string;
+
+  /**
+   * Hard deadline (epoch ms) by which the function must return.
+   * Used to prevent retries from exceeding the serverless function timeout.
+   */
+  deadlineMs?: number;
 }
 
 /**

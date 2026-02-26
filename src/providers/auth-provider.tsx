@@ -76,6 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // In dev (React StrictMode) effects can run twice; ensure we don't spam getSession().
   const didFallbackSyncRef = useRef(false);
 
+  // Guard: prevent sync effect from clearing user right after refreshUser() set it
+  const lastManualRefreshRef = useRef(0);
+
   // Set mounted state after hydration
   useEffect(() => {
     setHasMounted(true);
@@ -105,20 +108,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [hasMounted, isCheckSign]);
 
   // Sync session user to local state (only after mount to avoid hydration issues)
+  // Uses userRef instead of user state to avoid re-triggering when refreshUser() sets user
   useEffect(() => {
     if (!hasMounted) return;
-    
-    const currentUserId = user?.id;
+
+    const currentUserId = userRef.current?.id;
     const sessionUserId = (sessionUser as any)?.id;
 
     if (sessionUser && sessionUserId !== currentUserId) {
       setUser(sessionUser as User);
       void fetchUserInfo();
     } else if (!sessionUser && currentUserId) {
+      if (Date.now() - lastManualRefreshRef.current < 5000) return;
       setUser(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMounted, sessionUser?.id, (sessionUser as any)?.email, user?.id]);
+  }, [hasMounted, sessionUser?.id, (sessionUser as any)?.email]);
 
   // Fallback: if the session cookie is present but useSession lags, do a single refresh.
   useEffect(() => {
@@ -149,39 +154,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userRef.current = user;
   }, [user]);
 
+  // Capture anonymous session data on mount before any child effect clears localStorage
+  const anonSessionRef = useRef<{ anonymousUserId: string } | null>(null);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('talecraft_anonymous_session');
+      if (raw) anonSessionRef.current = JSON.parse(raw);
+    } catch {}
+  }, []);
+
   // Convert anonymous session when user authenticates (signup or login)
-  // Delayed to avoid competing with page-load DB queries
   const prevUserRef = useRef<User | null>(null);
   useEffect(() => {
     const wasNull = prevUserRef.current === null;
     prevUserRef.current = user;
-
     if (!wasNull || !user?.id) return;
 
-    const ANON_KEY = 'talecraft_anonymous_session';
-    try {
-      const raw =
-        typeof window !== 'undefined' ? localStorage.getItem(ANON_KEY) : null;
-      if (!raw) return;
-      const { anonymousUserId } = JSON.parse(raw);
-      if (!anonymousUserId) return;
+    const anonData = anonSessionRef.current;
+    if (!anonData?.anonymousUserId) return;
+    anonSessionRef.current = null;
 
-      const timer = setTimeout(() => {
-        fetch('/api/anonymous/convert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ anonymousUserId }),
-        })
-          .catch(() => {})
-          .finally(() => {
-            clearAnonymousSession();
-          });
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    } catch {
-      clearAnonymousSession();
-    }
+    fetch('/api/anonymous/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ anonymousUserId: anonData.anonymousUserId }),
+    })
+      .catch(() => {})
+      .finally(() => {
+        clearAnonymousSession();
+      });
   }, [user]);
 
   const fetchUserInfo = useCallback(async () => {
@@ -232,6 +234,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    didFallbackSyncRef.current = false;
+
+    try {
+      const res: any = await authClient.getSession();
+      const fresh = extractSessionUser(res?.data ?? res);
+      if (fresh?.id) {
+        setUser(fresh);
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('get session failed:', e);
+      }
+    }
+
+    await fetchUserInfo();
+
+    // Prevent the sync effect from clearing user while useSession() catches up
+    lastManualRefreshRef.current = Date.now();
+  }, [fetchUserInfo]);
+
   const login = useCallback(
     async (email: string, password: string, callbackURL?: string) => {
       await signIn.email(
@@ -241,15 +264,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           callbackURL: callbackURL || '/',
         },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
             router.refresh();
-            // Reset fallback sync to allow re-check
             didFallbackSyncRef.current = false;
+            await refreshUser();
           },
         }
       );
     },
-    [router]
+    [router, refreshUser]
   );
 
   const logout = useCallback(
@@ -267,27 +290,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [router]
   );
-
-  const refreshUser = useCallback(async () => {
-    // Reset fallback sync to allow immediate re-check
-    didFallbackSyncRef.current = false;
-    
-    // Try to get fresh session from Better Auth
-    try {
-      const res: any = await authClient.getSession();
-      const fresh = extractSessionUser(res?.data ?? res);
-      if (fresh?.id) {
-        setUser(fresh);
-      }
-    } catch (e) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('get session failed:', e);
-      }
-    }
-    
-    // Fetch extended user info (includes quota overview)
-    await fetchUserInfo();
-  }, [fetchUserInfo]);
 
   const showOneTap = useCallback(
     async (configs: Record<string, string>) => {

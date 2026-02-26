@@ -118,6 +118,7 @@ export async function generateIllustration({
   model = DEFAULT_IMAGE_MODEL,
   style: _style,
   aspectRatio,
+  deadlineMs,
 }: GenerateIllustrationParams): Promise<GenerationResult> {
   if (!userPrompt?.trim()) {
     throw new Error('User prompt is required');
@@ -154,16 +155,29 @@ export async function generateIllustration({
     generationConfig,
   };
 
-  const GEMINI_TIMEOUT_MS = 55_000;
+  const DEFAULT_GEMINI_TIMEOUT_MS = 55_000;
   const MAX_RETRIES = 2;
+  const UPLOAD_BUFFER_MS = 10_000;
   const requestBody = JSON.stringify(payload);
 
   let lastError: Error | null = null;
   let data: any;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    // Compute per-attempt timeout: either the default, or whatever time
+    // remains before the function deadline (minus buffer for upload/DB work).
+    let timeoutMs = DEFAULT_GEMINI_TIMEOUT_MS;
+    if (deadlineMs) {
+      const remaining = deadlineMs - Date.now() - UPLOAD_BUFFER_MS;
+      if (remaining <= 5_000) {
+        // Not enough time for another attempt — bail out with what we have
+        break;
+      }
+      timeoutMs = Math.min(timeoutMs, remaining);
+    }
+
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(apiUrl, {
@@ -193,7 +207,7 @@ export async function generateIllustration({
     } catch (e: any) {
       clearTimeout(timer);
       if (e.name === 'AbortError') {
-        lastError = new Error(`Gemini API request timed out after ${GEMINI_TIMEOUT_MS}ms`);
+        lastError = new Error(`Gemini API request timed out after ${timeoutMs}ms`);
       } else {
         lastError = e;
       }
