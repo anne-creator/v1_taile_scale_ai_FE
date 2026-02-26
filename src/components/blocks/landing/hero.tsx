@@ -74,7 +74,7 @@ export function Hero({
     isLoading: isAnonLoading,
   } = useAnonymousSession();
 
-  const [userMode, setUserMode] = useState<UserMode>('developers');
+  const [userMode, setUserMode] = useState<UserMode>('creators');
   const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>('typescript');
   const [apiKey, setApiKey] = useState('');
   const [codePrompt, setCodePrompt] = useState('');
