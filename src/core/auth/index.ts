@@ -4,12 +4,20 @@ import { getAllConfigs } from '@/shared/models/config';
 
 import { getAuthOptions } from './config';
 
-// get auth instance in server side
+let cachedAuth: ReturnType<typeof betterAuth> | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 60_000;
+
 export async function getAuth() {
-  // get configs from db and env
+  const now = Date.now();
+  if (cachedAuth && now - cacheTimestamp < CACHE_TTL_MS) {
+    return cachedAuth;
+  }
+
   const configs = await getAllConfigs();
-
   const authOptions = await getAuthOptions(configs);
+  cachedAuth = betterAuth(authOptions as BetterAuthOptions);
+  cacheTimestamp = now;
 
-  return betterAuth(authOptions as BetterAuthOptions);
+  return cachedAuth;
 }

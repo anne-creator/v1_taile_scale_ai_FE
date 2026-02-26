@@ -150,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   // Convert anonymous session when user authenticates (signup or login)
+  // Delayed to avoid competing with page-load DB queries
   const prevUserRef = useRef<User | null>(null);
   useEffect(() => {
     const wasNull = prevUserRef.current === null;
@@ -165,17 +166,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { anonymousUserId } = JSON.parse(raw);
       if (!anonymousUserId) return;
 
-      fetch('/api/anonymous/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ anonymousUserId }),
-      })
-        .catch(() => {})
-        .finally(() => {
-          clearAnonymousSession();
-        });
+      const timer = setTimeout(() => {
+        fetch('/api/anonymous/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ anonymousUserId }),
+        })
+          .catch(() => {})
+          .finally(() => {
+            clearAnonymousSession();
+          });
+      }, 3000);
+
+      return () => clearTimeout(timer);
     } catch {
-      // best-effort
+      clearAnonymousSession();
     }
   }, [user]);
 

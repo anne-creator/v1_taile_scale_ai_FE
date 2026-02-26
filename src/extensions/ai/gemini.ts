@@ -98,13 +98,27 @@ export class GeminiProvider implements AIProvider {
       },
     };
 
-    const resp = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 55_000);
+
+    let resp: Response;
+    try {
+      resp = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+    } catch (e: any) {
+      clearTimeout(timer);
+      if (e.name === 'AbortError') {
+        throw new Error('Gemini API request timed out after 55s');
+      }
+      throw e;
+    }
+    clearTimeout(timer);
 
     if (!resp.ok) {
       const errorText = await resp.text();

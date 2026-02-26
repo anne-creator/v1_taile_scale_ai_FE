@@ -154,23 +154,59 @@ export async function generateIllustration({
     generationConfig,
   };
 
-  // Call Gemini API
-  const response = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  const GEMINI_TIMEOUT_MS = 55_000;
+  const MAX_RETRIES = 2;
+  const requestBody = JSON.stringify(payload);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Gemini API request failed with status ${response.status}: ${errorText}`
-    );
+  let lastError: Error | null = null;
+  let data: any;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: requestBody,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timer);
+
+      if (response.status === 503 && attempt < MAX_RETRIES - 1) {
+        lastError = new Error(`Gemini API returned 503, retrying...`);
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Gemini API request failed with status ${response.status}: ${errorText}`
+        );
+      }
+
+      data = await response.json();
+      break;
+    } catch (e: any) {
+      clearTimeout(timer);
+      if (e.name === 'AbortError') {
+        lastError = new Error(`Gemini API request timed out after ${GEMINI_TIMEOUT_MS}ms`);
+      } else {
+        lastError = e;
+      }
+      if (attempt < MAX_RETRIES - 1) {
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+    }
   }
 
-  const data = await response.json();
+  if (!data) {
+    throw lastError || new Error('Gemini API request failed after retries');
+  }
 
   // Validate response
   if (!data.candidates || data.candidates.length === 0) {

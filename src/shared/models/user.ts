@@ -71,22 +71,35 @@ export async function getUserByUserIds(userIds: string[]) {
 }
 
 export async function getUserInfo() {
-  const signUser = await getSignUser();
-
-  return signUser;
+  try {
+    const signUser = await getSignUser();
+    return signUser;
+  } catch (e) {
+    console.error('getUserInfo failed:', e);
+    return null;
+  }
 }
 
 export async function getUserQuota(userId: string) {
   return getQuotaOverview(userId);
 }
 
-export async function getSignUser() {
-  const auth = await getAuth();
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+const AUTH_TIMEOUT_MS = 8000;
 
-  return session?.user;
+export async function getSignUser() {
+  const authPromise = (async () => {
+    const auth = await getAuth();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    return session?.user;
+  })();
+
+  const timeoutPromise = new Promise<null>((resolve) =>
+    setTimeout(() => resolve(null), AUTH_TIMEOUT_MS)
+  );
+
+  return Promise.race([authPromise, timeoutPromise]);
 }
 
 export async function isEmailVerified(email: string): Promise<boolean> {

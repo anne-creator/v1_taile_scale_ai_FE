@@ -2,6 +2,8 @@ import { respErr, respOk } from '@/shared/lib/resp';
 import { getUserInfo } from '@/shared/models/user';
 import { convertAnonymousUser } from '@/shared/services/anonymous';
 
+const CONVERT_TIMEOUT_MS = 5000;
+
 export async function POST(request: Request) {
   try {
     const user = await getUserInfo();
@@ -16,11 +18,16 @@ export async function POST(request: Request) {
       return respErr('anonymousUserId is required');
     }
 
-    await convertAnonymousUser(anonymousUserId, user.id);
+    const convertPromise = convertAnonymousUser(anonymousUserId, user.id);
+    const timeoutPromise = new Promise<void>((resolve) =>
+      setTimeout(resolve, CONVERT_TIMEOUT_MS)
+    );
+
+    await Promise.race([convertPromise, timeoutPromise]);
 
     return respOk();
   } catch (e: any) {
     console.error('anonymous/convert failed', e);
-    return respErr(e.message || 'Failed to convert anonymous session');
+    return respOk();
   }
 }

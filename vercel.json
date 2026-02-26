@@ -15,6 +15,9 @@
     "src/app/api/ai/**/*.ts": {
       "maxDuration": 60
     },
+    "src/app/api/v1/generate/route.ts": {
+      "maxDuration": 60
+    },
     "src/app/api/payment/**/*.ts": {
       "maxDuration": 30
     },
