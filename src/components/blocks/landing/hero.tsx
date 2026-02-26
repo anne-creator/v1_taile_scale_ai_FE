@@ -39,6 +39,9 @@ type AspectRatio = '16:9' | '1:1' | '4:3';
 
 const POLL_INTERVAL = 3000;
 
+const DEFAULT_CODE_PROMPT =
+  'A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest';
+
 // localStorage utility for API keys (anonymous users)
 const apiKeyStorage = {
   getKey: () => {
@@ -74,9 +77,7 @@ export function Hero({
   const [userMode, setUserMode] = useState<UserMode>('developers');
   const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>('typescript');
   const [apiKey, setApiKey] = useState('');
-  const [codePrompt, setCodePrompt] = useState(
-    'A wise old owl wearing a velvet burgundy waistcoat and half-moon reading glasses, perched on a branch turned into a makeshift lectern, reading aloud from an oversized leather-bound book to a circle of wide-eyed baby woodland creatures sitting on toadstools, deep inside an ancient oak forest'
-  );
+  const [codePrompt, setCodePrompt] = useState('');
   const [prompt, setPrompt] = useState('');
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('16:9');
   const [copied, setCopied] = useState(false);
@@ -99,6 +100,8 @@ export function Hero({
   const placeholderImage =
     'https://pub-56194e5487384280af43a03cc4ea8ee4.r2.dev/uploads/illustrations/dfddf168-b993-439a-adae-c7973d5a73d4.jpeg';
 
+  const effectivePrompt = codePrompt || DEFAULT_CODE_PROMPT;
+
   const codeExamples: Record<CodeLanguage, string> = {
     typescript: `const response = await fetch('https://talescaleai.com/api/v1/generate', {
   method: 'POST',
@@ -107,7 +110,7 @@ export function Hero({
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    prompt: "${codePrompt}",
+    prompt: "${effectivePrompt}",
     style: "children_book",
     aspect_ratio: "${aspectRatio}"
   })
@@ -123,7 +126,7 @@ headers = {
     "Content-Type": "application/json"
 }
 data = {
-    "prompt": "${codePrompt}",
+    "prompt": "${effectivePrompt}",
     "style": "children_book",
     "aspect_ratio": "${aspectRatio}"
 }
@@ -135,7 +138,7 @@ print(result["data"]["image_url"])`,
   -H "X-API-Key: ${apiKey || 'YOUR_API_KEY'}" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "prompt": "${codePrompt}",
+    "prompt": "${effectivePrompt}",
     "style": "children_book",
     "aspect_ratio": "${aspectRatio}"
   }'`,
@@ -237,7 +240,7 @@ print(result["data"]["image_url"])`,
   }, []);
 
   const handleGenerate = async () => {
-    const currentPrompt = userMode === 'developers' ? codePrompt : prompt;
+    const currentPrompt = userMode === 'developers' ? effectivePrompt : prompt;
 
     if (!currentPrompt.trim()) {
       setError('Please enter a prompt');
@@ -560,7 +563,7 @@ print(result["data"]["image_url"])`,
                   <label className="mb-2 block text-sm">Edit Prompt</label>
                   <Input
                     type="text"
-                    placeholder="A wise old owl in a velvet waistcoat reading to woodland creatures..."
+                    placeholder={DEFAULT_CODE_PROMPT}
                     value={codePrompt}
                     onChange={(e) => setCodePrompt(e.target.value)}
                   />
