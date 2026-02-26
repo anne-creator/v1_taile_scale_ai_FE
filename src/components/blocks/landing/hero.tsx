@@ -254,20 +254,50 @@ print(result["data"]["image_url"])`,
       return;
     }
 
-    // For unauthenticated users, provision an anonymous session automatically
     let activeKey = apiKey;
-    if (!user && !activeKey.trim()) {
-      const session = await createAnonSession();
-      if (!session) {
-        setShowQuotaModal(true);
-        return;
-      }
-      activeKey = session.apiKey;
-      setApiKey(activeKey);
-    }
 
     if (!activeKey.trim()) {
-      setError('Please generate or enter an API key first');
+      if (!user) {
+        // Anonymous user: provision a session automatically
+        const session = await createAnonSession();
+        if (!session) {
+          setShowQuotaModal(true);
+          return;
+        }
+        activeKey = session.apiKey;
+        setApiKey(activeKey);
+      } else if (userMode === 'creators') {
+        // Logged-in creator: auto-generate an API key transparently
+        setIsGeneratingKey(true);
+        try {
+          const resp = await fetch('/api/apikey/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: 'Story Illustrator' }),
+          });
+          const { code, message, data } = await resp.json();
+          if (code !== 0) throw new Error(message || 'Failed to create API key');
+          activeKey = data?.key;
+          if (activeKey) {
+            setApiKey(activeKey);
+            apiKeyStorage.setKey(activeKey);
+          }
+        } catch (err: any) {
+          setError(err.message || 'Failed to set up your session');
+          setIsGeneratingKey(false);
+          return;
+        } finally {
+          setIsGeneratingKey(false);
+        }
+      }
+    }
+
+    if (!activeKey?.trim()) {
+      setError(
+        userMode === 'developers'
+          ? 'Please generate or enter an API key first'
+          : 'Something went wrong setting up your session. Please try again.'
+      );
       return;
     }
 
@@ -499,7 +529,7 @@ print(result["data"]["image_url"])`,
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              For Creators (No code)
+              For Creators
             </button>
           </div>
         </div>
@@ -509,7 +539,7 @@ print(result["data"]["image_url"])`,
           <h1 className="mb-4 text-3xl font-bold tracking-tight sm:text-5xl">
             {userMode === 'developers'
               ? 'Reliable Image Generation API'
-              : 'No-Code Story Illustrator'}
+              : 'Story Illustrator'}
           </h1>
           <p className="text-muted-foreground text-lg">
             {userMode === 'developers'
@@ -709,36 +739,12 @@ print(result["data"]["image_url"])`,
                   </div>
                 </div>
 
-                {/* API Key Input */}
-                <div>
-                  <label className="mb-2 block text-sm">Your API Key</label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="password"
-                      placeholder="sk-••••••••••••••••"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={handleGenerateApiKey}
-                      disabled={isGeneratingKey}
-                    >
-                      {isGeneratingKey ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Wand2 className="mr-1 h-4 w-4" />
-                          Generate Key
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  {error && (
-                    <p className="text-destructive mt-1 text-xs">{error}</p>
-                  )}
-                </div>
+                {error && (
+                  <p className="text-destructive flex items-center gap-1 text-xs">
+                    <AlertCircle className="h-3 w-3" />
+                    {error}
+                  </p>
+                )}
 
                 {/* Generate Button */}
                 <Button
@@ -746,12 +752,12 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || isAnonLoading || !prompt.trim() || (!!user && !apiKey.trim())}
+                  disabled={isGenerating || isGeneratingKey || isAnonLoading || !prompt.trim()}
                 >
-                  {isGenerating || isAnonLoading ? (
+                  {isGenerating || isGeneratingKey || isAnonLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isAnonLoading ? 'Setting up...' : 'Generating...'}
+                      {isAnonLoading || isGeneratingKey ? 'Setting up...' : 'Generating...'}
                     </>
                   ) : (
                     <>
