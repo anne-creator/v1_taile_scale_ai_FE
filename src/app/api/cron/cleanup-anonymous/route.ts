@@ -45,8 +45,8 @@ export async function GET(request: Request) {
         break;
       }
 
-      const shadowUserIds = expired.map((e) => e.shadowUserId);
-      const anonIds = expired.map((e) => e.id);
+      const shadowUserIds = expired.map((e: { id: string; shadowUserId: string }) => e.shadowUserId);
+      const anonIds = expired.map((e: { id: string; shadowUserId: string }) => e.id);
 
       // Delete anonymous_user records first (they FK to user with CASCADE from user side)
       await db()
@@ -78,8 +78,8 @@ export async function GET(request: Request) {
       .limit(BATCH_SIZE);
 
     if (convertedExpired.length > 0) {
-      const shadowIds = convertedExpired.map((e) => e.shadowUserId);
-      const anonIds = convertedExpired.map((e) => e.id);
+      const shadowIds = convertedExpired.map((e: { id: string; shadowUserId: string }) => e.shadowUserId);
+      const anonIds = convertedExpired.map((e: { id: string; shadowUserId: string }) => e.id);
 
       await db()
         .delete(anonymousUser)

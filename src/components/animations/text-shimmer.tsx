@@ -17,17 +17,14 @@ export const TextShimmer: FC<TextShimmerProps> = ({
       style={
         {
           "--shimmer-width": `${shimmerWidth}px`,
+          backgroundSize: `calc(100% + var(--shimmer-width)) 100%`,
         } as CSSProperties
       }
       className={cn(
-        "mx-auto max-w-md text-neutral-600/50 dark:text-neutral-400/50",
-
-        // Shimmer effect
-        "animate-shimmer bg-clip-text bg-no-repeat [background-position:0_0] [background-size:var(--shimmer-width)_100%] [transition:background-position_1s_cubic-bezier(.6,.6,0,1)_infinite]",
-
-        // Shimmer gradient
-        "bg-gradient-to-r from-neutral-100 via-black/80 via-50% to-neutral-100 dark:from-neutral-900 dark:via-white/80 dark:to-neutral-900",
-
+        "mx-auto max-w-md",
+        "animate-text-shimmer bg-clip-text text-transparent bg-no-repeat",
+        "bg-[linear-gradient(90deg,_var(--color-neutral-400)_0%,_var(--color-neutral-400)_35%,_var(--color-neutral-900)_50%,_var(--color-neutral-400)_65%,_var(--color-neutral-400)_100%)]",
+        "dark:bg-[linear-gradient(90deg,_var(--color-neutral-500)_0%,_var(--color-neutral-500)_35%,_var(--color-neutral-100)_50%,_var(--color-neutral-500)_65%,_var(--color-neutral-500)_100%)]",
         className
       )}
     >

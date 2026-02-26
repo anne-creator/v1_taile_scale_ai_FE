@@ -265,9 +265,13 @@ print(result["data"]["image_url"])`,
     setError(null);
     setGeneratedImage(null);
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+
     try {
       const resp = await fetch('/api/v1/generate', {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'X-API-Key': activeKey,
@@ -279,9 +283,13 @@ print(result["data"]["image_url"])`,
         }),
       });
 
+      clearTimeout(timeout);
+
       if (!resp.ok) {
         const errorData = await resp.json().catch(() => ({}));
-        throw new Error(errorData.message || `Request failed: ${resp.status}`);
+        setError(errorData.message || `Request failed: ${resp.status}`);
+        setIsGenerating(false);
+        return;
       }
 
       const { code, message, data } = await resp.json();
@@ -297,7 +305,9 @@ print(result["data"]["image_url"])`,
           setShowQuotaModal(true);
           return;
         }
-        throw new Error(message || 'Generation failed');
+        setError(message || 'Generation failed. Please try again.');
+        setIsGenerating(false);
+        return;
       }
 
       // Decrement anonymous remaining count on success
@@ -331,8 +341,14 @@ print(result["data"]["image_url"])`,
 
       setTimeout(poll, POLL_INTERVAL);
     } catch (error: any) {
+      clearTimeout(timeout);
+      const isTimeout = error.name === 'AbortError';
       console.error('Generate error:', error);
-      setError(error.message || 'Failed to generate image');
+      setError(
+        isTimeout
+          ? 'Generation timed out. The server is under heavy load — please try again.'
+          : error.message || 'Failed to generate image'
+      );
       setIsGenerating(false);
     }
   };
@@ -612,7 +628,7 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || isAnonLoading || (user && !apiKey.trim())}
+                  disabled={isGenerating || isAnonLoading || (!!user && !apiKey.trim())}
                 >
                   {isGenerating || isAnonLoading ? (
                     <>
@@ -626,11 +642,6 @@ print(result["data"]["image_url"])`,
                     </>
                   )}
                 </Button>
-                {!user && anonSession && (
-                  <p className="text-muted-foreground text-center text-xs">
-                    {anonSession.remainingGenerations} free generation{anonSession.remainingGenerations !== 1 ? 's' : ''} remaining
-                  </p>
-                )}
               </>
             ) : (
               <>
@@ -725,7 +736,7 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || isAnonLoading || !prompt.trim() || (user && !apiKey.trim())}
+                  disabled={isGenerating || isAnonLoading || !prompt.trim() || (!!user && !apiKey.trim())}
                 >
                   {isGenerating || isAnonLoading ? (
                     <>
@@ -739,11 +750,6 @@ print(result["data"]["image_url"])`,
                     </>
                   )}
                 </Button>
-                {!user && anonSession && (
-                  <p className="text-muted-foreground text-center text-xs">
-                    {anonSession.remainingGenerations} free generation{anonSession.remainingGenerations !== 1 ? 's' : ''} remaining
-                  </p>
-                )}
               </>
             )}
           </div>
@@ -772,14 +778,19 @@ print(result["data"]["image_url"])`,
                 </div>
 
                 {/* Center loading indicator */}
-                <div className="relative z-10 flex flex-col items-center gap-3">
+                <div className="relative z-10 flex flex-col items-center gap-4">
                   <Sparkles
-                    className="text-primary h-10 w-10 animate-pulse"
+                    className="text-primary h-10 w-10 animate-pulse [animation-duration:2.5s]"
                     aria-hidden="true"
                   />
-                  <TextShimmer className="text-sm" shimmerWidth={120}>
-                    Creating your illustration...
-                  </TextShimmer>
+                  <div className="flex flex-col items-center gap-1">
+                    <TextShimmer className="text-sm" shimmerWidth={120}>
+                      Creating your illustration...
+                    </TextShimmer>
+                    <p className="text-muted-foreground/60 text-xs">
+                      It might take 5–20s to generate
+                    </p>
+                  </div>
                 </div>
 
                 {/* Animated progress bar at bottom */}

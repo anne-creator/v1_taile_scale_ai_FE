@@ -13,6 +13,23 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Functional loading indicators communicate system state — exempt from suppression */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .animate-pulse {
+    animation-duration: 2s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .animate-text-shimmer {
+    animation-duration: 3s !important;
+    animation-iteration-count: infinite !important;
+  }
+  .animate-progress {
+    animation-duration: 2s !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 @plugin 'tailwindcss-animate';
@@ -147,6 +164,15 @@ pre {
     }
     100% {
       transform: translateX(-100%);
+    }
+  }
+  --animate-text-shimmer: text-shimmer 3s ease-in-out infinite;
+  @keyframes text-shimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
     }
   }
 }
