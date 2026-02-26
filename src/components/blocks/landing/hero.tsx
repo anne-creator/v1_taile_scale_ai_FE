@@ -544,7 +544,7 @@ print(result["data"]["image_url"])`,
           <p className="text-muted-foreground text-lg">
             {userMode === 'developers'
               ? 'Generate consistent style illustrations in seconds.'
-              : 'Create consistent characters and scenes instantly.'}
+              : 'Generate high-quality illustrations in a consistent style.'}
           </p>
         </div>
 
