@@ -102,15 +102,22 @@ export function Hero({
 
   const effectivePrompt = codePrompt || DEFAULT_CODE_PROMPT;
 
+  const escapeForJSON = (str: string) =>
+    str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+  const safeApiKey =
+    apiKey && !/[\s'"\\{}]/.test(apiKey) ? apiKey : 'YOUR_API_KEY';
+  const safePrompt = escapeForJSON(effectivePrompt);
+
   const codeExamples: Record<CodeLanguage, string> = {
     typescript: `const response = await fetch('https://talescaleai.com/api/v1/generate', {
   method: 'POST',
   headers: {
-    'X-API-Key': '${apiKey || 'YOUR_API_KEY'}',
+    'X-API-Key': '${safeApiKey}',
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    prompt: "${effectivePrompt}",
+    prompt: "${safePrompt}",
     style: "children_book",
     aspect_ratio: "${aspectRatio}"
   })
@@ -122,11 +129,11 @@ console.log(result.data.image_url);`,
 
 url = "https://talescaleai.com/api/v1/generate"
 headers = {
-    "X-API-Key": "${apiKey || 'YOUR_API_KEY'}",
+    "X-API-Key": "${safeApiKey}",
     "Content-Type": "application/json"
 }
 data = {
-    "prompt": "${effectivePrompt}",
+    "prompt": "${safePrompt}",
     "style": "children_book",
     "aspect_ratio": "${aspectRatio}"
 }
@@ -135,10 +142,10 @@ response = requests.post(url, headers=headers, json=data)
 result = response.json()
 print(result["data"]["image_url"])`,
     curl: `curl -X POST https://talescaleai.com/api/v1/generate \\
-  -H "X-API-Key: ${apiKey || 'YOUR_API_KEY'}" \\
+  -H "X-API-Key: ${safeApiKey}" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "prompt": "${effectivePrompt}",
+    "prompt": "${safePrompt}",
     "style": "children_book",
     "aspect_ratio": "${aspectRatio}"
   }'`,
@@ -553,7 +560,7 @@ print(result["data"]["image_url"])`,
                       )}
                     </button>
                   </div>
-                  <pre className="scrollbar-thin max-h-[280px] overflow-y-auto text-sm break-all whitespace-pre-wrap text-gray-300">
+                  <pre className="scrollbar-thin max-h-[280px] overflow-x-auto overflow-y-auto text-sm whitespace-pre text-gray-300">
                     <code>{codeExamples[codeLanguage]}</code>
                   </pre>
                 </div>
