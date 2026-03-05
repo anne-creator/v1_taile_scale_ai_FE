@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { useAnonymousSession } from '@/hooks/use-anonymous-session';
 import { useAuth } from '@/providers/auth-provider';
 import { useUI } from '@/providers/ui-provider';
 import {
@@ -29,7 +30,6 @@ import {
 
 import { Link } from '@/core/i18n/navigation';
 import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
-import { useAnonymousSession } from '@/hooks/use-anonymous-session';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
 
@@ -276,7 +276,8 @@ print(result["data"]["image_url"])`,
             body: JSON.stringify({ title: 'Story Illustrator' }),
           });
           const { code, message, data } = await resp.json();
-          if (code !== 0) throw new Error(message || 'Failed to create API key');
+          if (code !== 0)
+            throw new Error(message || 'Failed to create API key');
           activeKey = data?.key;
           if (activeKey) {
             setApiKey(activeKey);
@@ -463,13 +464,11 @@ print(result["data"]["image_url"])`,
               <Sparkles className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
             </div>
             <h3 className="mb-2 text-xl font-semibold">
-              {anonSession
-                ? 'Free Trial Complete'
-                : 'Sign In Required'}
+              {anonSession ? 'Free Trial Complete' : 'Sign In Required'}
             </h3>
             <p className="text-muted-foreground">
               {anonSession
-                ? 'You\'ve used all your free generations. Sign up to get more credits and unlock all features!'
+                ? "You've used all your free generations. Sign up to get more credits and unlock all features!"
                 : 'Sign in to generate images and unlock all features!'}
             </p>
           </div>
@@ -668,7 +667,9 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || isAnonLoading || (!!user && !apiKey.trim())}
+                  disabled={
+                    isGenerating || isAnonLoading || (!!user && !apiKey.trim())
+                  }
                 >
                   {isGenerating || isAnonLoading ? (
                     <>
@@ -752,12 +753,19 @@ print(result["data"]["image_url"])`,
                   variant="default"
                   className="w-full"
                   onClick={handleGenerate}
-                  disabled={isGenerating || isGeneratingKey || isAnonLoading || !prompt.trim()}
+                  disabled={
+                    isGenerating ||
+                    isGeneratingKey ||
+                    isAnonLoading ||
+                    !prompt.trim()
+                  }
                 >
                   {isGenerating || isGeneratingKey || isAnonLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isAnonLoading || isGeneratingKey ? 'Setting up...' : 'Generating...'}
+                      {isAnonLoading || isGeneratingKey
+                        ? 'Setting up...'
+                        : 'Generating...'}
                     </>
                   ) : (
                     <>
